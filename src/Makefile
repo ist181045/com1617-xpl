@@ -1,11 +1,11 @@
-# $Id: Makefile,v 1.1 2017/02/17 16:02:31 david Exp $
+# $Id: Makefile,v 1.2 2017/02/21 18:14:49 ist181045 Exp $
 #---------------------------------------------------------------
 #             CONFIGURE THESE VARIABLES IF NEEDED
 #---------------------------------------------------------------
 
-ROOT = ${HOME}/compiladores/root
-CDK_INC_DIR = $(ROOT)/usr/include
-CDK_LIB_DIR = $(ROOT)/usr/lib
+ROOT = 
+CDK_INC_DIR = $(ROOT)/usr/local/include
+CDK_LIB_DIR = $(ROOT)/usr/local/lib
 
 L_NAME=xpl_scanner
 Y_NAME=xpl_parser
