@@ -1,7 +1,5 @@
 # CVS folders + sub-folders
 
-/CVS/*
-**/CVS/*
+CVS
 .cvsignore
-*/.cvsignore
 
