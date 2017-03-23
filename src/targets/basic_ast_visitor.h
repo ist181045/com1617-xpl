@@ -103,7 +103,7 @@ public:
   virtual void do_assignment_node(cdk::assignment_node * const node, int lvl) = 0;
 
 public:
-  virtual void do_program_node(xpl::program_node * const node, int lvl) = 0;
+  virtual void do_function_node(xpl::function_node * const node, int lvl) = 0;
   virtual void do_evaluation_node(xpl::evaluation_node * const node, int lvl) = 0;
   virtual void do_print_node(xpl::print_node * const node, int lvl) = 0;
   virtual void do_read_node(xpl::read_node * const node, int lvl) = 0;

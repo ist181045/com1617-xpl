@@ -106,10 +106,10 @@ void xpl::xml_writer::do_assignment_node(cdk::assignment_node * const node, int 
 
 //---------------------------------------------------------------------------
 
-void xpl::xml_writer::do_program_node(xpl::program_node * const node, int lvl) {
-  openTag(node, lvl);
+void xpl::xml_writer::do_function_node(xpl::function_node * const node, int lvl) {
+  /*openTag(node, lvl);
   node->statements()->accept(this, lvl + 4);
-  closeTag(node, lvl);
+  closeTag(node, lvl);*/
 }
 
 //---------------------------------------------------------------------------

@@ -28,8 +28,8 @@ namespace cdk {
 //---------------------------------------------------------------------------
 
 namespace xpl {
-class program_node; 
 class evaluation_node; 
+class next_node; 
 class read_node; 
 class while_node; 
 class if_else_node; 
@@ -80,8 +80,8 @@ class if_node;
 //     THESE ARE THE NODES DEFINED SPECIFICALLY FOR THIS APPLICATION
 //---------------------------------------------------------------------------
 
-#include "ast/program_node.h"
 #include "ast/evaluation_node.h"
+#include "ast/next_node.h"
 #include "ast/read_node.h"
 #include "ast/while_node.h"
 #include "ast/if_else_node.h"

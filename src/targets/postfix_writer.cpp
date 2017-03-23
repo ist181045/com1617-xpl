@@ -142,7 +142,7 @@ void xpl::postfix_writer::do_assignment_node(cdk::assignment_node * const node, 
 
 //---------------------------------------------------------------------------
 
-void xpl::postfix_writer::do_program_node(xpl::program_node * const node, int lvl) {
+void xpl::postfix_writer::do_function_node(xpl::function_node * const node, int lvl) {
   // The ProgramNode (representing the whole program) is the
   // main function node.
 
@@ -151,9 +151,9 @@ void xpl::postfix_writer::do_program_node(xpl::program_node * const node, int lv
   _pf.ALIGN();
   _pf.GLOBAL("_main", _pf.FUNC());
   _pf.LABEL("_main");
-  _pf.ENTER(0);  // XPL doesn't implement local variables
+  // _pf.ENTER(0);  // XPL doesn't implement local variables
 
-  node->statements()->accept(this, lvl);
+  // node->statements()->accept(this, lvl);
 
   // end the main function
   _pf.INT(0);
@@ -246,3 +246,7 @@ void xpl::postfix_writer::do_if_else_node(xpl::if_else_node * const node, int lv
   node->elseblock()->accept(this, lvl + 2);
   _pf.LABEL(mklbl(lbl1 = lbl2));
 }
+
+//---------------------------------------------------------------------------
+
+void xpl::postfix_writer::do_next_node(xpl::next_node * const node, int lvl) {}
