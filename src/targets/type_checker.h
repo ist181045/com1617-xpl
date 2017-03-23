@@ -1,4 +1,4 @@
-// $Id: type_checker.h,v 1.9 2017/03/23 21:03:20 ist181045 Exp $ -*- c++ -*-
+// $Id: type_checker.h,v 1.10 2017/03/23 21:17:33 ist181045 Exp $ -*- c++ -*-
 #ifndef __XPL_SEMANTICS_TYPE_CHECKER_H__
 #define __XPL_SEMANTICS_TYPE_CHECKER_H__
 
@@ -76,9 +76,6 @@ namespace xpl {
     void do_read_node(xpl::read_node * const node, int lvl);
 
   public:
-    void do_malloc_node(xpl::malloc_node * const node, int lvl);
-
-  public:
     void do_while_node(xpl::while_node * const node, int lvl);
     void do_sweep_up_node(xpl::sweep_up_node * const node, int lvl);
     void do_sweep_down_node(xpl::sweep_down_node * const node, int lvl);
@@ -86,9 +83,13 @@ namespace xpl {
     void do_if_else_node(xpl::if_else_node * const node, int lvl);
 
   public:
+    void do_block_node(xpl::block_node * const node, int lvl);
     void do_next_node(xpl::next_node * const node, int lvl);
     void do_stop_node(xpl::stop_node * const node, int lvl);
     void do_return_node(xpl::return_node * const node, int lvl);
+
+  public:
+    void do_malloc_node(xpl::malloc_node * const node, int lvl);
 
   public:
     void do_null_node(xpl::null_node * const node, int lvl);

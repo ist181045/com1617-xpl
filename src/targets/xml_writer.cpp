@@ -150,6 +150,8 @@ void xpl::xml_writer::do_while_node(xpl::while_node * const node, int lvl) {
   closeTag("block", lvl + 2);
   closeTag(node, lvl);
 }
+void xpl::xml_writer::do_sweep_up_node(xpl::sweep_up_node * const node, int lvl) {}
+void xpl::xml_writer::do_sweep_down_node(xpl::sweep_down_node * const node, int lvl) {}
 
 //---------------------------------------------------------------------------
 
@@ -182,6 +184,7 @@ void xpl::xml_writer::do_if_else_node(xpl::if_else_node * const node, int lvl) {
 
 //---------------------------------------------------------------------------
 
+void xpl::xml_writer::do_block_node(xpl::block_node * const node, int lvl) {}
 void xpl::xml_writer::do_next_node(xpl::next_node * const node, int lvl) {}
 void xpl::xml_writer::do_stop_node(xpl::stop_node * const node, int lvl) {}
 void xpl::xml_writer::do_return_node(xpl::return_node * const node, int lvl) {}
@@ -189,11 +192,6 @@ void xpl::xml_writer::do_return_node(xpl::return_node * const node, int lvl) {}
 //---------------------------------------------------------------------------
 
 void xpl::xml_writer::do_malloc_node(xpl::malloc_node * const node, int lvl) {}
-
-//---------------------------------------------------------------------------
-
-void xpl::xml_writer::do_sweep_up_node(xpl::sweep_up_node * const node, int lvl) {}
-void xpl::xml_writer::do_sweep_down_node(xpl::sweep_down_node * const node, int lvl) {}
 
 //---------------------------------------------------------------------------
 
