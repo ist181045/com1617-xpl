@@ -91,9 +91,6 @@ namespace xpl {
     void do_if_node(xpl::if_node * const node, int lvl);
     void do_if_else_node(xpl::if_else_node * const node, int lvl);
 
-  public:
-    void do_next_node(xpl::next_node * const node, int lvl);
-
   };
 
 } // xpl

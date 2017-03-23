@@ -12,13 +12,13 @@ namespace xpl {
    */
   class function_node: public cdk::basic_node {
     basic_type *_type;
-    cdk::sequence_node *_declarations;
+    cdk::sequence_node *_arguments;
     cdk::sequence_node *_statements;
 
   public:
-    inline function_node(int lineno, cdk::sequence_node *declarations
+    inline function_node(int lineno, cdk::sequence_node *arguments,
         cdk::sequence_node *statements) :
-      cdk::basic_node(lineno), _declarations(declarations), _statements(statements) {
+      cdk::basic_node(lineno), _arguments(arguments), _statements(statements) {
     }
 
   public:
@@ -26,8 +26,8 @@ namespace xpl {
       return _type;
     }
     
-    inline cdk::sequence_node *declarations() {
-      return _declarations;
+    inline cdk::sequence_node *arguments() {
+      return _arguments;
     }
 
     inline cdk::sequence_node *statements() {

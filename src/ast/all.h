@@ -30,6 +30,7 @@ namespace cdk {
 namespace xpl {
 class evaluation_node; 
 class next_node; 
+class function_node; 
 class read_node; 
 class while_node; 
 class if_else_node; 
@@ -82,6 +83,7 @@ class if_node;
 
 #include "ast/evaluation_node.h"
 #include "ast/next_node.h"
+#include "ast/function_node.h"
 #include "ast/read_node.h"
 #include "ast/while_node.h"
 #include "ast/if_else_node.h"
