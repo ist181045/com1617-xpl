@@ -256,6 +256,7 @@ void xpl::postfix_writer::do_return_node(xpl::return_node * const node, int lvl)
 //---------------------------------------------------------------------------
 
 void xpl::postfix_writer::do_sweep_up_node(xpl::sweep_up_node * const node, int lvl) {}
+void xpl::postfix_writer::do_sweep_down_node(xpl::sweep_down_node * const node, int lvl) {}
 
 //---------------------------------------------------------------------------
 

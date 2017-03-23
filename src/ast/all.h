@@ -28,6 +28,7 @@ namespace cdk {
 //---------------------------------------------------------------------------
 
 namespace xpl {
+class sweep_down_node; 
 class identity_node; 
 class stop_node; 
 class return_node; 
@@ -87,6 +88,7 @@ class if_node;
 //     THESE ARE THE NODES DEFINED SPECIFICALLY FOR THIS APPLICATION
 //---------------------------------------------------------------------------
 
+#include "ast/sweep_down_node.h"
 #include "ast/identity_node.h"
 #include "ast/stop_node.h"
 #include "ast/return_node.h"
