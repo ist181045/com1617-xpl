@@ -1,3 +1,4 @@
+// $Id: next_node.h,v 1.2 2017/03/23 19:05:07 ist181045 Exp $
 #ifndef __XPL_NEXTNODE_H__
 #define __XPL_NEXTNODE_H__
 
