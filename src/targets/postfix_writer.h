@@ -80,6 +80,9 @@ namespace xpl {
     void do_if_else_node(xpl::if_else_node * const node, int lvl);
 
   public:
+    void do_null_node(xpl::null_node * const node, int lvl);
+
+  public:
     void do_next_node(xpl::next_node * const node, int lvl);
     void do_stop_node(xpl::stop_node * const node, int lvl);
     void do_return_node(xpl::return_node * const node, int lvl);

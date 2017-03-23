@@ -182,6 +182,10 @@ void xpl::xml_writer::do_if_else_node(xpl::if_else_node * const node, int lvl) {
 
 //---------------------------------------------------------------------------
 
+void xpl::xml_writer::do_null_node(xpl::null_node * const node, int lvl) {}
+
+//---------------------------------------------------------------------------
+
 void xpl::xml_writer::do_next_node(xpl::next_node * const node, int lvl) {}
 void xpl::xml_writer::do_stop_node(xpl::stop_node * const node, int lvl) {}
 void xpl::xml_writer::do_return_node(xpl::return_node * const node, int lvl) {}
