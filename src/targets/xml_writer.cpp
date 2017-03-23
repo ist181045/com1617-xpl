@@ -188,6 +188,10 @@ void xpl::xml_writer::do_return_node(xpl::return_node * const node, int lvl) {}
 
 //---------------------------------------------------------------------------
 
+void xpl::xml_writer::do_malloc_node(xpl::malloc_node * const node, int lvl) {}
+
+//---------------------------------------------------------------------------
+
 void xpl::xml_writer::do_sweep_up_node(xpl::sweep_up_node * const node, int lvl) {}
 void xpl::xml_writer::do_sweep_down_node(xpl::sweep_down_node * const node, int lvl) {}
 

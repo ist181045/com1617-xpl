@@ -33,6 +33,7 @@ class identity_node;
 class stop_node; 
 class return_node; 
 class null_node; 
+class malloc_node; 
 class evaluation_node; 
 class next_node; 
 class position_node; 
@@ -93,6 +94,7 @@ class if_node;
 #include "ast/stop_node.h"
 #include "ast/return_node.h"
 #include "ast/null_node.h"
+#include "ast/malloc_node.h"
 #include "ast/evaluation_node.h"
 #include "ast/next_node.h"
 #include "ast/position_node.h"

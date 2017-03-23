@@ -75,6 +75,9 @@ namespace xpl {
     void do_read_node(xpl::read_node * const node, int lvl);
 
   public:
+    void do_malloc_node(xpl::malloc_node * const node, int lvl);
+
+  public:
     void do_while_node(xpl::while_node * const node, int lvl);
     void do_sweep_up_node(xpl::sweep_up_node * const node, int lvl);
     void do_sweep_down_node(xpl::sweep_down_node * const node, int lvl);
