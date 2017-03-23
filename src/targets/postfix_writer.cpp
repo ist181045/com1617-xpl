@@ -260,3 +260,4 @@ void xpl::postfix_writer::do_null_node(xpl::null_node * const node, int lvl) {}
 //---------------------------------------------------------------------------
 
 void xpl::postfix_writer::do_identity_node(xpl::identity_node * const node, int lvl) {}
+void xpl::postfix_writer::do_position_node(xpl::position_node * const node, int lvl) {}

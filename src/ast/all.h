@@ -34,6 +34,7 @@ class return_node;
 class null_node; 
 class evaluation_node; 
 class next_node; 
+class position_node; 
 class function_node; 
 class read_node; 
 class while_node; 
@@ -91,6 +92,7 @@ class if_node;
 #include "ast/null_node.h"
 #include "ast/evaluation_node.h"
 #include "ast/next_node.h"
+#include "ast/position_node.h"
 #include "ast/function_node.h"
 #include "ast/read_node.h"
 #include "ast/while_node.h"

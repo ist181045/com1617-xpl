@@ -101,6 +101,7 @@ namespace xpl {
 
   public:
     void do_identity_node(xpl::identity_node * const node, int lvl);
+    void do_position_node(xpl::position_node * const node, int lvl);
   };
 
 } // xpl
