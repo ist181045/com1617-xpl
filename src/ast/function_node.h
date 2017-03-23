@@ -1,4 +1,4 @@
-// $Id: function_node.h,v 1.1 2017/03/23 17:59:34 ist181045 Exp $ -*- c++ -*-
+// $Id: function_node.h,v 1.2 2017/03/23 18:25:45 ist181045 Exp $ -*- c++ -*-
 #ifndef __XPL_FUNCTIONNODE_H__
 #define __XPL_FUNCTIONNODE_H__
 

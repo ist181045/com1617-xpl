@@ -28,6 +28,8 @@ namespace cdk {
 //---------------------------------------------------------------------------
 
 namespace xpl {
+class stop_node; 
+class return_node; 
 class evaluation_node; 
 class next_node; 
 class function_node; 
@@ -81,6 +83,8 @@ class if_node;
 //     THESE ARE THE NODES DEFINED SPECIFICALLY FOR THIS APPLICATION
 //---------------------------------------------------------------------------
 
+#include "ast/stop_node.h"
+#include "ast/return_node.h"
 #include "ast/evaluation_node.h"
 #include "ast/next_node.h"
 #include "ast/function_node.h"

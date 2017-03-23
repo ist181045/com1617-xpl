@@ -246,3 +246,9 @@ void xpl::postfix_writer::do_if_else_node(xpl::if_else_node * const node, int lv
   node->elseblock()->accept(this, lvl + 2);
   _pf.LABEL(mklbl(lbl1 = lbl2));
 }
+
+//---------------------------------------------------------------------------
+
+void xpl::postfix_writer::do_next_node(xpl::next_node * const node, int lvl) {}
+void xpl::postfix_writer::do_stop_node(xpl::stop_node * const node, int lvl) {}
+void xpl::postfix_writer::do_return_node(xpl::return_node * const node, int lvl) {}
