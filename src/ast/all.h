@@ -38,6 +38,7 @@ class position_node;
 class function_node; 
 class read_node; 
 class while_node; 
+class sweep_up_node; 
 class if_else_node; 
 class print_node; 
 class if_node; 
@@ -96,6 +97,7 @@ class if_node;
 #include "ast/function_node.h"
 #include "ast/read_node.h"
 #include "ast/while_node.h"
+#include "ast/sweep_up_node.h"
 #include "ast/if_else_node.h"
 #include "ast/print_node.h"
 #include "ast/if_node.h"

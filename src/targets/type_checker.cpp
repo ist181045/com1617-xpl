@@ -177,6 +177,10 @@ void xpl::type_checker::do_return_node(xpl::return_node * const node, int lvl) {
 
 //---------------------------------------------------------------------------
 
+void xpl::type_checker::do_sweep_up_node(xpl::sweep_up_node * const node, int lvl) {}
+
+//---------------------------------------------------------------------------
+
 void xpl::type_checker::do_null_node(xpl::null_node * const node, int lvl) {}
 
 //---------------------------------------------------------------------------
