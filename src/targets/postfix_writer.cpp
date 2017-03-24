@@ -229,7 +229,7 @@ void xpl::postfix_writer::do_read_node(xpl::read_node * const node, int lvl) {
   ASSERT_SAFE_EXPRESSIONS;
   _pf.CALL("readi");
   _pf.PUSH();
-  node->argument()->accept(this, lvl);
+  //node->argument()->accept(this, lvl);
   _pf.STORE();
 }
 

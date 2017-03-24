@@ -1,5 +1,5 @@
 %{
-// $Id: xpl_parser.y,v 1.2 2017/03/23 18:25:45 ist181045 Exp $
+// $Id: xpl_parser.y,v 1.3 2017/03/24 16:02:45 ist181045 Exp $
 //-- don't change *any* of these: if you do, you'll break the compiler.
 #include <cdk/compiler.h>
 #include "ast/all.h"
@@ -33,7 +33,7 @@
 %left '*' '/' '%'
 %nonassoc tUNARY
 
-%type <node> stmt program
+%type <node> stmt //program
 %type <sequence> list
 %type <expression> expr
 %type <lvalue> lval
@@ -52,7 +52,7 @@ list : stmt	     { $$ = new cdk::sequence_node(LINE, $1); }
 
 stmt : expr ';'                         { $$ = new xpl::evaluation_node(LINE, $1); }
  	   | tPRINT expr ';'                  { $$ = new xpl::print_node(LINE, $2); }
-     | tREAD lval ';'                   { $$ = new xpl::read_node(LINE, $2); }
+     | tREAD ';'                        { $$ = new xpl::read_node(LINE); }
      | tWHILE '(' expr ')' stmt         { $$ = new xpl::while_node(LINE, $3, $5); }
      | tIF '(' expr ')' stmt %prec tIFX { $$ = new xpl::if_node(LINE, $3, $5); }
      | tIF '(' expr ')' stmt tELSE stmt { $$ = new xpl::if_else_node(LINE, $3, $5, $7); }

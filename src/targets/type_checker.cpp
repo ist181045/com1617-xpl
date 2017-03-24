@@ -163,11 +163,11 @@ void xpl::type_checker::do_print_node(xpl::print_node * const node, int lvl) {
 //---------------------------------------------------------------------------
 
 void xpl::type_checker::do_read_node(xpl::read_node * const node, int lvl) {
-  try {
+  /*try {
     node->argument()->accept(this, lvl);
   } catch (const std::string &id) {
     throw "undeclared variable '" + id + "'";
-  }
+  }*/
 }
 
 //---------------------------------------------------------------------------
