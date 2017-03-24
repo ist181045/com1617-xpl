@@ -38,6 +38,10 @@ void xpl::type_checker::do_neg_node(cdk::neg_node * const node, int lvl) {
   processUnaryExpression(node, lvl);
 }
 
+void xpl::type_checker::do_not_node(cdk::not_node * const node, int lvl) {
+  processUnaryExpression(node, lvl);
+}
+
 //---------------------------------------------------------------------------
 
 inline void xpl::type_checker::processBinaryExpression(cdk::binary_expression_node * const node, int lvl) {
@@ -85,6 +89,14 @@ void xpl::type_checker::do_ne_node(cdk::ne_node * const node, int lvl) {
   processBinaryExpression(node, lvl);
 }
 void xpl::type_checker::do_eq_node(cdk::eq_node * const node, int lvl) {
+  processBinaryExpression(node, lvl);
+}
+
+void xpl::type_checker::do_and_node(cdk::and_node * const node, int lvl) {
+  processBinaryExpression(node, lvl);
+}
+
+void xpl::type_checker::do_or_node(cdk::or_node * const node, int lvl) {
   processBinaryExpression(node, lvl);
 }
 

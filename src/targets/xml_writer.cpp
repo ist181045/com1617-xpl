@@ -35,6 +35,10 @@ inline void xpl::xml_writer::do_unary_expression(cdk::unary_expression_node * co
   closeTag(node, lvl);
 }
 
+void xpl::xml_writer::do_not_node(cdk::not_node * const node, int lvl) {
+  do_unary_expression(node, lvl);
+}
+
 void xpl::xml_writer::do_neg_node(cdk::neg_node * const node, int lvl) {
   do_unary_expression(node, lvl);
 }
@@ -80,6 +84,14 @@ void xpl::xml_writer::do_ne_node(cdk::ne_node * const node, int lvl) {
   do_binary_expression(node, lvl);
 }
 void xpl::xml_writer::do_eq_node(cdk::eq_node * const node, int lvl) {
+  do_binary_expression(node, lvl);
+}
+
+void xpl::xml_writer::do_and_node(cdk::and_node * const node, int lvl) {
+  do_binary_expression(node, lvl);
+}
+
+void xpl::xml_writer::do_or_node(cdk::or_node * const node, int lvl) {
   do_binary_expression(node, lvl);
 }
 
