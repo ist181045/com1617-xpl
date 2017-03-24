@@ -125,6 +125,10 @@ public:
   virtual void do_malloc_node(xpl::malloc_node * const node, int lvl) = 0;
 
 public:
+  virtual void do_index_node(xpl::index_node * const node, int lvl) = 0;
+
+public:
+  virtual void do_real_node(xpl::real_node * const node, int lvl) = 0;
   virtual void do_null_node(xpl::null_node * const node, int lvl) = 0;
   
 public:

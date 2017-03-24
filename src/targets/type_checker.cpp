@@ -185,6 +185,11 @@ void xpl::type_checker::do_malloc_node(xpl::malloc_node * const node, int lvl) {
 
 //---------------------------------------------------------------------------
 
+void xpl::type_checker::do_index_node(xpl::index_node * const node, int lvl) {}
+
+//---------------------------------------------------------------------------
+
+void xpl::type_checker::do_real_node(xpl::real_node * const node, int lvl) {}
 void xpl::type_checker::do_null_node(xpl::null_node * const node, int lvl) {}
 
 //---------------------------------------------------------------------------

@@ -263,6 +263,11 @@ void xpl::postfix_writer::do_malloc_node(xpl::malloc_node * const node, int lvl)
 
 //---------------------------------------------------------------------------
 
+void xpl::postfix_writer::do_index_node(xpl::index_node * const node, int lvl) {}
+
+//---------------------------------------------------------------------------
+
+void xpl::postfix_writer::do_real_node(xpl::real_node * const node, int lvl) {}
 void xpl::postfix_writer::do_null_node(xpl::null_node * const node, int lvl) {}
 
 //---------------------------------------------------------------------------

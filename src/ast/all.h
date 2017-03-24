@@ -33,6 +33,7 @@ class identity_node;
 class stop_node; 
 class return_node; 
 class vardecl_node; 
+class index_node; 
 class null_node; 
 class malloc_node; 
 class block_node; 
@@ -44,6 +45,7 @@ class read_node;
 class while_node; 
 class sweep_up_node; 
 class if_else_node; 
+class real_node; 
 class print_node; 
 class if_node; 
 
@@ -96,6 +98,7 @@ class if_node;
 #include "ast/stop_node.h"
 #include "ast/return_node.h"
 #include "ast/vardecl_node.h"
+#include "ast/index_node.h"
 #include "ast/null_node.h"
 #include "ast/malloc_node.h"
 #include "ast/block_node.h"
@@ -107,6 +110,7 @@ class if_node;
 #include "ast/while_node.h"
 #include "ast/sweep_up_node.h"
 #include "ast/if_else_node.h"
+#include "ast/real_node.h"
 #include "ast/print_node.h"
 #include "ast/if_node.h"
 
