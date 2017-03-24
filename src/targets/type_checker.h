@@ -1,4 +1,4 @@
-// $Id: type_checker.h,v 1.15 2017/03/24 14:42:34 ist181045 Exp $ -*- c++ -*-
+// $Id: type_checker.h,v 1.16 2017/03/24 15:13:39 ist181045 Exp $ -*- c++ -*-
 #ifndef __XPL_SEMANTICS_TYPE_CHECKER_H__
 #define __XPL_SEMANTICS_TYPE_CHECKER_H__
 
@@ -88,6 +88,7 @@ namespace xpl {
     void do_next_node(xpl::next_node * const node, int lvl);
     void do_stop_node(xpl::stop_node * const node, int lvl);
     void do_vardecl_node(xpl::vardecl_node * const node, int lvl);
+    void do_funcdecl_node(xpl::funcdecl_node * const node, int lvl);
     void do_return_node(xpl::return_node * const node, int lvl);
 
   public:
