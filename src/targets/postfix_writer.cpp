@@ -19,6 +19,7 @@ void xpl::postfix_writer::do_integer_node(cdk::integer_node * const node, int lv
 }
 
 void xpl::postfix_writer::do_double_node(cdk::double_node * const node, int lvl) {
+  _pf.DOUBLE(node->value()); // push a double
 }
 
 void xpl::postfix_writer::do_string_node(cdk::string_node * const node, int lvl) {
@@ -275,4 +276,5 @@ void xpl::postfix_writer::do_null_node(xpl::null_node * const node, int lvl) {}
 //---------------------------------------------------------------------------
 
 void xpl::postfix_writer::do_identity_node(xpl::identity_node * const node, int lvl) {}
+void xpl::postfix_writer::do_invocation_node(xpl::invocation_node * const node, int lvl) {}
 void xpl::postfix_writer::do_position_node(xpl::position_node * const node, int lvl) {}

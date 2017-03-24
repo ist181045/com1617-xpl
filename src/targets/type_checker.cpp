@@ -199,4 +199,5 @@ void xpl::type_checker::do_null_node(xpl::null_node * const node, int lvl) {}
 //---------------------------------------------------------------------------
 
 void xpl::type_checker::do_identity_node(xpl::identity_node * const node, int lvl) {}
+void xpl::type_checker::do_invocation_node(xpl::invocation_node * const node, int lvl) {}
 void xpl::type_checker::do_position_node(xpl::position_node * const node, int lvl) {}
