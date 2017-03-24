@@ -254,6 +254,7 @@ void xpl::postfix_writer::do_if_else_node(xpl::if_else_node * const node, int lv
 void xpl::postfix_writer::do_block_node(xpl::block_node * const node, int lvl) {}
 void xpl::postfix_writer::do_next_node(xpl::next_node * const node, int lvl) {}
 void xpl::postfix_writer::do_stop_node(xpl::stop_node * const node, int lvl) {}
+void xpl::postfix_writer::do_vardecl_node(xpl::vardecl_node * const node, int lvl) {}
 void xpl::postfix_writer::do_return_node(xpl::return_node * const node, int lvl) {}
 
 //---------------------------------------------------------------------------

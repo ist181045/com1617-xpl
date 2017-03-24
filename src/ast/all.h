@@ -32,6 +32,7 @@ class sweep_down_node;
 class identity_node; 
 class stop_node; 
 class return_node; 
+class vardecl_node; 
 class null_node; 
 class malloc_node; 
 class block_node; 
@@ -94,6 +95,7 @@ class if_node;
 #include "ast/identity_node.h"
 #include "ast/stop_node.h"
 #include "ast/return_node.h"
+#include "ast/vardecl_node.h"
 #include "ast/null_node.h"
 #include "ast/malloc_node.h"
 #include "ast/block_node.h"

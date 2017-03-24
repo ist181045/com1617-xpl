@@ -176,6 +176,7 @@ void xpl::type_checker::do_if_else_node(xpl::if_else_node * const node, int lvl)
 void xpl::type_checker::do_block_node(xpl::block_node * const node, int lvl) {}
 void xpl::type_checker::do_next_node(xpl::next_node * const node, int lvl) {}
 void xpl::type_checker::do_stop_node(xpl::stop_node * const node, int lvl) {}
+void xpl::type_checker::do_vardecl_node(xpl::vardecl_node * const node, int lvl) {}
 void xpl::type_checker::do_return_node(xpl::return_node * const node, int lvl) {}
 
 //---------------------------------------------------------------------------
