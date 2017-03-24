@@ -1,4 +1,4 @@
-// $Id: block_node.h,v 1.1 2017/03/23 21:17:33 ist181045 Exp $
+// $Id: block_node.h,v 1.2 2017/03/24 14:54:08 ist181045 Exp $
 #ifndef __XPL_BLOCKNODE_H__
 #define __XPL_BLOCKNODE_H__
 
@@ -6,7 +6,7 @@
 
 namespace xpl {
 
-  class block_node : cdk::basic_node {
+  class block_node : public cdk::basic_node {
     cdk::sequence_node *_declarations;
     cdk::sequence_node *_instructions;
 

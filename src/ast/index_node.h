@@ -1,4 +1,4 @@
-// $Id: index_node.h,v 1.2 2017/03/24 11:37:07 ist181045 Exp $
+// $Id: index_node.h,v 1.3 2017/03/24 14:54:08 ist181045 Exp $
 #ifndef __XPL_INDEXNODE_H__
 #define __XPL_INDEXNODE_H__
 
@@ -6,7 +6,7 @@
 #include <cdk/ast/expression_node.h>
 
 namespace xpl {
-  class index_node : cdk::lvalue_node {
+  class index_node : public cdk::lvalue_node {
     cdk::expression_node *_expression;
     cdk::expression_node *_offset;
     
