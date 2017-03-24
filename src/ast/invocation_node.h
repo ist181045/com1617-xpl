@@ -1,4 +1,4 @@
-// $Id: invocation_node.h,v 1.1 2017/03/24 14:42:34 ist181045 Exp $ -*- c++ -*-
+// $Id: invocation_node.h,v 1.2 2017/03/24 14:48:43 ist181045 Exp $ -*- c++ -*-
 #ifndef __XPL_INVOCNODE_H__
 #define __XPL_INVOCNODE_H__
 
@@ -18,7 +18,7 @@ namespace xpl {
         _arguments(arguments) {}
 
   public:
-    inline cdk::invocation_node *function() {
+    inline cdk::identifier_node *function() {
       return _function;
     }
 

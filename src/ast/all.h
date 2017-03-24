@@ -36,6 +36,7 @@ class vardecl_node;
 class index_node; 
 class null_node; 
 class malloc_node; 
+class invocation_node; 
 class block_node; 
 class evaluation_node; 
 class next_node; 
@@ -100,6 +101,7 @@ class if_node;
 #include "ast/index_node.h"
 #include "ast/null_node.h"
 #include "ast/malloc_node.h"
+#include "ast/invocation_node.h"
 #include "ast/block_node.h"
 #include "ast/evaluation_node.h"
 #include "ast/next_node.h"

@@ -1,4 +1,4 @@
-// $Id: vardecl_node.h,v 1.1 2017/03/24 11:06:43 ist181045 Exp $ -*- c++ -*-
+// $Id: vardecl_node.h,v 1.2 2017/03/24 14:48:43 ist181045 Exp $ -*- c++ -*-
 #ifndef __XPL_VARDECLNODE_H__
 #define __XPL_VARDECLNODE_H__
 
@@ -7,7 +7,8 @@
 
 namespace xpl {
 
-  class vardecl_node : cdk::basic_node {
+  class vardecl_node : public cdk::basic_node {
+    int _scope;
     basic_type *_type;
     cdk::identifier_node *_name;
 
@@ -17,6 +18,10 @@ namespace xpl {
         _name(name) {}
 
   public:
+    inline const int scope() const {
+      return _scope;
+    }
+    
     inline basic_type *type() {
       return _type;
     }
