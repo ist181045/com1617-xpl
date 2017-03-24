@@ -1,4 +1,4 @@
-// $Id: null_node.h,v 1.1 2017/03/23 19:40:27 ist181045 Exp $
+// $Id: null_node.h,v 1.2 2017/03/24 14:23:07 ist181045 Exp $
 #ifndef __XPL_NULLNODE_H__
 #define __XPL_NULLNODE_H__
 
@@ -6,7 +6,7 @@
 
 namespace xpl {
 
-  class null_node : public cdk::literal_node<int> {
+  class null_node : public virtual cdk::literal_node<int> {
   protected:
     inline null_node(int lineno) :
         cdk::literal_node<int>(lineno, 0) {
