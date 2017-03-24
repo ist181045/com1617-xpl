@@ -13,6 +13,11 @@ void xpl::type_checker::do_integer_node(cdk::integer_node * const node, int lvl)
   node->type(new basic_type(4, basic_type::TYPE_INT));
 }
 
+void xpl::type_checker::do_double_node(cdk::double_node * const node, int lvl) {
+  ASSERT_UNSPEC;
+  node->type(new basic_type(8, basic_type::TYPE_DOUBLE));
+}
+
 void xpl::type_checker::do_string_node(cdk::string_node * const node, int lvl) {
   ASSERT_UNSPEC;
   node->type(new basic_type(4, basic_type::TYPE_STRING));
@@ -189,7 +194,6 @@ void xpl::type_checker::do_index_node(xpl::index_node * const node, int lvl) {}
 
 //---------------------------------------------------------------------------
 
-void xpl::type_checker::do_real_node(xpl::real_node * const node, int lvl) {}
 void xpl::type_checker::do_null_node(xpl::null_node * const node, int lvl) {}
 
 //---------------------------------------------------------------------------

@@ -18,6 +18,10 @@ void xpl::xml_writer::do_integer_node(cdk::integer_node * const node, int lvl) {
   process_literal(node, lvl);
 }
 
+void xpl::xml_writer::do_double_node(cdk::double_node * const node, int lvl) {
+  process_literal(node, lvl);
+}
+
 void xpl::xml_writer::do_string_node(cdk::string_node * const node, int lvl) {
   process_literal(node, lvl);
 }
@@ -200,7 +204,6 @@ void xpl::xml_writer::do_index_node(xpl::index_node * const node, int lvl) {}
 
 //---------------------------------------------------------------------------
 
-void xpl::xml_writer::do_real_node(xpl::real_node * const node, int lvl) {}
 void xpl::xml_writer::do_null_node(xpl::null_node * const node, int lvl) {}
 
 //---------------------------------------------------------------------------
