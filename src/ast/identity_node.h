@@ -1,4 +1,4 @@
-// $Id: identity_node.h,v 1.1 2017/03/23 19:55:49 ist181045 Exp $ -*- c++ -*-
+// $Id: identity_node.h,v 1.2 2017/03/27 01:58:02 ist181045 Exp $ -*- c++ -*-
 #ifndef __XPL_IDENTITYNODE_H__
 #define __XPL_IDENTITYNODE_H__
 
@@ -7,7 +7,7 @@
 namespace xpl {
 
   class identity_node : public cdk::unary_expression_node {
-  protected:
+  public:
     inline identity_node(int lineno, cdk::expression_node *expression)
         : cdk::unary_expression_node(lineno, expression) {
     }
@@ -19,6 +19,6 @@ namespace xpl {
 
   };
 
-} // cdk
+} // xpl
 
 #endif

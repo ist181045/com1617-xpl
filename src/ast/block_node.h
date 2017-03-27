@@ -1,4 +1,4 @@
-// $Id: block_node.h,v 1.2 2017/03/24 14:54:08 ist181045 Exp $
+// $Id: block_node.h,v 1.3 2017/03/27 01:58:02 ist181045 Exp $ -*- c++ -*-
 #ifndef __XPL_BLOCKNODE_H__
 #define __XPL_BLOCKNODE_H__
 
@@ -10,7 +10,7 @@ namespace xpl {
     cdk::sequence_node *_declarations;
     cdk::sequence_node *_instructions;
 
-  protected:
+  public:
     inline block_node(int lineno, cdk::sequence_node *declarations,
         cdk::sequence_node *instructions) : cdk::basic_node(lineno),
         _declarations(declarations), _instructions(instructions) {}

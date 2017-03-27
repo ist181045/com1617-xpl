@@ -1,4 +1,4 @@
-// $Id: function_node.h,v 1.5 2017/03/24 15:57:45 ist181045 Exp $ -*- c++ -*-
+// $Id: function_node.h,v 1.6 2017/03/27 01:58:02 ist181045 Exp $ -*- c++ -*-
 #ifndef __XPL_FUNCTIONNODE_H__
 #define __XPL_FUNCTIONNODE_H__
 
@@ -10,9 +10,6 @@
 
 namespace xpl {
 
-  /**
-   * Class for describing program nodes.
-   */
   class function_node: public cdk::basic_node {
     int _scope;
     basic_type *_type;

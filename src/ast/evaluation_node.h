@@ -1,4 +1,4 @@
-// $Id: evaluation_node.h,v 1.1 2017/02/17 16:02:31 david Exp $
+// $Id: evaluation_node.h,v 1.2 2017/03/27 01:58:02 ist181045 Exp $ -*- c++ -*-
 #ifndef __XPL_EVALUATIONNODE_H__
 #define __XPL_EVALUATIONNODE_H__
 

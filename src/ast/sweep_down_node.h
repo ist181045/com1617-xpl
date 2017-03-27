@@ -1,4 +1,4 @@
-// $Id: sweep_down_node.h,v 1.2 2017/03/24 15:24:04 ist181045 Exp $ -*- c++ -*-
+// $Id: sweep_down_node.h,v 1.3 2017/03/27 01:58:02 ist181045 Exp $ -*- c++ -*-
 #ifndef __XPL_SWEEPDOWNNODE_H__
 #define __XPL_SWEEPDOWNNODE_H__
 
@@ -17,7 +17,7 @@ namespace xpl {
     cdk::expression_node *_step;
     cdk::basic_node *_block;
 
-  protected:
+  public:
     inline sweep_down_node(int lineno, cdk::lvalue_node *lvalue,
         cdk::expression_node *initial, cdk::expression_node *lower,
         cdk::expression_node *step, cdk::basic_node *block)
@@ -26,7 +26,6 @@ namespace xpl {
     }
 
   public:
-
     inline cdk::lvalue_node *lvalue() {
       return _lvalue;
     }

@@ -1,4 +1,4 @@
-// $Id: malloc_node.h,v 1.2 2017/03/24 14:54:08 ist181045 Exp $ -*- c++ -*-
+// $Id: malloc_node.h,v 1.3 2017/03/27 01:58:02 ist181045 Exp $ -*- c++ -*-
 
 #ifndef __XPL_MALLOCNODE_H__
 #define __XPL_MALLOCNODE_H__ 
@@ -10,7 +10,7 @@ namespace xpl {
   class malloc_node : public cdk::expression_node {
     cdk::expression_node *_expression;
 
-  protected:
+  public:
     inline malloc_node(int lineno, cdk::expression_node *expression)
       : cdk::expression_node(lineno), _expression(expression) {}
 

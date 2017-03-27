@@ -1,4 +1,4 @@
-// $Id: funcdecl_node.h,v 1.1 2017/03/24 15:13:39 ist181045 Exp $ -*- c++ -*-
+// $Id: funcdecl_node.h,v 1.2 2017/03/27 01:58:02 ist181045 Exp $ -*- c++ -*-
 #ifndef __XPL_FUNCDECLNODE_H__
 #define __XPL_FUNCDECLNODE_H__
 
@@ -13,7 +13,7 @@ namespace xpl {
     cdk::identifier_node *_name;
     cdk::sequence_node *_arguments;
 
-  protected:
+  public:
     inline funcdecl_node(int lineno, basic_type *type,
         cdk::identifier_node *name, cdk::sequence_node *arguments)
         : cdk::basic_node(lineno), _type(type), _name(name),

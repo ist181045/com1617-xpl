@@ -1,4 +1,4 @@
-// $Id: stop_node.h,v 1.2 2017/03/23 19:05:07 ist181045 Exp $
+// $Id: stop_node.h,v 1.3 2017/03/27 01:58:02 ist181045 Exp $ -*- c++ -*-
 #ifndef __XPL_STOPNODE_H__
 #define __XPL_STOPNODE_H__
 
@@ -7,7 +7,7 @@
 namespace xpl {
 
   class stop_node : public cdk::basic_node {
-  protected:
+  public:
     inline stop_node(int lineno) :
         cdk::basic_node(lineno) {
     }
@@ -19,6 +19,6 @@ namespace xpl {
 
   };
 
-} // cdk
+} // xpl
 
 #endif
