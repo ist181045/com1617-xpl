@@ -1,6 +1,7 @@
 # CVS folders + sub-folders
 
 CVS
+CVSROOT
 .cvsignore
 
 # exec + parser + scanner
