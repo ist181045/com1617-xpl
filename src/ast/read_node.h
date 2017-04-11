@@ -1,4 +1,4 @@
-// $Id: read_node.h,v 1.2 2017/03/24 16:02:45 ist181045 Exp $ -*- c++ -*-
+// $Id: read_node.h,v 1.3 2017/04/11 22:36:30 ist181045 Exp $ -*- c++ -*-
 #ifndef __XPL_READNODE_H__
 #define __XPL_READNODE_H__
 
@@ -6,13 +6,10 @@
 
 namespace xpl {
 
-  /**
-   * Class for describing read nodes.
-   */
   class read_node: public cdk::expression_node {
   public:
-    inline read_node(int lineno) :
-        cdk::expression_node(lineno) {
+    inline read_node(int lineno)
+        : cdk::expression_node(lineno) {
     }
 
   public:

@@ -1,4 +1,4 @@
-// $Id: print_node.h,v 1.1 2017/02/17 16:02:31 david Exp $ -*- c++ -*-
+// $Id: print_node.h,v 1.2 2017/04/11 22:36:30 ist181045 Exp $ -*- c++ -*-
 #ifndef __XPL_PRINTNODE_H__
 #define __XPL_PRINTNODE_H__
 
@@ -6,15 +6,12 @@
 
 namespace xpl {
 
-  /**
-   * Class for describing print nodes.
-   */
   class print_node: public cdk::basic_node {
     cdk::expression_node *_argument;
 
   public:
-    inline print_node(int lineno, cdk::expression_node *argument) :
-        cdk::basic_node(lineno), _argument(argument) {
+    inline print_node(int lineno, cdk::expression_node *argument)
+        : cdk::basic_node(lineno), _argument(argument) {
     }
 
   public:

@@ -1,4 +1,4 @@
-// $Id: if_else_node.h,v 1.1 2017/02/17 16:02:31 david Exp $ -*- c++ -*-
+// $Id: if_else_node.h,v 1.2 2017/04/11 22:36:30 ist181045 Exp $ -*- c++ -*-
 #ifndef __CDK_IFELSENODE_H__
 #define __CDK_IFELSENODE_H__
 
@@ -6,16 +6,15 @@
 
 namespace xpl {
 
-  /**
-   * Class for describing if-then-else nodes.
-   */
   class if_else_node: public cdk::basic_node {
     cdk::expression_node *_condition;
     cdk::basic_node *_thenblock, *_elseblock;
 
   public:
-    inline if_else_node(int lineno, cdk::expression_node *condition, cdk::basic_node *thenblock, cdk::basic_node *elseblock) :
-        cdk::basic_node(lineno), _condition(condition), _thenblock(thenblock), _elseblock(elseblock) {
+    inline if_else_node(int lineno, cdk::expression_node *condition,
+        cdk::basic_node *thenblock, cdk::basic_node *elseblock)
+        : cdk::basic_node(lineno), _condition(condition), _thenblock(thenblock),
+        _elseblock(elseblock) {
     }
 
   public:

@@ -1,4 +1,4 @@
-// $Id: return_node.h,v 1.3 2017/03/27 01:58:02 ist181045 Exp $ -*- c++ -*-
+// $Id: return_node.h,v 1.4 2017/04/11 22:36:30 ist181045 Exp $ -*- c++ -*-
 #ifndef __XPL_RETURNNODE_H__
 #define __XPL_RETURNNODE_H__
 
@@ -6,10 +6,10 @@
 
 namespace xpl {
 
-  class return_node : public cdk::basic_node {
+  class return_node: public cdk::basic_node {
   public:
-    inline return_node(int lineno) :
-        cdk::basic_node(lineno) {
+    inline return_node(int lineno)
+        : cdk::basic_node(lineno) {
     }
 
   public:

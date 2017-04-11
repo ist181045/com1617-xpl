@@ -1,4 +1,4 @@
-// $Id: evaluation_node.h,v 1.2 2017/03/27 01:58:02 ist181045 Exp $ -*- c++ -*-
+// $Id: evaluation_node.h,v 1.3 2017/04/11 22:36:30 ist181045 Exp $ -*- c++ -*-
 #ifndef __XPL_EVALUATIONNODE_H__
 #define __XPL_EVALUATIONNODE_H__
 
@@ -6,22 +6,19 @@
 
 namespace xpl {
 
-  /**
-   * Class for describing evaluation nodes.
-   */
   class evaluation_node: public cdk::basic_node {
     cdk::expression_node *_argument;
 
   public:
-    inline evaluation_node(int lineno, cdk::expression_node *argument) :
-        cdk::basic_node(lineno), _argument(argument) {
+    inline evaluation_node(int lineno, cdk::expression_node *argument)
+        : cdk::basic_node(lineno), _argument(argument) {
     }
 
   public:
     inline cdk::expression_node *argument() {
       return _argument;
     }
-
+    
     void accept(basic_ast_visitor *sp, int level) {
       sp->do_evaluation_node(this, level);
     }

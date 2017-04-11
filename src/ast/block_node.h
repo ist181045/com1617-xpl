@@ -1,4 +1,4 @@
-// $Id: block_node.h,v 1.3 2017/03/27 01:58:02 ist181045 Exp $ -*- c++ -*-
+// $Id: block_node.h,v 1.4 2017/04/11 22:36:30 ist181045 Exp $ -*- c++ -*-
 #ifndef __XPL_BLOCKNODE_H__
 #define __XPL_BLOCKNODE_H__
 
@@ -6,20 +6,21 @@
 
 namespace xpl {
 
-  class block_node : public cdk::basic_node {
+  class block_node: public cdk::basic_node {
     cdk::sequence_node *_declarations;
     cdk::sequence_node *_instructions;
 
   public:
     inline block_node(int lineno, cdk::sequence_node *declarations,
-        cdk::sequence_node *instructions) : cdk::basic_node(lineno),
-        _declarations(declarations), _instructions(instructions) {}
+        cdk::sequence_node *instructions)
+        : cdk::basic_node(lineno), _declarations(declarations),
+        _instructions(instructions) {
+    }
 
   public:
     inline cdk::sequence_node *declarations() {
       return _declarations;
     }
-
     inline cdk::sequence_node *instructions() {
       return _instructions;
     }
