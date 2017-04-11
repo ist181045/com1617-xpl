@@ -1,7 +1,8 @@
-// $Id: while_node.h,v 1.2 2017/04/11 22:36:30 ist181045 Exp $ -*- c++ -*-
+// $Id: while_node.h,v 1.3 2017/04/11 22:45:15 ist181045 Exp $ -*- c++ -*-
 #ifndef __CDK_WHILENODE_H__
 #define __CDK_WHILENODE_H__
 
+#include <cdk/ast/basic_node.h>
 #include <cdk/ast/expression_node.h>
 
 namespace xpl {

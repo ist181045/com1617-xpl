@@ -1,8 +1,9 @@
-// $Id: block_node.h,v 1.4 2017/04/11 22:36:30 ist181045 Exp $ -*- c++ -*-
+// $Id: block_node.h,v 1.5 2017/04/11 22:45:15 ist181045 Exp $ -*- c++ -*-
 #ifndef __XPL_BLOCKNODE_H__
 #define __XPL_BLOCKNODE_H__
 
 #include <cdk/ast/basic_node.h>
+#include <cdk/ast/sequence_node.h>
 
 namespace xpl {
 

@@ -1,11 +1,9 @@
-// $Id: sweep_down_node.h,v 1.4 2017/04/11 22:36:30 ist181045 Exp $ -*- c++ -*-
+// $Id: sweep_down_node.h,v 1.5 2017/04/11 22:45:15 ist181045 Exp $ -*- c++ -*-
 #ifndef __XPL_SWEEPDOWNNODE_H__
 #define __XPL_SWEEPDOWNNODE_H__
 
 #include <cdk/ast/basic_node.h>
-
 #include <cdk/ast/expression_node.h>
-#include <cdk/ast/integer_node.h>
 #include <cdk/ast/lvalue_node.h>
 
 namespace xpl {
