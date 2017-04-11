@@ -116,7 +116,7 @@ namespace xpl {
 
   public:
     void do_identity_node(xpl::identity_node * const node, int lvl);
-    void do_invocation_node(xpl::invocation_node * const node, int lvl);
+    void do_funcall_node(xpl::funcall_node * const node, int lvl);
     void do_address_of_node(xpl::address_of_node * const node, int lvl);
   };
 
