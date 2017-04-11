@@ -129,7 +129,7 @@ public:
 public:
   virtual void do_identity_node(xpl::identity_node * const node, int lvl) = 0;
   virtual void do_invocation_node(xpl::invocation_node * const node, int lvl) = 0;
-  virtual void do_position_node(xpl::position_node * const node, int lvl) = 0;
+  virtual void do_address_of_node(xpl::address_of_node * const node, int lvl) = 0;
 
 };
 
