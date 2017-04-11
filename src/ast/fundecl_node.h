@@ -1,6 +1,6 @@
-// $Id: funcdecl_node.h,v 1.3 2017/04/11 16:17:01 ist181045 Exp $ -*- c++ -*-
-#ifndef __XPL_FUNCDECLNODE_H__
-#define __XPL_FUNCDECLNODE_H__
+// $Id: fundecl_node.h,v 1.1 2017/04/11 17:07:21 ist181045 Exp $ -*- c++ -*-
+#ifndef __XPL_FUNDECLNODE_H__
+#define __XPL_FUNDECLNODE_H__
 
 #include <string>
 
@@ -9,14 +9,14 @@
 
 namespace xpl {
 
-  class funcdecl_node : public cdk::basic_node {
+  class fundecl_node : public cdk::basic_node {
     int _scope;
     basic_type *_type;
     std::string *_name;
     cdk::sequence_node *_arguments;
 
   public:
-    inline funcdecl_node(int lineno, basic_type *type, std::string *name,
+    inline fundecl_node(int lineno, basic_type *type, std::string *name,
         cdk::sequence_node *arguments) : cdk::basic_node(lineno), _type(type),
         _name(name), _arguments(arguments) {}
 
@@ -38,7 +38,7 @@ namespace xpl {
     }
 
     void accept(basic_ast_visitor *sp, int level) {
-      sp->do_funcdecl_node(this, level);
+      sp->do_fundecl_node(this, level);
     }
 
   };

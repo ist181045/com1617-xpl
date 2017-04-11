@@ -114,7 +114,7 @@ public:
   virtual void do_next_node(xpl::next_node * const node, int lvl) = 0;
   virtual void do_stop_node(xpl::stop_node * const node, int lvl) = 0;
   virtual void do_vardecl_node(xpl::vardecl_node * const node, int lvl) = 0;
-  virtual void do_funcdecl_node(xpl::funcdecl_node * const node, int lvl) = 0;
+  virtual void do_fundecl_node(xpl::fundecl_node * const node, int lvl) = 0;
   virtual void do_return_node(xpl::return_node * const node, int lvl) = 0;
 
 public:
