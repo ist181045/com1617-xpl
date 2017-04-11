@@ -1,6 +1,8 @@
-// $Id: invocation_node.h,v 1.3 2017/03/27 01:58:02 ist181045 Exp $ -*- c++ -*-
+// $Id: invocation_node.h,v 1.4 2017/04/11 16:17:01 ist181045 Exp $ -*- c++ -*-
 #ifndef __XPL_INVOCNODE_H__
 #define __XPL_INVOCNODE_H__
+
+#include <string>
 
 #include <cdk/ast/expression_node.h>
 #include <cdk/ast/identifier_node.h>
@@ -9,17 +11,16 @@
 namespace xpl {
 
   class invocation_node : public cdk::expression_node {
-    cdk::identifier_node *_function;
+    std::string *_function;
     cdk::sequence_node *_arguments;
 
   public:
-    inline invocation_node(int lineno, cdk::identifier_node *function,
-        cdk::sequence_node *arguments)
-        : cdk::expression_node(lineno), _function(function),
-        _arguments(arguments) {}
+    inline invocation_node(int lineno, std::string *function,
+        cdk::sequence_node *arguments) : cdk::expression_node(lineno),
+        _function(function), _arguments(arguments) {}
 
   public:
-    inline cdk::identifier_node *function() {
+    inline std::string *function() {
       return _function;
     }
 

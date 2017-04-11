@@ -1,6 +1,8 @@
-// $Id: function_node.h,v 1.6 2017/03/27 01:58:02 ist181045 Exp $ -*- c++ -*-
+// $Id: function_node.h,v 1.7 2017/04/11 16:17:01 ist181045 Exp $ -*- c++ -*-
 #ifndef __XPL_FUNCTIONNODE_H__
 #define __XPL_FUNCTIONNODE_H__
+
+#include <string>
 
 #include <cdk/ast/basic_node.h>
 #include <cdk/ast/expression_node.h>
@@ -13,17 +15,17 @@ namespace xpl {
   class function_node: public cdk::basic_node {
     int _scope;
     basic_type *_type;
-    cdk::identifier_node *_name;
+    std::string *_name;
     cdk::sequence_node *_arguments;
     cdk::expression_node *_retval;
     block_node *_body;
 
   public:
     inline function_node(int lineno, int scope, basic_type *type,
-      cdk::identifier_node *name, cdk::sequence_node *arguments,
-      cdk::expression_node *retval, block_node *body) :
-      cdk::basic_node(lineno), _scope(scope), _type(type), _name(name),
-      _arguments(arguments), _retval(retval), _body(body) {}
+        std::string *name, cdk::sequence_node *arguments,
+        cdk::expression_node *retval, block_node *body) :
+        cdk::basic_node(lineno), _scope(scope), _type(type), _name(name),
+        _arguments(arguments), _retval(retval), _body(body) {}
 
   public:
     inline const int scope() const {
