@@ -1,4 +1,4 @@
-// $Id: function_node.h,v 1.7 2017/04/11 16:17:01 ist181045 Exp $ -*- c++ -*-
+// $Id: function_node.h,v 1.8 2017/04/11 16:34:22 ist181045 Exp $ -*- c++ -*-
 #ifndef __XPL_FUNCTIONNODE_H__
 #define __XPL_FUNCTIONNODE_H__
 
@@ -36,7 +36,7 @@ namespace xpl {
       return _type;
     }
 
-    inline cdk::identifier_node *name() {
+    inline std::string *name() {
       return _name;
     }
 
