@@ -16,6 +16,11 @@ xpl_scanner.cpp
 
 **/ast/all.h
 
+# JetBrains CLion
+.idea/
+CMakeLists.txt
+cmake-build-debug/
+
 # Others
 
 com-notes.todo
