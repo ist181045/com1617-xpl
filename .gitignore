@@ -14,7 +14,7 @@ xpl_scanner.cpp
 
 # ast defs
 
-src/ast/all.h
+**/ast/all.h
 
 # Others
 
