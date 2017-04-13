@@ -1,13 +1,15 @@
-// $Id: function_node.h,v 1.10 2017/04/11 22:45:15 ist181045 Exp $ -*- c++ -*-
+// $Id: function_node.h,v 1.11 2017/04/13 11:10:23 ist181045 Exp $ -*- c++ -*-
 #ifndef __XPL_FUNCTIONNODE_H__
 #define __XPL_FUNCTIONNODE_H__
 
 #include <cdk/ast/basic_node.h>
-#include <cdk/ast/expression_node.h>
+#include <cdk/ast/literal_node.h>
 #include <cdk/ast/sequence_node.h>
 #include <cdk/basic_type.h>
 
 #include <string>
+
+#include "block_node.h"
 
 namespace xpl {
 
@@ -16,13 +18,13 @@ namespace xpl {
     basic_type *_type;
     std::string *_name;
     cdk::sequence_node *_arguments;
-    cdk::expression_node *_retval;
+    cdk::literal_node<basic_type> *_retval;
     block_node *_body;
 
   public:
     inline function_node(int lineno, int scope, basic_type *type,
         std::string *name, cdk::sequence_node *arguments,
-        cdk::expression_node *retval, block_node *body)
+        cdk::literal_node<basic_type> *retval, block_node *body)
         : cdk::basic_node(lineno), _scope(scope), _type(type), _name(name),
         _arguments(arguments), _retval(retval), _body(body) {
     }
@@ -40,7 +42,7 @@ namespace xpl {
     inline cdk::sequence_node *arguments() {
       return _arguments;
     }
-    inline cdk::expression_node *retval() {
+    inline cdk::literal_node<basic_type> *retval() {
       return _retval;
     }
     inline block_node *body() {
