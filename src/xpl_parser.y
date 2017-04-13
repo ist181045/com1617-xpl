@@ -1,5 +1,5 @@
 %{
-// $Id: xpl_parser.y,v 1.5 2017/04/13 17:36:10 ist181045 Exp $
+// $Id: xpl_parser.y,v 1.6 2017/04/13 20:06:22 ist181045 Exp $
 //-- don't change *any* of these: if you do, you'll break the compiler.
 #include <cdk/compiler.h>
 #include "ast/all.h"
@@ -12,36 +12,55 @@
 %}
 
 %union {
-  int                   i;  /* integer value */
-  double                d;  /* double/real value */
-  std::string          *s;  /* symbol name or string literal */
-  cdk::basic_node      *node; /* node pointer */
-  cdk::sequence_node   *sequence;
+  int          i;  /* integer value */
+  double       d;  /* double/real value */
+  std::string *s;  /* symbol name or string literal */
+  
+  cdk::basic_node      *node;       /* node pointer */
   cdk::expression_node *expression; /* expression nodes */
-  cdk::lvalue_node     *lvalue;
+  cdk::lvalue_node     *lvalue;     /* lvalue nodes */
+  cdk::sequence_node   *sequence;   /* sequence nodes */
+
+  xpl::null_node *null; /* null nodes */
 };
 
-%token <i> tINTEGER
-%token <d> tREAL
-%token <s> tIDENTIFIER tSTRING
-%token tPROCEDURE
+    /* Literals + identifier */
+%token <i>    tINTEGER
+%token <d>    tREAL
+%token <null> tNULL
+%token <s>    tIDENTIFIER tSTRING
 
+
+    /* Iteration */
 %token tWHILE tSWEEP
-%token tIF
-%token tNEXT tSTOP tRETURN
-%token tPRINTLN
+
+    /* Scope */
 %token tPUBLIC tUSE
 
+    /* Conditional */
+%token tIF
 %nonassoc tIFX
 %nonassoc tELSE
 %nonassoc tELSIF
 
+    /* Control */
+%token tNEXT tSTOP tRETURN
+
+    /* I/O */
+%token tPRINTLN
+
+    /* Others */
+%token tPROCEDURE
+
+    /* Arithmetic */
 %right '='
 %left tGE tLE tEQ tNE '>' '<'
 %left '+' '-'
 %left '*' '/' '%'
 %nonassoc tUNARY
 
+
+    /* Rule types */
 %type <node> stmt //program
 %type <sequence> list
 %type <expression> expr
@@ -52,36 +71,34 @@
 %}
 %%
 
-//program : tBEGIN list tEND { compiler->ast(new xpl::program_node(LINE, $2)); }
-        //;
-
-list : stmt      { $$ = new cdk::sequence_node(LINE, $1); }
+list : stmt      { $$ = new cdk::sequence_node(LINE, $1);     }
      | list stmt { $$ = new cdk::sequence_node(LINE, $2, $1); }
      ;
 
-stmt : expr ';'                         { $$ = new xpl::evaluation_node(LINE, $1); }
-     | tWHILE '(' expr ')' stmt         { $$ = new xpl::while_node(LINE, $3, $5); }
-     | tIF '(' expr ')' stmt %prec tIFX { $$ = new xpl::if_node(LINE, $3, $5); }
+stmt : expr ';'                         { $$ = new xpl::evaluation_node(LINE, $1);      }
+     | tWHILE '(' expr ')' stmt         { $$ = new xpl::while_node(LINE, $3, $5);       }
+     | tIF '(' expr ')' stmt %prec tIFX { $$ = new xpl::if_node(LINE, $3, $5);          }
      | tIF '(' expr ')' stmt tELSE stmt { $$ = new xpl::if_else_node(LINE, $3, $5, $7); }
      | '{' list '}'                     { $$ = $2; }
      ;
 
 expr : tINTEGER                { $$ = new cdk::integer_node(LINE, $1); }
-     | tSTRING                 { $$ = new cdk::string_node(LINE, $1); }
-     | '-' expr %prec tUNARY   { $$ = new cdk::neg_node(LINE, $2); }
+     | tSTRING                 { $$ = new cdk::string_node(LINE, $1);  }
+     | tREAL                   { $$ = new cdk::double_node(LINE, $1);  }
+     | '-' expr %prec tUNARY   { $$ = new cdk::neg_node(LINE, $2);     }
      | expr '+' expr           { $$ = new cdk::add_node(LINE, $1, $3); }
      | expr '-' expr           { $$ = new cdk::sub_node(LINE, $1, $3); }
      | expr '*' expr           { $$ = new cdk::mul_node(LINE, $1, $3); }
      | expr '/' expr           { $$ = new cdk::div_node(LINE, $1, $3); }
      | expr '%' expr           { $$ = new cdk::mod_node(LINE, $1, $3); }
-     | expr '<' expr           { $$ = new cdk::lt_node(LINE, $1, $3); }
-     | expr '>' expr           { $$ = new cdk::gt_node(LINE, $1, $3); }
-     | expr tGE expr           { $$ = new cdk::ge_node(LINE, $1, $3); }
-     | expr tLE expr           { $$ = new cdk::le_node(LINE, $1, $3); }
-     | expr tNE expr           { $$ = new cdk::ne_node(LINE, $1, $3); }
-     | expr tEQ expr           { $$ = new cdk::eq_node(LINE, $1, $3); }
+     | expr '<' expr           { $$ = new cdk::lt_node(LINE, $1, $3);  }
+     | expr '>' expr           { $$ = new cdk::gt_node(LINE, $1, $3);  }
+     | expr tGE expr           { $$ = new cdk::ge_node(LINE, $1, $3);  }
+     | expr tLE expr           { $$ = new cdk::le_node(LINE, $1, $3);  }
+     | expr tNE expr           { $$ = new cdk::ne_node(LINE, $1, $3);  }
+     | expr tEQ expr           { $$ = new cdk::eq_node(LINE, $1, $3);  }
      | '(' expr ')'            { $$ = $2; }
-     | lval                    { $$ = new cdk::rvalue_node(LINE, $1); }  //FIXME
+     | lval                    { $$ = new cdk::rvalue_node(LINE, $1);  }  //FIXME
      | lval '=' expr           { $$ = new cdk::assignment_node(LINE, $1, $3); }
      ;
 

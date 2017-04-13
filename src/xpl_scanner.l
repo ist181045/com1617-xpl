@@ -1,7 +1,7 @@
 %option c++ yyclass="xpl_scanner" outfile="xpl_scanner.cpp"
 %option stack noyywrap yylineno 8bit debug
 %{
-/* $Id: xpl_scanner.l,v 1.3 2017/04/13 17:36:11 ist181045 Exp $ */
+/* $Id: xpl_scanner.l,v 1.4 2017/04/13 20:06:22 ist181045 Exp $ */
 // make relevant includes before including the parser's tab file
 #include <string>
 #include <cdk/ast/sequence_node.h>
@@ -22,10 +22,12 @@ DOUBLE     [0-9]+"."[0-9]*|"."[0-9]+
 EXP        [Ee][-+]?[0-9]+
 
     /* Other rules */
-SINGLES    [-|()[<>=+*&/%;!@?{}\].]
+SINGLES    [-()[\]<>=+*/%;!@?|~&{}.]
 
 %x X_STRING X_COMMENT
+
 %%
+    { set_debug(1); }
 
     /* Comments */
     /* Multi-line nested comments */
@@ -57,6 +59,7 @@ SINGLES    [-|()[<>=+*&/%;!@?{}\].]
 "int"                  return tINTEGER;
 "real"                 return tREAL;
 "string"               return tSTRING;
+"null"                 return tNULL;
 
 
     /* Scope keywords */
