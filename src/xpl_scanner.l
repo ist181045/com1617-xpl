@@ -1,7 +1,7 @@
 %option c++ yyclass="xpl_scanner" outfile="xpl_scanner.cpp"
 %option stack noyywrap yylineno 8bit
-%{ 
-/* $Id: xpl_scanner.l,v 1.1 2017/02/17 16:02:31 david Exp $ */
+%{
+/* $Id: xpl_scanner.l,v 1.2 2017/04/13 16:40:45 ist181045 Exp $ */
 // make relevant includes before including the parser's tab file
 #include <string>
 #include <cdk/ast/sequence_node.h>
@@ -12,37 +12,87 @@
 // don't change this
 #define yyerror LexerError
 %}
-%x X_STRING
+%x X_STRING X_COMMENT
 %%
 
-"--".*                 ; /* ignore comments */
+  /* Comments */
+  /* Multi-line nested comments */
 
-">="                   return tGE; 
-"<="                   return tLE; 
-"=="                   return tEQ; 
-"!="                   return tNE; 
+"/*"                   yy_push_state(X_COMMENT);
+<X_COMMENT>"/*"        yy_push_state(X_COMMENT);
+<X_COMMENT>"*/"        yy_pop_state();
+<X_COMMENT>.|\n        ;
 
-"while"                return tWHILE; 
-"if"                   return tIF; 
-"else"                 return tELSE; 
-"print"                return tPRINT; 
-"read"                 return tREAD; 
-"begin"                return tBEGIN; 
-"end"                  return tEND; 
 
-[A-Za-z][A-Za-z0-9_]*  yylval.s = new std::string(yytext); return tIDENTIFIER;
+  /* Single-line comments */
 
-\'                     yy_push_state(X_STRING); yylval.s = new std::string("");
-<X_STRING>\'           yy_pop_state(); return tSTRING;
-<X_STRING>\\\'         *yylval.s += yytext + 1;
+"//".*$                ;
+
+
+
+  /* Operators */
+  /* Relational operators */
+
+">="                   return tGE;
+"<="                   return tLE;
+"=="                   return tEQ;
+"!="                   return tNE;
+
+  /* I/O operators */
+
+"!!"                   return tPRINTLN;
+
+
+
+  /* Keywords */
+  /* Scope keywords */
+
+"public"               return tPUBLIC;
+"use"                  return tUSE;
+
+
+  /* Iteration statement keywords */
+
+"while"                return tWHILE;
+"sweep"                return tSWEEP;
+
+
+  /* Conditional statement keywords */
+
+"if"                   return tIF;
+"else"                 return tELSE;
+"elsif"                return tELSIF;
+
+
+  /* Control statement keywords */
+
+"next"                 return tNEXT;
+"stop"                 return tSTOP;
+"return"               return tRETURN;
+
+
+  /* Identifiers */
+
+[A-Za-z_][A-Za-z0-9_]* yylval.s = new std::string(yytext); return tIDENTIFIER;
+
+
+
+  /* Literals */
+  /* Strings */
+
+\"                     yy_push_state(X_STRING); yylval.s = new std::string("");
+<X_STRING>\"           yy_pop_state(); return tSTRING;
+<X_STRING>\\\"         *yylval.s += yytext + 1;
 <X_STRING>.            *yylval.s += yytext;
-<X_STRING>\n           yyerror("newline in string");
+<X_STRING>\n           yyerror("Newline in string");
 
-[0-9]+                 yylval.i = strtol(yytext, nullptr, 10); return tINTEGER;
 
 [-()<>=+*/%;{}.]       return *yytext;
 
 [ \t\n]+               ; /* ignore whitespace */
+
+
+  /* Aliens */
 
 .                      yyerror("Unknown character");
 
