@@ -1,7 +1,7 @@
 %option c++ yyclass="xpl_scanner" outfile="xpl_scanner.cpp"
-%option stack noyywrap yylineno 8bit debug
+%option stack noyywrap yylineno 8bit
 %{
-/* $Id: xpl_scanner.l,v 1.10 2017/04/14 17:52:28 ist181045 Exp $ */
+/* $Id: xpl_scanner.l,v 1.11 2017/04/14 17:56:08 ist181045 Exp $ */
 // make relevant includes before including the parser's tab file
 #include <string>
 #include <cdk/ast/sequence_node.h>
@@ -39,7 +39,6 @@ EXPROPS    [-+()[\]?*/%<>~&|=!@]
 %x X_COMMENT X_STR X_STRMORE X_STRNO
 
 %%
-    { set_debug(1); }
 
     /* Lexical conventions (3) ============================================== */
     /* Comments (3.2) ------------------------------------------------------- */
