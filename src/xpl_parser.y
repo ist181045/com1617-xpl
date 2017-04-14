@@ -1,5 +1,5 @@
 %{
-// $Id: xpl_parser.y,v 1.9 2017/04/14 17:12:19 ist181045 Exp $
+// $Id: xpl_parser.y,v 1.10 2017/04/14 17:53:53 ist181045 Exp $
 //-- don't change *any* of these: if you do, you'll break the compiler.
 #include <cdk/compiler.h>
 #include "ast/all.h"
@@ -77,11 +77,15 @@
 
 
     /* 7 Expressions ======================================================== */
-%right '='
-%left tGE tLE tEQ tNE '>' '<'
-%left '+' '-'
-%left '*' '/' '%'
-%nonassoc tUNARY
+%right    '='                      /* Assignment */
+%left     '|'                      /* Logical 'or' */
+%left     '&'                      /* Logical 'and' */
+%nonassoc '~'                      /* Logical 'not' */
+%left     tEQ tNE tLE tGE '<' '>'  /* Comparative + Equality */
+%left     '+' '-'                  /* Additive */
+%left     '*' '/' '%'              /* Multiplicative */
+%nonassoc tUNARY                   /* Unary precedence token */
+%nonassoc '(' ')' '[' ']'          /* Primary */
 
 %{
 //-- The rules below will be included in yyparse, the main parsing function.
