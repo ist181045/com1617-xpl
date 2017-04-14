@@ -1,7 +1,7 @@
 %option c++ yyclass="xpl_scanner" outfile="xpl_scanner.cpp"
 %option stack noyywrap yylineno 8bit debug
 %{
-/* $Id: xpl_scanner.l,v 1.8 2017/04/14 16:43:23 ist181045 Exp $ */
+/* $Id: xpl_scanner.l,v 1.9 2017/04/14 17:12:20 ist181045 Exp $ */
 // make relevant includes before including the parser's tab file
 #include <string>
 #include <cdk/ast/sequence_node.h>
@@ -43,7 +43,7 @@ EXPROPS    [-+()[\]?*/%<>~&|=!@]
     { set_debug(1); }
 
     /* Lexical conventions (3) ============================================== */
-    /* Comments (3.2) */
+    /* Comments (3.2) ------------------------------------------------------- */
     /* Multi-line nested comments */
 <INITIAL,X_STRMORE>"/*"    yy_push_state(X_COMMENT);
 <X_COMMENT>"/*"            yy_push_state(X_COMMENT);
@@ -55,7 +55,7 @@ EXPROPS    [-+()[\]?*/%<>~&|=!@]
 <INITIAL,X_STRMORE>"//".*$ ;
 
 
-    /* Keywords (3.3) ------------------------------------------------------- */
+    /* 3.3 Keywords --------------------------------------------------------- */
     /* Literals */
 "int"                  return tTYPEINTEGER;
 "real"                 return tTYPEREAL;

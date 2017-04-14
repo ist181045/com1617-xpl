@@ -1,5 +1,5 @@
 %{
-// $Id: xpl_parser.y,v 1.8 2017/04/14 12:19:09 ist181045 Exp $
+// $Id: xpl_parser.y,v 1.9 2017/04/14 17:12:19 ist181045 Exp $
 //-- don't change *any* of these: if you do, you'll break the compiler.
 #include <cdk/compiler.h>
 #include "ast/all.h"
@@ -11,6 +11,7 @@
 //-- don't change *any* of these --- END!
 %}
 
+    /* 1 Data Types ========================================================= */
 %union {
   int          i;  /* integer value */
   double       d;  /* double/real value */
@@ -24,16 +25,28 @@
   xpl::null_node *null; /* null nodes */
 };
 
-    /* Literals + identifier */
+    /* Numeric types */
 %token <i>    tINTEGER
 %token <d>    tREAL
-%token <s>    tIDENTIFIER tSTRING
+
+    /* String */
+%token <s>    tSTRING
+
+    /* Pointers */
 %token <null> tNULL
+
+    /* Identifier (doesn't belong.. argh!) */
+%token <s>    tIDENTIFIER
+
+
+
+    /* 3 Lexical Conventions ================================================ */
+    /* 3.3 Keywords --------------------------------------------------------- */
+    /* Literals */
 %token tTYPEINTEGER tTYPEREAL tTYPESTRING
 
-
-    /* Iteration */
-%token tWHILE tSWEEP
+    /* Function */
+%token tPROCEDURE
 
     /* Scope */
 %token tPUBLIC tUSE
@@ -44,35 +57,40 @@
 %nonassoc tELSE
 %nonassoc tELSIF
 
-    /* Control */
-%token tNEXT tSTOP tRETURN
+    /* Iteration */
+%token tWHILE tSWEEP
 
-    /* I/O */
+    /* Control */
+%token tSTOP tNEXT tRETURN
+
+    /* 3.6 Delimiters and terminators --------------------------------------- */
 %token tPRINTLN
 
-    /* Others */
-%token tPROCEDURE
 
-    /* Arithmetic */
+
+    /* 4 Syntax ============================================================= */
+%type <node> stmt
+%type <sequence> list
+%type <expression> expr
+%type <lvalue> lval
+
+
+
+    /* 7 Expressions ======================================================== */
 %right '='
 %left tGE tLE tEQ tNE '>' '<'
 %left '+' '-'
 %left '*' '/' '%'
 %nonassoc tUNARY
 
-
-    /* Rule types */
-%type <node> stmt
-%type <sequence> list
-%type <expression> expr
-%type <lvalue> lval
-
 %{
 //-- The rules below will be included in yyparse, the main parsing function.
 %}
 %%
 
-file : list      { compiler->ast(new cdk::sequence_node(LINE, $1)); }
+    /* 4 Syntax ============================================================= */
+
+file : list      { compiler->ast($1); }
 
 list : stmt      { $$ = new cdk::sequence_node(LINE, $1);     }
      | list stmt { $$ = new cdk::sequence_node(LINE, $2, $1); }
