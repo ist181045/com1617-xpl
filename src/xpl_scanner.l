@@ -1,7 +1,7 @@
 %option c++ yyclass="xpl_scanner" outfile="xpl_scanner.cpp"
 %option stack noyywrap yylineno 8bit debug
 %{
-/* $Id: xpl_scanner.l,v 1.7 2017/04/14 14:31:54 ist181045 Exp $ */
+/* $Id: xpl_scanner.l,v 1.8 2017/04/14 16:43:23 ist181045 Exp $ */
 // make relevant includes before including the parser's tab file
 #include <string>
 #include <cdk/ast/sequence_node.h>
@@ -16,23 +16,34 @@
 #define yyerror LexerError
 %}
 
-    /* Literal regex */
-INTEGER    [1-9][0-9]*|"0"
-HEXC       [0-9A-Fa-f]
-HEX        "0x"{HEXC}+
+    /* Helpful rules */
+DECDIG     [0-9]
+HEXDIG     [0-9A-Fa-f]
+HEX        "0x"{HEXDIG}+
 
-REAL       [0-9]+"."[0-9]*|"."[0-9]+
-EXP        [Ee][-+]?[0-9]+
+    /* Literal regex rules */
+    /* Integers (see 3.8.1 Integers) */
+INTEGER    [1-9]{DECDIG}*|"0"
 
-    /* Other regex */
-SINGLES    [-()[\]<>=+*/%;!@?|~&{}.]
+    /* Reals (see 3.8.2 Floating point reals) */
+REAL       {DECDIG}+"."{DECDIG}*|"."{DECDIG}+
+EXP        [Ee][-+]?{DECDIG}+
+
+
+    /* Other regex rules */
+    /* Blanks (see 3.1 Blank characters) */
+BLANK      [\t\n\r ]
+
+    /* Expression operators (see 7 Expressions) */
+EXPROPS    [-+()[\]?*/%<>~&|=!@]
 
 %x X_COMMENT X_STR X_STRMORE X_STRNO
 
 %%
     { set_debug(1); }
 
-    /* Comments */
+    /* Lexical conventions (3) ============================================== */
+    /* Comments (3.2) */
     /* Multi-line nested comments */
 <INITIAL,X_STRMORE>"/*"    yy_push_state(X_COMMENT);
 <X_COMMENT>"/*"            yy_push_state(X_COMMENT);
@@ -44,80 +55,53 @@ SINGLES    [-()[\]<>=+*/%;!@?|~&{}.]
 <INITIAL,X_STRMORE>"//".*$ ;
 
 
-
-    /* Operators */
-    /* Relational operators */
-">="                   return tGE;
-"<="                   return tLE;
-"=="                   return tEQ;
-"!="                   return tNE;
-
-    /* I/O operators */
-"!!"                   return tPRINTLN;
-
-
-
-    /* Keywords */
-    /* Literal identifier keywords */
+    /* Keywords (3.3) ------------------------------------------------------- */
+    /* Literals */
 "int"                  return tTYPEINTEGER;
 "real"                 return tTYPEREAL;
 "string"               return tTYPESTRING;
-    
-    /* Literals */
 "null"                 return tNULL;
 
+    /* Function */
+"procedure"            return tPROCEDURE;
 
-    /* Scope keywords */
+    /* Scope */
 "public"               return tPUBLIC;
 "use"                  return tUSE;
 
-
-    /* Conditional statement keywords */
+    /* Conditional */
 "if"                   return tIF;
-"else"                 return tELSE;
 "elsif"                return tELSIF;
+"else"                 return tELSE;
 
+    /* Iteration */
+"while"                return tWHILE;
+"sweep"                return tSWEEP;
 
-    /* Control statement keywords */
+    /* Control */
 "stop"                 return tSTOP;
 "next"                 return tNEXT;
 "return"               return tRETURN;
 
 
-    /* Iteration statement keywords */
-"while"                return tWHILE;
-"sweep"                return tSWEEP;
+    /* 3.5 Expression Operators --------------------------------------------- */
+    /* Comparative and equalty */
+">="                   return tGE;
+"<="                   return tLE;
+"=="                   return tEQ;
+"!="                   return tNE;
 
 
-    /* Others */
-"procedure"            return tPROCEDURE;
+    /* 3.6 Delimiters and terminators --------------------------------------- */
+"!!"                   return tPRINTLN;
 
 
-    /* Identifiers */
+    /* 3.7 Identifiers (names) ---------------------------------------------- */
 [A-Za-z_][A-Za-z0-9_]* yylval.s = new std::string(yytext); return tIDENTIFIER;
 
 
-
-    /* Literals */
-    /* Strings */
-\"                     yy_push_state(X_STR); yylval.s = new std::string("");
-<X_STR>\"              yy_pop_state(); return tSTRING;
-<X_STR>\\0             yy_push_state(X_STRNO); return tSTRING; /* NULL -> done here */
-<X_STR>\"[[:space:]]   yy_push_state(X_STRMORE); /* Is there more? */
-<X_STR>\\{HEXC}{1,2}   *yylval.s += (char)strtol((yytext + 1), nullptr, 16); /* special hex */
-<X_STR>\\\"            *yylval.s += yytext + 1; /* double quote */
-<X_STR>.               *yylval.s += yytext;
-<X_STR,X_STRNO>\n      yyerror("Newline in string");
-
-<X_STRMORE>\"          yy_pop_state(); /* There's more! */
-<X_STRMORE>[[:space:]] ; /* Keep looking */
-<X_STRMORE>.           yy_pop_state(); yy_pop_state(); return tSTRING; /* end */
-
-<X_STRNO>\"            yy_pop_state(); yy_pop_state();
-<X_STRNO>.             ; /* Ignore whatever is found */
-
-
-    /* Integers */
+    /* 3.8 Literals --------------------------------------------------------- */
+    /* 3.8.1 Integers */
 "0"+{INTEGER}          yyerror("Integers mustn\'t have a single leading 0");
 {INTEGER}|{HEX}        {
     short b = yytext[1] && yytext[1] == 'x' ? 16 : 10;
@@ -131,18 +115,36 @@ SINGLES    [-()[\]<>=+*/%;!@?|~&{}.]
     }
 }
 
-
-    /* Reals (safe, flex will match rules above first) */
+    /* 3.8.2 Floating point reals */
 ({REAL}|{INTEGER}){EXP}? yylval.d = strtod(yytext, nullptr); return tREAL;
 
+    /* 3.8.3 Strings */
+\"                     yy_push_state(X_STR); yylval.s = new std::string("");
+<X_STR>\"              yy_pop_state(); return tSTRING;
+<X_STR>\\0             yy_push_state(X_STRNO); return tSTRING; /* NULL -> end */
+<X_STR>\"{BLANK}       yy_push_state(X_STRMORE); /* Is there more? */
+<X_STR>\\{HEXDIG}{1,2} *yylval.s += (char)strtol((yytext + 1), nullptr, 16); /* special hex */
+<X_STR>\\\"            *yylval.s += yytext + 1; /* double quote */
+<X_STR>.               *yylval.s += yytext;
+<X_STR,X_STRNO>\n      yyerror("Newline in string");
 
-    /* Others */
-    /* Single characters */
-{SINGLES}              return *yytext;
+<X_STRMORE>\"          yy_pop_state(); /* There's more! */
+<X_STRMORE>{BLANK}     ; /* Keep looking */
+<X_STRMORE>.           yy_pop_state(); yy_pop_state(); return tSTRING; /* end */
+
+<X_STRNO>\"            yy_pop_state(); yy_pop_state();
+<X_STRNO>.             ; /* Ignore whatever is found */
 
 
-    /* Whitespace */
-[[:space:]]+           ; /* ignore horizontal and vertical whitespace */
+
+    /* 7 Expressions ======================================================== */
+    /* Single characters (see table in 7) */
+{EXPROPS}|[{};,.]      return *yytext;
+
+
+
+    /* Whitespace (see 3.1 Blank characters) */
+{BLANK}+               ; /* ignore blank characters */
 
 
     /* Aliens */
