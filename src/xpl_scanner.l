@@ -1,7 +1,7 @@
 %option c++ yyclass="xpl_scanner" outfile="xpl_scanner.cpp"
 %option stack noyywrap yylineno 8bit debug
 %{
-/* $Id: xpl_scanner.l,v 1.9 2017/04/14 17:12:20 ist181045 Exp $ */
+/* $Id: xpl_scanner.l,v 1.10 2017/04/14 17:52:28 ist181045 Exp $ */
 // make relevant includes before including the parser's tab file
 #include <string>
 #include <cdk/ast/sequence_node.h>
@@ -10,7 +10,6 @@
 #include "xpl_parser.tab.h"
 
 #include <climits>
-#include <cmath>
 
 // don't change this
 #define yyerror LexerError
