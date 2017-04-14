@@ -1,4 +1,4 @@
-// $Id: fundecl_node.h,v 1.3 2017/04/11 22:45:15 ist181045 Exp $ -*- c++ -*-
+// $Id: fundecl_node.h,v 1.4 2017/04/14 16:42:48 ist181045 Exp $ -*- c++ -*-
 #ifndef __XPL_FUNDECLNODE_H__
 #define __XPL_FUNDECLNODE_H__
 
@@ -17,9 +17,9 @@ namespace xpl {
     cdk::sequence_node *_arguments;
 
   public:
-    inline fundecl_node(int lineno, basic_type *type, std::string *name,
+    inline fundecl_node(int lineno, int scope, basic_type *type, std::string *name,
         cdk::sequence_node *arguments)
-        : cdk::basic_node(lineno), _type(type), _name(name),
+        : cdk::basic_node(lineno), _scope(scope), _type(type), _name(name),
         _arguments(arguments) {
     }
 
