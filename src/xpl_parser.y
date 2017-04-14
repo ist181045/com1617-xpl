@@ -1,5 +1,5 @@
 %{
-// $Id: xpl_parser.y,v 1.6 2017/04/13 20:06:22 ist181045 Exp $
+// $Id: xpl_parser.y,v 1.7 2017/04/14 11:46:35 ist181045 Exp $
 //-- don't change *any* of these: if you do, you'll break the compiler.
 #include <cdk/compiler.h>
 #include "ast/all.h"
@@ -27,8 +27,9 @@
     /* Literals + identifier */
 %token <i>    tINTEGER
 %token <d>    tREAL
-%token <null> tNULL
 %token <s>    tIDENTIFIER tSTRING
+%token <null> tNULL
+%token tTYPEINT tTYPEREAL tTYPESTRING
 
 
     /* Iteration */
@@ -61,7 +62,7 @@
 
 
     /* Rule types */
-%type <node> stmt //program
+%type <node> stmt
 %type <sequence> list
 %type <expression> expr
 %type <lvalue> lval
@@ -70,6 +71,8 @@
 //-- The rules below will be included in yyparse, the main parsing function.
 %}
 %%
+
+file : list      { compiler->ast(new cdk::sequence_node(LINE, $1)); }
 
 list : stmt      { $$ = new cdk::sequence_node(LINE, $1);     }
      | list stmt { $$ = new cdk::sequence_node(LINE, $2, $1); }

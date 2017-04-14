@@ -1,7 +1,7 @@
 %option c++ yyclass="xpl_scanner" outfile="xpl_scanner.cpp"
 %option stack noyywrap yylineno 8bit debug
 %{
-/* $Id: xpl_scanner.l,v 1.4 2017/04/13 20:06:22 ist181045 Exp $ */
+/* $Id: xpl_scanner.l,v 1.5 2017/04/14 11:46:35 ist181045 Exp $ */
 // make relevant includes before including the parser's tab file
 #include <string>
 #include <cdk/ast/sequence_node.h>
@@ -55,10 +55,12 @@ SINGLES    [-()[\]<>=+*/%;!@?|~&{}.]
 
 
     /* Keywords */
-    /* Literal keywords */
-"int"                  return tINTEGER;
-"real"                 return tREAL;
-"string"               return tSTRING;
+    /* Literal identifier keywords */
+"int"                  return tTYPEINT;
+"real"                 return tTYPEREAL;
+"string"               return tTYPESTRING;
+    
+    /* Literals */
 "null"                 return tNULL;
 
 
