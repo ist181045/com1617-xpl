@@ -1,7 +1,7 @@
 %option c++ yyclass="xpl_scanner" outfile="xpl_scanner.cpp"
 %option stack noyywrap yylineno 8bit debug
 %{
-/* $Id: xpl_scanner.l,v 1.5 2017/04/14 11:46:35 ist181045 Exp $ */
+/* $Id: xpl_scanner.l,v 1.6 2017/04/14 12:19:09 ist181045 Exp $ */
 // make relevant includes before including the parser's tab file
 #include <string>
 #include <cdk/ast/sequence_node.h>
@@ -18,7 +18,8 @@
 
     /* Literal rules */
 INTEGER    [1-9][0-9]*|"0"
-DOUBLE     [0-9]+"."[0-9]*|"."[0-9]+
+HEX        "0x"[0-9A-Fa-f]+
+REAL       [0-9]+"."[0-9]*|"."[0-9]+
 EXP        [Ee][-+]?[0-9]+
 
     /* Other rules */
@@ -56,7 +57,7 @@ SINGLES    [-()[\]<>=+*/%;!@?|~&{}.]
 
     /* Keywords */
     /* Literal identifier keywords */
-"int"                  return tTYPEINT;
+"int"                  return tTYPEINTEGER;
 "real"                 return tTYPEREAL;
 "string"               return tTYPESTRING;
     
@@ -105,22 +106,22 @@ SINGLES    [-()[\]<>=+*/%;!@?|~&{}.]
 
 
     /* Integers */
-0+{INTEGER}            yyerror("Integers mustn\'t have a single leading 0");
-{INTEGER}              {
-    long l = strtol(yytext, nullptr, 10);
+"0"+{INTEGER}          yyerror("Integers mustn\'t have a single leading 0");
+{INTEGER}|{HEX}        {
+    short b = yytext[1] && yytext[1] == 'x' ? 16 : 10;
+    long l = strtol(yytext, nullptr, b);
+
     if (l > INT_MAX) yyerror("Integer overflow");
     else if (l < INT_MIN) yyerror("Integer underflow");
     else {
-    yylval.i = (int)l;
-    return tINTEGER;
+      yylval.i = (int)l;
+      return tINTEGER;
     }
 }
-"0x"[0-9A-Fa-f]        yylval.i = strtol(yytext, nullptr, 16); return tINTEGER;
 
 
-    /* Reals */
-{DOUBLE}{EXP}?         yylval.d = strtod(yytext, nullptr); return tREAL;
-{INTEGER}{EXP}         yylval.d = strtod(yytext, nullptr); return tREAL;
+    /* Reals (safe, flex will match rules above first) */
+({REAL}|{INTEGER}){EXP}? yylval.d = strtod(yytext, nullptr); return tREAL;
 
 
     /* Others */
@@ -129,7 +130,7 @@ SINGLES    [-()[\]<>=+*/%;!@?|~&{}.]
 
 
     /* Whitespace */
-[ \t\n]+               ; /* ignore whitespace */
+[ \t\n\r]+             ; /* ignore whitespace */
 
 
     /* Aliens */

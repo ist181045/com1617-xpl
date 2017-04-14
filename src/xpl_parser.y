@@ -1,5 +1,5 @@
 %{
-// $Id: xpl_parser.y,v 1.7 2017/04/14 11:46:35 ist181045 Exp $
+// $Id: xpl_parser.y,v 1.8 2017/04/14 12:19:09 ist181045 Exp $
 //-- don't change *any* of these: if you do, you'll break the compiler.
 #include <cdk/compiler.h>
 #include "ast/all.h"
@@ -29,7 +29,7 @@
 %token <d>    tREAL
 %token <s>    tIDENTIFIER tSTRING
 %token <null> tNULL
-%token tTYPEINT tTYPEREAL tTYPESTRING
+%token tTYPEINTEGER tTYPEREAL tTYPESTRING
 
 
     /* Iteration */
