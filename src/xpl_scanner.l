@@ -1,7 +1,7 @@
 %option c++ yyclass="xpl_scanner" outfile="xpl_scanner.cpp"
 %option stack noyywrap yylineno 8bit debug
 %{
-/* $Id: xpl_scanner.l,v 1.6 2017/04/14 12:19:09 ist181045 Exp $ */
+/* $Id: xpl_scanner.l,v 1.7 2017/04/14 14:31:54 ist181045 Exp $ */
 // make relevant includes before including the parser's tab file
 #include <string>
 #include <cdk/ast/sequence_node.h>
@@ -16,30 +16,32 @@
 #define yyerror LexerError
 %}
 
-    /* Literal rules */
+    /* Literal regex */
 INTEGER    [1-9][0-9]*|"0"
-HEX        "0x"[0-9A-Fa-f]+
+HEXC       [0-9A-Fa-f]
+HEX        "0x"{HEXC}+
+
 REAL       [0-9]+"."[0-9]*|"."[0-9]+
 EXP        [Ee][-+]?[0-9]+
 
-    /* Other rules */
+    /* Other regex */
 SINGLES    [-()[\]<>=+*/%;!@?|~&{}.]
 
-%x X_STRING X_COMMENT
+%x X_COMMENT X_STR X_STRMORE X_STRNO
 
 %%
     { set_debug(1); }
 
     /* Comments */
     /* Multi-line nested comments */
-"/*"                   yy_push_state(X_COMMENT);
-<X_COMMENT>"/*"        yy_push_state(X_COMMENT);
-<X_COMMENT>"*/"        yy_pop_state();
-<X_COMMENT>.|\n        ;
+<INITIAL,X_STRMORE>"/*"    yy_push_state(X_COMMENT);
+<X_COMMENT>"/*"            yy_push_state(X_COMMENT);
+<X_COMMENT>"*/"            yy_pop_state();
+<X_COMMENT>.|\n            ;
 
 
     /* Single-line comments */
-"//".*$                ;
+<INITIAL,X_STRMORE>"//".*$ ;
 
 
 
@@ -98,11 +100,21 @@ SINGLES    [-()[\]<>=+*/%;!@?|~&{}.]
 
     /* Literals */
     /* Strings */
-\"                     yy_push_state(X_STRING); yylval.s = new std::string("");
-<X_STRING>\"           yy_pop_state(); return tSTRING;
-<X_STRING>\\\"         *yylval.s += yytext + 1;
-<X_STRING>.            *yylval.s += yytext;
-<X_STRING>\n           yyerror("Newline in string");
+\"                     yy_push_state(X_STR); yylval.s = new std::string("");
+<X_STR>\"              yy_pop_state(); return tSTRING;
+<X_STR>\\0             yy_push_state(X_STRNO); return tSTRING; /* NULL -> done here */
+<X_STR>\"[[:space:]]   yy_push_state(X_STRMORE); /* Is there more? */
+<X_STR>\\{HEXC}{1,2}   *yylval.s += (char)strtol((yytext + 1), nullptr, 16); /* special hex */
+<X_STR>\\\"            *yylval.s += yytext + 1; /* double quote */
+<X_STR>.               *yylval.s += yytext;
+<X_STR,X_STRNO>\n      yyerror("Newline in string");
+
+<X_STRMORE>\"          yy_pop_state(); /* There's more! */
+<X_STRMORE>[[:space:]] ; /* Keep looking */
+<X_STRMORE>.           yy_pop_state(); yy_pop_state(); return tSTRING; /* end */
+
+<X_STRNO>\"            yy_pop_state(); yy_pop_state();
+<X_STRNO>.             ; /* Ignore whatever is found */
 
 
     /* Integers */
@@ -130,7 +142,7 @@ SINGLES    [-()[\]<>=+*/%;!@?|~&{}.]
 
 
     /* Whitespace */
-[ \t\n\r]+             ; /* ignore whitespace */
+[[:space:]]+           ; /* ignore horizontal and vertical whitespace */
 
 
     /* Aliens */
