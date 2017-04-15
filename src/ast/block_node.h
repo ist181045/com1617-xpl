@@ -1,4 +1,4 @@
-// $Id: block_node.h,v 1.5 2017/04/11 22:45:15 ist181045 Exp $ -*- c++ -*-
+// $Id: block_node.h,v 1.6 2017/04/15 12:01:32 ist181045 Exp $ -*- c++ -*-
 #ifndef __XPL_BLOCKNODE_H__
 #define __XPL_BLOCKNODE_H__
 
@@ -9,21 +9,21 @@ namespace xpl {
 
   class block_node: public cdk::basic_node {
     cdk::sequence_node *_declarations;
-    cdk::sequence_node *_instructions;
+    cdk::sequence_node *_statements;
 
   public:
     inline block_node(int lineno, cdk::sequence_node *declarations,
-        cdk::sequence_node *instructions)
+        cdk::sequence_node *statements)
         : cdk::basic_node(lineno), _declarations(declarations),
-        _instructions(instructions) {
+        _statements(statements) {
     }
 
   public:
     inline cdk::sequence_node *declarations() {
       return _declarations;
     }
-    inline cdk::sequence_node *instructions() {
-      return _instructions;
+    inline cdk::sequence_node *statements() {
+      return _statements;
     }
 
     void accept(basic_ast_visitor *sp, int level) {
