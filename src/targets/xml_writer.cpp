@@ -123,9 +123,28 @@ void xpl::xml_writer::do_assignment_node(cdk::assignment_node * const node, int 
 //---------------------------------------------------------------------------
 
 void xpl::xml_writer::do_function_node(xpl::function_node * const node, int lvl) {
-  /*openTag(node, lvl);
-  node->statements()->accept(this, lvl + 4);
-  closeTag(node, lvl);*/
+  ASSERT_SAFE_EXPRESSIONS;
+  os() << std::string(lvl, ' ')
+      << "<function_node scope='" << node->scope()
+      << "' type='" << node->type()->name()
+      << "' name='" << node->name()
+      << "'>" << std::endl;
+  
+  openTag("arguments", lvl + 2);
+  node->arguments()->accept(this, lvl + 4);
+  closeTag("arguments", lvl + 2);
+  
+  openTag("body", lvl + 2);
+  node->body()->accept(this, lvl + 4);
+  closeTag("body", lvl + 2);
+
+  if (node->retval()) {
+    openTag("return", lvl + 2);
+    node->retval()->accept(this, lvl + 4);
+    closeTag("return", lvl + 2);
+  }
+  
+  closeTag(node, lvl);
 }
 
 //---------------------------------------------------------------------------
@@ -139,7 +158,9 @@ void xpl::xml_writer::do_evaluation_node(xpl::evaluation_node * const node, int 
 
 void xpl::xml_writer::do_print_node(xpl::print_node * const node, int lvl) {
   ASSERT_SAFE_EXPRESSIONS;
-  openTag(node, lvl);
+  os() << std::string(lvl, ' ')
+      << "<print_node newline='" << (node->newline() ? "yes" : "no")
+      << "'>" << std::endl;
   node->argument()->accept(this, lvl + 2);
   closeTag(node, lvl);
 }
@@ -149,7 +170,6 @@ void xpl::xml_writer::do_print_node(xpl::print_node * const node, int lvl) {
 void xpl::xml_writer::do_read_node(xpl::read_node * const node, int lvl) {
   ASSERT_SAFE_EXPRESSIONS;
   openTag(node, lvl);
-  //node->argument()->accept(this, lvl + 2);
   closeTag(node, lvl);
 }
 
@@ -166,8 +186,47 @@ void xpl::xml_writer::do_while_node(xpl::while_node * const node, int lvl) {
   closeTag("block", lvl + 2);
   closeTag(node, lvl);
 }
-void xpl::xml_writer::do_sweep_up_node(xpl::sweep_up_node * const node, int lvl) {}
-void xpl::xml_writer::do_sweep_down_node(xpl::sweep_down_node * const node, int lvl) {}
+void xpl::xml_writer::do_sweep_up_node(xpl::sweep_up_node * const node, int lvl) {
+  ASSERT_SAFE_EXPRESSIONS;
+  openTag(node, lvl);
+  openTag("lvalue", lvl + 2);
+  node->lvalue()->accept(this, lvl + 4);
+  closeTag("lvalue", lvl + 2);
+  openTag("initial", lvl + 2);
+  node->initial()->accept(this, lvl + 4);
+  closeTag("initial", lvl + 2);
+  openTag("upper", lvl + 2);
+  node->upper()->accept(this, lvl + 4);
+  closeTag("upper", lvl + 2);
+  openTag("step", lvl + 2);
+  node->step()->accept(this, lvl + 4);
+  closeTag("step", lvl + 2);
+  openTag("block", lvl + 2);
+  node->block()->accept(this, lvl + 4);
+  closeTag("block", lvl + 2);
+  closeTag(node, lvl);
+}
+
+void xpl::xml_writer::do_sweep_down_node(xpl::sweep_down_node * const node, int lvl) {
+  ASSERT_SAFE_EXPRESSIONS;
+  openTag(node, lvl);
+  openTag("lvalue", lvl + 2);
+  node->lvalue()->accept(this, lvl + 4);
+  closeTag("lvalue", lvl + 2);
+  openTag("initial", lvl + 2);
+  node->initial()->accept(this, lvl + 4);
+  closeTag("initial", lvl + 2);
+  openTag("lower", lvl + 2);
+  node->lower()->accept(this, lvl + 4);
+  closeTag("lower", lvl + 2);
+  openTag("step", lvl + 2);
+  node->step()->accept(this, lvl + 4);
+  closeTag("step", lvl + 2);
+  openTag("block", lvl + 2);
+  node->block()->accept(this, lvl + 4);
+  closeTag("block", lvl + 2);
+  closeTag(node, lvl);
+}
 
 //---------------------------------------------------------------------------
 
@@ -200,27 +259,113 @@ void xpl::xml_writer::do_if_else_node(xpl::if_else_node * const node, int lvl) {
 
 //---------------------------------------------------------------------------
 
-void xpl::xml_writer::do_block_node(xpl::block_node * const node, int lvl) {}
-void xpl::xml_writer::do_next_node(xpl::next_node * const node, int lvl) {}
-void xpl::xml_writer::do_stop_node(xpl::stop_node * const node, int lvl) {}
-void xpl::xml_writer::do_vardecl_node(xpl::vardecl_node * const node, int lvl) {}
-void xpl::xml_writer::do_fundecl_node(xpl::fundecl_node * const node, int lvl) {}
-void xpl::xml_writer::do_return_node(xpl::return_node * const node, int lvl) {}
+void xpl::xml_writer::do_block_node(xpl::block_node * const node, int lvl) {
+  openTag(node, lvl);
+  openTag("declarations", lvl + 2);
+  node->declarations()->accept(this, lvl + 4);
+  closeTag("declarations", lvl + 2);
+  openTag("statements", lvl + 2);
+  node->statements()->accept(this, lvl + 4);
+  closeTag("statements", lvl + 2);
+  closeTag(node, lvl);
+}
+
+void xpl::xml_writer::do_next_node(xpl::next_node * const node, int lvl) {
+  openTag(node, lvl);
+  closeTag(node, lvl);
+}
+
+void xpl::xml_writer::do_stop_node(xpl::stop_node * const node, int lvl) {
+  openTag(node, lvl);
+  closeTag(node, lvl);  
+}
+
+void xpl::xml_writer::do_return_node(xpl::return_node * const node, int lvl) {
+  openTag(node, lvl);
+  closeTag(node, lvl);  
+}
+
+void xpl::xml_writer::do_vardecl_node(xpl::vardecl_node * const node, int lvl) {
+  ASSERT_SAFE_EXPRESSIONS;
+  os() << std::string(lvl, ' ')
+      << "<vardecl_node scope='" << node->scope()
+      << "' type='" << node->type()->name()
+      << "' name='" << node->name()
+      << "'>" << std::endl;
+  openTag("value", lvl + 2);
+  node->val()->accept(this, lvl + 4);
+  closeTag("value", lvl + 2);
+  closeTag(node, lvl);
+}
+
+void xpl::xml_writer::do_fundecl_node(xpl::fundecl_node * const node, int lvl) {
+  ASSERT_SAFE_EXPRESSIONS;
+  os() << std::string(lvl, ' ')
+      << "<fundecl_node scope='" << node->scope()
+      << "' type='" << node->type()->name()
+      << "' name='" << node->name()
+      << "'>" << std::endl;
+  if (node->retval()) {
+    openTag("return", lvl + 2);
+    node->retval()->accept(this, lvl + 2);
+    closeTag("return", lvl + 2);
+  }
+  closeTag(node, lvl);  
+}
 
 //---------------------------------------------------------------------------
 
-void xpl::xml_writer::do_malloc_node(xpl::malloc_node * const node, int lvl) {}
+void xpl::xml_writer::do_malloc_node(xpl::malloc_node * const node, int lvl) {
+  ASSERT_SAFE_EXPRESSIONS;
+  openTag(node, lvl);
+  openTag("size", lvl + 2);
+  node->expression()->accept(this, lvl + 4);
+  closeTag("size", lvl + 2);
+  closeTag(node, lvl);
+}
 
 //---------------------------------------------------------------------------
 
-void xpl::xml_writer::do_index_node(xpl::index_node * const node, int lvl) {}
+void xpl::xml_writer::do_index_node(xpl::index_node * const node, int lvl) {
+  ASSERT_SAFE_EXPRESSIONS;
+  openTag(node, lvl);
+  openTag("expression", lvl + 2);
+  node->expression()->accept(this, lvl + 4);
+  closeTag("expression", lvl + 2);
+  openTag("offset", lvl + 2);
+  node->offset()->accept(this, lvl + 4);
+  closeTag("offset", lvl + 2);
+  closeTag(node, lvl);
+}
 
 //---------------------------------------------------------------------------
 
-void xpl::xml_writer::do_null_node(xpl::null_node * const node, int lvl) {}
+void xpl::xml_writer::do_null_node(xpl::null_node * const node, int lvl) {
+  ASSERT_SAFE_EXPRESSIONS;
+  openTag(node, lvl);
+  closeTag(node, lvl);
+}
 
 //---------------------------------------------------------------------------
 
-void xpl::xml_writer::do_identity_node(xpl::identity_node * const node, int lvl) {}
-void xpl::xml_writer::do_funcall_node(xpl::funcall_node * const node, int lvl) {}
-void xpl::xml_writer::do_address_of_node(xpl::address_of_node * const node, int lvl) {}
+void xpl::xml_writer::do_identity_node(xpl::identity_node * const node, int lvl) {
+  ASSERT_SAFE_EXPRESSIONS;
+  openTag(node, lvl);
+  node->argument()->accept(this, lvl + 4);
+  closeTag(node, lvl);
+}
+
+void xpl::xml_writer::do_funcall_node(xpl::funcall_node * const node, int lvl) {
+  os() << std::string(lvl, ' ')
+      << "<funcall_node name='" << node->name()
+      << "'>" << std::endl;
+  node->arguments()->accept(this, lvl + 2);
+  closeTag(node, lvl);
+}
+
+void xpl::xml_writer::do_address_of_node(xpl::address_of_node * const node, int lvl) {
+  ASSERT_SAFE_EXPRESSIONS;
+  openTag(node, lvl);
+  node->argument()->accept(this, lvl + 2);
+  closeTag(node, lvl);
+}
