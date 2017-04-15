@@ -1,7 +1,7 @@
 %option c++ yyclass="xpl_scanner" outfile="xpl_scanner.cpp"
 %option stack noyywrap yylineno 8bit
 %{
-/* $Id: xpl_scanner.l,v 1.11 2017/04/14 17:56:08 ist181045 Exp $ */
+/* $Id: xpl_scanner.l,v 1.12 2017/04/15 12:03:44 ist181045 Exp $ */
 // make relevant includes before including the parser's tab file
 #include <string>
 #include <cdk/ast/sequence_node.h>
@@ -58,7 +58,6 @@ EXPROPS    [-+()[\]?*/%<>~&|=!@]
 "int"                  return tTYPEINTEGER;
 "real"                 return tTYPEREAL;
 "string"               return tTYPESTRING;
-"null"                 return tNULL;
 
     /* Function */
 "procedure"            return tPROCEDURE;
@@ -74,7 +73,8 @@ EXPROPS    [-+()[\]?*/%<>~&|=!@]
 
     /* Iteration */
 "while"                return tWHILE;
-"sweep"                return tSWEEP;
+"sweep+"               return tSWEEPU;
+"sweep-"               return tSWEEPD;
 
     /* Control */
 "stop"                 return tSTOP;
@@ -133,11 +133,13 @@ EXPROPS    [-+()[\]?*/%<>~&|=!@]
 <X_STRNO>\"            yy_pop_state(); yy_pop_state();
 <X_STRNO>.             ; /* Ignore whatever is found */
 
+    /* 3.8.4 Pointers*/
+"null"                 return tNULL;
 
 
     /* 7 Expressions ======================================================== */
     /* Single characters (see table in 7) */
-{EXPROPS}|[{};,.]      return *yytext;
+{EXPROPS}|[{}:;,.]     return *yytext;
 
 
 
