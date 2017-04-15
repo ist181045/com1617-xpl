@@ -1,7 +1,7 @@
 %option c++ yyclass="xpl_scanner" outfile="xpl_scanner.cpp"
 %option stack noyywrap yylineno 8bit
 %{
-/* $Id: xpl_scanner.l,v 1.13 2017/04/15 12:13:02 ist181045 Exp $ */
+/* $Id: xpl_scanner.l,v 1.14 2017/04/15 13:27:32 ist181045 Exp $ */
 // make relevant includes before including the parser's tab file
 #include <string>
 #include <cdk/ast/sequence_node.h>
@@ -55,13 +55,13 @@ EXPROPS    [-+()[\]?*/%<>~&|=!@]
 
     /* 3.3 Keywords --------------------------------------------------------- */
     /* Literals */
-"int"                  return tTYPEINTEGER;
-"real"                 return tTYPEREAL;
-"string"               return tTYPESTRING;
+"int"                  yylval.t = new basic_type(4, basic_type::TYPE_INT); return tTYPEINTEGER;
+"real"                 yylval.t = new basic_type(8, basic_type::TYPE_DOUBLE); return tTYPEREAL;
+"string"               yylval.t = new basic_type(4, basic_type::TYPE_STRING); return tTYPESTRING;
 "null"                 return tNULL;
 
     /* Function */
-"procedure"            return tPROCEDURE;
+"procedure"            yylval.t = new basic_type(0, basic_type::TYPE_VOID); return tPROCEDURE;
 
     /* Scope */
 "public"               return tPUBLIC;
