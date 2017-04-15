@@ -292,9 +292,11 @@ void xpl::xml_writer::do_vardecl_node(xpl::vardecl_node * const node, int lvl) {
       << "' type='" << node->type()->name()
       << "' name='" << node->name()
       << "'>" << std::endl;
-  openTag("value", lvl + 2);
-  node->val()->accept(this, lvl + 4);
-  closeTag("value", lvl + 2);
+  if (node->val()) {
+    openTag("value", lvl + 2);
+    node->val()->accept(this, lvl + 4);
+    closeTag("value", lvl + 2);
+  }
   closeTag(node, lvl);
 }
 
@@ -305,6 +307,9 @@ void xpl::xml_writer::do_fundecl_node(xpl::fundecl_node * const node, int lvl) {
       << "' type='" << node->type()->name()
       << "' name='" << node->name()
       << "'>" << std::endl;
+  openTag("arguments", lvl + 2);
+  node->arguments()->accept(this, lvl + 4);
+  closeTag("arguments", lvl + 2);
   if (node->retval()) {
     openTag("return", lvl + 2);
     node->retval()->accept(this, lvl + 2);
