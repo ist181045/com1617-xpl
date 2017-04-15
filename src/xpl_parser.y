@@ -1,5 +1,5 @@
 %{
-// $Id: xpl_parser.y,v 1.12 2017/04/15 12:12:36 ist181045 Exp $
+// $Id: xpl_parser.y,v 1.13 2017/04/15 13:28:41 ist181045 Exp $
 //-- don't change *any* of these: if you do, you'll break the compiler.
 #include <cdk/compiler.h>
 #include "ast/all.h"
@@ -46,7 +46,7 @@
     /* 3 Lexical Conventions ================================================ */
     /* 3.3 Keywords --------------------------------------------------------- */
     /* Literals */
-%token tTYPEINTEGER tTYPEREAL tTYPESTRING
+%token <t> tTYPEINTEGER tTYPEREAL tTYPESTRING
 
     /* Function */
 %token <t> tPROCEDURE
@@ -73,7 +73,7 @@
 
 
     /* 4 Syntax ============================================================= */
-%type <block>      body blck
+%type <block>      blck body
 %type <node>       cond decl elsif func iter stmt
 %type <expression> expr lit
 %type <i>          qual
@@ -93,8 +93,8 @@
 %left     '+' '-'                  /* Additive               */
 %left     '*' '/' '%'              /* Multiplicative         */
 %nonassoc '?' tUNARY               /* Unary precedence */
-%nonassoc '{' '}'                  /* Block precedence, solves conflicts in func */
 %nonassoc '(' ')' '[' ']'          /* Primary */
+%nonassoc '{' '}'                  /* Block precedence, solves conflicts in func */
 
 %{
 //-- The rules below will be included in yyparse, the main parsing function.
@@ -144,9 +144,9 @@ qual : tPUBLIC      { $$ = 1; }
      | tUSE         { $$ = 2; }
      ;
 
-type : tTYPEINTEGER { $$ = new basic_type(4, basic_type::TYPE_INT);    }
-     | tTYPEREAL    { $$ = new basic_type(8, basic_type::TYPE_DOUBLE); }
-     | tTYPESTRING  { $$ = new basic_type(0, basic_type::TYPE_STRING);  }
+type : tTYPEINTEGER { $$ = $1; }
+     | tTYPEREAL    { $$ = $1; }
+     | tTYPESTRING  { $$ = $1; }
      | '[' type ']' {
        $$ = new basic_type(4, basic_type::TYPE_POINTER);
        $$->_subtype = $2;
