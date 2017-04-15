@@ -1,5 +1,5 @@
 %{
-// $Id: xpl_parser.y,v 1.13 2017/04/15 13:28:41 ist181045 Exp $
+// $Id: xpl_parser.y,v 1.14 2017/04/15 18:14:01 ist181045 Exp $
 //-- don't change *any* of these: if you do, you'll break the compiler.
 #include <cdk/compiler.h>
 #include "ast/all.h"
@@ -39,20 +39,21 @@
 %token <null> tNULL
 
     /* Identifier (doesn't belong.. argh!) */
-%token <s>    tIDENTIFIER
+%token <s> tIDENTIFIER
 
 
 
     /* 3 Lexical Conventions ================================================ */
-    /* 3.3 Keywords --------------------------------------------------------- */
+    /* 3.3 Keywords (mixed with some precedence rules) ---------------------- */
     /* Literals */
 %token <t> tTYPEINTEGER tTYPEREAL tTYPESTRING
+%nonassoc tQUALX /* Allows reduction of qual before type */
 
     /* Function */
 %token <t> tPROCEDURE
 
     /* Scope */
-%nonassoc <i> tPUBLIC tUSE
+%token tPUBLIC tUSE
 
     /* Conditional */
 %token tIF
@@ -119,34 +120,28 @@ decl : var ';'   { $$ = $1; }
 
 
     /* Variable ------------------------------------------------------------- */
-var  : type tIDENTIFIER               { $$ = new xpl::vardecl_node(LINE, 0, $1, $2);      }
-     | type tIDENTIFIER '=' expr      { $$ = new xpl::vardecl_node(LINE, 0, $1, $2, $4);  }
-     | qual type tIDENTIFIER          { $$ = new xpl::vardecl_node(LINE, $1, $2, $3);     }
+var  : qual type tIDENTIFIER          { $$ = new xpl::vardecl_node(LINE, $1, $2, $3);     }
      | qual type tIDENTIFIER '=' expr { $$ = new xpl::vardecl_node(LINE, $1, $2, $3, $5); }
      ;
 
 
     /* Function ------------------------------------------------------------- */
-func : tPROCEDURE tIDENTIFIER '(' vars ')'             { $$ = new xpl::fundecl_node (LINE, 0, $1, $2, $4);         }
-     | tPROCEDURE tIDENTIFIER '(' vars ')' body        { $$ = new xpl::function_node(LINE, 0, $1, $2, $4, $6);     }
-     | type tIDENTIFIER '(' vars ')'                   { $$ = new xpl::fundecl_node (LINE, 0, $1, $2, $4);         }
-     | type tIDENTIFIER '(' vars ')' body              { $$ = new xpl::function_node(LINE, 0, $1, $2, $4, $6);     }
-     | type tIDENTIFIER '(' vars ')' '=' lit           { $$ = new xpl::fundecl_node (LINE, 0, $1, $2, $4, $7);     }
-     | type tIDENTIFIER '(' vars ')' '=' lit body      { $$ = new xpl::function_node(LINE, 0, $1, $2, $4, $8, $7); }
-     | qual tPROCEDURE tIDENTIFIER '(' vars ')'        { $$ = new xpl::fundecl_node (LINE, $1, $2, $3, $5);        }
-     | qual tPROCEDURE tIDENTIFIER '(' vars ')' body   { $$ = new xpl::function_node(LINE, $1, $2, $3, $5, $7);    }
-     | qual type tIDENTIFIER '(' vars ')'              { $$ = new xpl::fundecl_node (LINE, $1, $2, $3, $5);        }
-     | qual type tIDENTIFIER '(' vars ')' body         { $$ = new xpl::function_node(LINE, $1, $2, $3, $5, $7);    }
-     | qual type tIDENTIFIER '(' vars ')' '=' lit      { $$ = new xpl::fundecl_node (LINE, $1, $2, $3, $5, $8);    }
+func : qual tPROCEDURE tIDENTIFIER '(' vars ')'        { $$ = new xpl::fundecl_node (LINE, $1, $2, $3, $5);         }
+     | qual tPROCEDURE tIDENTIFIER '(' vars ')' body   { $$ = new xpl::function_node(LINE, $1, $2, $3, $5, $7);     }
+     | qual type tIDENTIFIER '(' vars ')'              { $$ = new xpl::fundecl_node (LINE, $1, $2, $3, $5);         }
+     | qual type tIDENTIFIER '(' vars ')' body         { $$ = new xpl::function_node(LINE, $1, $2, $3, $5, $7);     }
+     | qual type tIDENTIFIER '(' vars ')' '=' lit      { $$ = new xpl::fundecl_node (LINE, $1, $2, $3, $5, $8);     }
+     | qual type tIDENTIFIER '(' vars ')' '=' lit body { $$ = new xpl::function_node(LINE, $1, $2, $3, $5, $9, $8); }
      ;
 
 qual : tPUBLIC      { $$ = 1; }
      | tUSE         { $$ = 2; }
+     | %prec tQUALX { $$ = 0; }
      ;
 
-type : tTYPEINTEGER { $$ = $1; }
-     | tTYPEREAL    { $$ = $1; }
-     | tTYPESTRING  { $$ = $1; }
+type : tTYPEINTEGER { $$ = new basic_type(4, basic_type::TYPE_INT); }
+     | tTYPEREAL    { $$ = new basic_type(8, basic_type::TYPE_DOUBLE); }
+     | tTYPESTRING  { $$ = new basic_type(4, basic_type::TYPE_STRING); }
      | '[' type ']' {
        $$ = new basic_type(4, basic_type::TYPE_POINTER);
        $$->_subtype = $2;
@@ -249,6 +244,7 @@ expr : lit                       { $$ = $1; }
 
 exprs: expr                      { $$ = new cdk::sequence_node(LINE, $1);       }
      | exprs ',' expr            { $$ = new cdk::sequence_node(LINE, $3, $1);   }
+     | /* eps */                 { $$ = new cdk::sequence_node(LINE);           }
      ;
 
 lval : tIDENTIFIER               { $$ = new cdk::identifier_node(LINE, $1);     }

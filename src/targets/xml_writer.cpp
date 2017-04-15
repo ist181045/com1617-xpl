@@ -361,6 +361,7 @@ void xpl::xml_writer::do_identity_node(xpl::identity_node * const node, int lvl)
 }
 
 void xpl::xml_writer::do_funcall_node(xpl::funcall_node * const node, int lvl) {
+  ASSERT_SAFE_EXPRESSIONS;
   os() << std::string(lvl, ' ')
       << "<funcall_node name='" << node->name()
       << "'>" << std::endl;
