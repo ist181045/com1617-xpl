@@ -1,5 +1,5 @@
 %{
-// $Id: xpl_parser.y,v 1.11 2017/04/15 12:04:39 ist181045 Exp $
+// $Id: xpl_parser.y,v 1.12 2017/04/15 12:12:36 ist181045 Exp $
 //-- don't change *any* of these: if you do, you'll break the compiler.
 #include <cdk/compiler.h>
 #include "ast/all.h"
@@ -92,7 +92,7 @@
 %left     tEQ tNE tLE tGE '<' '>'  /* Comparative + Equality */
 %left     '+' '-'                  /* Additive               */
 %left     '*' '/' '%'              /* Multiplicative         */
-%nonassoc tUNARY                   /* Unary precedence token */
+%nonassoc '?' tUNARY               /* Unary precedence */
 %nonassoc '{' '}'                  /* Block precedence, solves conflicts in func */
 %nonassoc '(' ')' '[' ']'          /* Primary */
 
