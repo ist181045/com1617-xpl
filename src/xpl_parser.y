@@ -1,5 +1,5 @@
 %{
-// $Id: xpl_parser.y,v 1.14 2017/04/15 18:14:01 ist181045 Exp $
+// $Id: xpl_parser.y,v 1.15 2017/04/16 15:27:06 ist181045 Exp $
 //-- don't change *any* of these: if you do, you'll break the compiler.
 #include <cdk/compiler.h>
 #include "ast/all.h"
@@ -47,7 +47,6 @@
     /* 3.3 Keywords (mixed with some precedence rules) ---------------------- */
     /* Literals */
 %token <t> tTYPEINTEGER tTYPEREAL tTYPESTRING
-%nonassoc tQUALX /* Allows reduction of qual before type */
 
     /* Function */
 %token <t> tPROCEDURE
@@ -95,7 +94,11 @@
 %left     '*' '/' '%'              /* Multiplicative         */
 %nonassoc '?' tUNARY               /* Unary precedence */
 %nonassoc '(' ')' '[' ']'          /* Primary */
-%nonassoc '{' '}'                  /* Block precedence, solves conflicts in func */
+%nonassoc tQUALX                   /* Solves conflict between reducing decl and
+                                        shifting [ from the malloc expression.
+                                      Only here becuase qual can produce eps..
+                                        Bit hacky.. but it works. */
+%nonassoc '{'                      /* Block precedence (always shift {) */
 
 %{
 //-- The rules below will be included in yyparse, the main parsing function.
@@ -238,7 +241,6 @@ expr : lit                       { $$ = $1; }
      | expr tEQ expr             { $$ = new cdk::eq_node(LINE, $1, $3);         }
      | tIDENTIFIER '(' exprs ')' { $$ = new xpl::funcall_node(LINE, $1, $3);    }
      | lval '?'                  { $$ = new xpl::address_of_node(LINE, $1);     }
-     | lval '[' expr ']'         { $$ = new xpl::index_node(LINE, $1, $3);      }
      | lval '=' expr             { $$ = new cdk::assignment_node(LINE, $1, $3); }
      ;
 
@@ -248,6 +250,7 @@ exprs: expr                      { $$ = new cdk::sequence_node(LINE, $1);       
      ;
 
 lval : tIDENTIFIER               { $$ = new cdk::identifier_node(LINE, $1);     }
+     | lval '[' expr ']'         { $$ = new xpl::index_node(LINE, $1, $3);      }
      ;
 
 %%
