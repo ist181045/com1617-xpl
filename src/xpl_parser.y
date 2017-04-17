@@ -1,5 +1,5 @@
 %{
-// $Id: xpl_parser.y,v 1.16 2017/04/17 09:08:38 ist181045 Exp $
+// $Id: xpl_parser.y,v 1.17 2017/04/17 09:09:42 ist181045 Exp $
 //-- don't change *any* of these: if you do, you'll break the compiler.
 #include <cdk/compiler.h>
 #include "ast/all.h"
@@ -246,7 +246,7 @@ exprs: expr                      { $$ = new cdk::sequence_node(LINE, $1);       
      ;
 
 lval : tIDENTIFIER               { $$ = new cdk::identifier_node(LINE, $1);     }
-     | lval '[' expr ']'         { $$ = new xpl::index_node(LINE, $1, $3);      }
+     | expr '[' expr ']'         { $$ = new xpl::index_node(LINE, $1, $3);      }
      ;
 
 %%
