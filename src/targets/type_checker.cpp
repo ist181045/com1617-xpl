@@ -151,6 +151,7 @@ void xpl::type_checker::do_assignment_node(cdk::assignment_node * const node, in
 //---------------------------------------------------------------------------
 
 void xpl::type_checker::do_function_node(xpl::function_node * const node, int lvl) {}
+void xpl::type_checker::do_var_node(xpl::var_node * const node, int lvl) {}
 
 void xpl::type_checker::do_evaluation_node(xpl::evaluation_node * const node, int lvl) {
   node->argument()->accept(this, lvl + 2);

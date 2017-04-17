@@ -192,6 +192,8 @@ void xpl::postfix_writer::do_function_node(xpl::function_node * const node, int 
   _pf.EXTERN("println");
 }
 
+void xpl::postfix_writer::do_var_node(xpl::var_node * const node, int lvl) {}
+
 //---------------------------------------------------------------------------
 
 void xpl::postfix_writer::do_evaluation_node(xpl::evaluation_node * const node, int lvl) {
