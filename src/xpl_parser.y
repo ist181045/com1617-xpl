@@ -1,5 +1,5 @@
 %{
-// $Id: xpl_parser.y,v 1.19 2017/04/17 15:35:35 ist181045 Exp $
+// $Id: xpl_parser.y,v 1.20 2017/04/17 23:23:55 ist181045 Exp $
 //-- don't change *any* of these: if you do, you'll break the compiler.
 #include <cdk/compiler.h>
 #include "ast/all.h"
@@ -56,7 +56,8 @@
     /* Conditional */
 %token tIF
 %nonassoc tIFX
-%nonassoc tELSE tELSIF
+%nonassoc tELSE
+%nonassoc tELSIF
 
     /* Iteration */
 %token tWHILE tSWEEPD tSWEEPU
@@ -82,21 +83,21 @@
 
 
     /* 7 Expressions ======================================================== */
-%right    '='                      /* Assignment             */
-%left     '|'                      /* Logical 'or'           */
-%left     '&'                      /* Logical 'and'          */
-%nonassoc '~'                      /* Logical 'not'          */
-%left     tEQ tNE tLE tGE '<' '>'  /* Comparative + Equality */
-%left     '+' '-'                  /* Additive               */
-%left     '*' '/' '%'              /* Multiplicative         */
-%nonassoc '?' tUNARY               /* Unary precedence */
-%nonassoc '(' ')' '[' ']'          /* Primary */
-%nonassoc tQUALX                   /* Solves conflict between reducing decl and
-                                        shifting [ from the malloc expression.
-                                      Only here because qual can produce eps..
-                                        Bit hacky.. but it works, bit more
-                                        compact syntax. */
-%nonassoc '{'                      /* Block precedence (always shift {) */
+%right    '='               /* Assignment       */
+%left     '|'               /* Logical 'or'     */
+%left     '&'               /* Logical 'and'    */
+%nonassoc '~'               /* Logical 'not'    */
+%left     tEQ tNE           /* Equality         */
+%left     tLE tGE '<' '>'   /* Comparative      */
+%left     '+' '-'           /* Additive         */
+%left     '*' '/' '%'       /* Multiplicative   */
+%nonassoc '?' tUNARY        /* Unary precedence */
+%nonassoc '(' ')' '[' ']'   /* Primary          */
+%nonassoc tQUALX            /* Solves conflict between reducing decl and
+                                shifting [ from the malloc expression.
+                               Only here because qual can produce eps.. Bit
+                                hacky.. but bit more compact syntax */
+%nonassoc '{'               /* Block precedence */
 
 %{
 //-- The rules below will be included in yyparse, the main parsing function.
