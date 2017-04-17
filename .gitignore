@@ -23,5 +23,6 @@ cmake-build-debug/
 
 # Others
 
-com-notes.todo
 *.o
+com-notes.todo
+run_tests
