@@ -1,5 +1,5 @@
 %{
-// $Id: xpl_parser.y,v 1.20 2017/04/17 23:23:55 ist181045 Exp $
+// $Id: xpl_parser.y,v 1.21 2017/04/17 23:48:53 ist181045 Exp $
 //-- don't change *any* of these: if you do, you'll break the compiler.
 #include <cdk/compiler.h>
 #include "ast/all.h"
@@ -56,8 +56,7 @@
     /* Conditional */
 %token tIF
 %nonassoc tIFX
-%nonassoc tELSE
-%nonassoc tELSIF
+%nonassoc tELSE tELSIF
 
     /* Iteration */
 %token tWHILE tSWEEPD tSWEEPU
