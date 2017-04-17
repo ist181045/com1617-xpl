@@ -330,12 +330,6 @@ void xpl::xml_writer::do_fundecl_node(xpl::fundecl_node * const node, int lvl) {
   node->arguments()->accept(this, lvl + 4);
   closeTag("arguments", lvl + 2);
   
-  if (node->retval()) {
-    openTag("return", lvl + 2);
-    node->retval()->accept(this, lvl + 2);
-    closeTag("return", lvl + 2);
-  }
-  
   closeTag(node, lvl);  
 }
 

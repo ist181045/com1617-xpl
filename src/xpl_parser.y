@@ -1,5 +1,5 @@
 %{
-// $Id: xpl_parser.y,v 1.17 2017/04/17 09:09:42 ist181045 Exp $
+// $Id: xpl_parser.y,v 1.18 2017/04/17 10:32:23 ist181045 Exp $
 //-- don't change *any* of these: if you do, you'll break the compiler.
 #include <cdk/compiler.h>
 #include "ast/all.h"
@@ -57,8 +57,7 @@
     /* Conditional */
 %token tIF
 %nonassoc tIFX
-%nonassoc tELSE
-%nonassoc tELSIF
+%nonassoc tELSE tELSIF
 
     /* Iteration */
 %token tWHILE tSWEEPD tSWEEPU
@@ -133,7 +132,6 @@ func : qual tPROCEDURE tIDENTIFIER '(' vars ')'        { $$ = new xpl::fundecl_n
      | qual tPROCEDURE tIDENTIFIER '(' vars ')' body   { $$ = new xpl::function_node(LINE, $1, $2, $3, $5, $7);     }
      | qual type tIDENTIFIER '(' vars ')'              { $$ = new xpl::fundecl_node (LINE, $1, $2, $3, $5);         }
      | qual type tIDENTIFIER '(' vars ')' body         { $$ = new xpl::function_node(LINE, $1, $2, $3, $5, $7);     }
-     | qual type tIDENTIFIER '(' vars ')' '=' lit      { $$ = new xpl::fundecl_node (LINE, $1, $2, $3, $5, $8);     }
      | qual type tIDENTIFIER '(' vars ')' '=' lit body { $$ = new xpl::function_node(LINE, $1, $2, $3, $5, $9, $8); }
      ;
 
@@ -142,13 +140,10 @@ qual : tPUBLIC      { $$ = 1; }
      | %prec tQUALX { $$ = 0; }
      ;
 
-type : tTYPEINTEGER { $$ = new basic_type(4, basic_type::TYPE_INT); }
-     | tTYPEREAL    { $$ = new basic_type(8, basic_type::TYPE_DOUBLE); }
-     | tTYPESTRING  { $$ = new basic_type(4, basic_type::TYPE_STRING); }
-     | '[' type ']' {
-       $$ = new basic_type(4, basic_type::TYPE_POINTER);
-       $$->_subtype = $2;
-     }
+type : tTYPEINTEGER { $$ = $1; }
+     | tTYPEREAL    { $$ = $1; }
+     | tTYPESTRING  { $$ = $1; }
+     | '[' type ']' { $$ = $2; $$->_subtype = $2; }
      ;
 
 vars : var          { $$ = new cdk::sequence_node(LINE, $1);     }
