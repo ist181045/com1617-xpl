@@ -1,5 +1,5 @@
 %{
-// $Id: xpl_parser.y,v 1.15 2017/04/16 15:27:06 ist181045 Exp $
+// $Id: xpl_parser.y,v 1.16 2017/04/17 09:08:38 ist181045 Exp $
 //-- don't change *any* of these: if you do, you'll break the compiler.
 #include <cdk/compiler.h>
 #include "ast/all.h"
@@ -74,12 +74,12 @@
 
     /* 4 Syntax ============================================================= */
 %type <block>      blck body
-%type <node>       cond decl elsif func iter stmt
+%type <node>       cond decl else func iter stmt
 %type <expression> expr lit
 %type <i>          qual
 %type <t>          type
 %type <lvalue>     lval
-%type <sequence>   decls elifs exprs stmts vars
+%type <sequence>   decls exprs stmts vars
 %type <var>        var
 
 
@@ -194,17 +194,13 @@ stmt : expr ';'      { $$ = new xpl::evaluation_node(LINE, $1);  }
 
 
     /* Conditional statements */
-cond : tIF '(' expr ')' stmt %prec tIFX              { $$ = new xpl::if_node(LINE, $3, $5); }
-     | tIF '(' expr ')' stmt tELSE stmt              { $$ = new xpl::if_else_node(LINE, $3, $5, $7); }
-     | tIF '(' expr ')' stmt elifs %prec tIFX        { $$ = new xpl::if_else_node(LINE, $3, $5, $6); }
-     | tIF '(' expr ')' stmt elifs tELSE stmt        { $$ = new xpl::if_else_node(LINE, $3, $5, new cdk::sequence_node(LINE, $8, $6)); }
+cond : tIF '(' expr ')' stmt %prec tIFX    { $$ = new xpl::if_node(LINE, $3, $5);          }
+     | tIF '(' expr ')' stmt else          { $$ = new xpl::if_else_node(LINE, $3, $5, $6); }
      ;
 
-elifs: elsif                     { $$ = new cdk::sequence_node(LINE, $1);     }
-     | elifs elsif               { $$ = new cdk::sequence_node(LINE, $2, $1); }
-     ;
-
-elsif: tELSIF '(' expr ')' stmt  { $$ = new xpl::if_node(LINE, $3, $5); }
+else : tELSE stmt                          { $$ = $2; }
+     | tELSIF '(' expr ')' stmt %prec tIFX { $$ = new xpl::if_node(LINE, $3, $5);          }
+     | tELSIF '(' expr ')' stmt else       { $$ = new xpl::if_else_node(LINE, $3, $5, $6); }
      ;
 
 
