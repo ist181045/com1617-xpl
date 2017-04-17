@@ -1,5 +1,5 @@
 %{
-// $Id: xpl_parser.y,v 1.18 2017/04/17 10:32:23 ist181045 Exp $
+// $Id: xpl_parser.y,v 1.19 2017/04/17 15:35:35 ist181045 Exp $
 //-- don't change *any* of these: if you do, you'll break the compiler.
 #include <cdk/compiler.h>
 #include "ast/all.h"
@@ -24,7 +24,6 @@
   cdk::sequence_node   *sequence;   /* sequence nodes */
 
   xpl::block_node *block; /* block nodes */
-  xpl::vardecl_node *var; /* variable nodes */
   xpl::null_node *null;   /* null nodes */
 };
 
@@ -73,13 +72,12 @@
 
     /* 4 Syntax ============================================================= */
 %type <block>      blck body
-%type <node>       cond decl else func iter stmt
+%type <node>       cond decl else func iter stmt var
 %type <expression> expr lit
 %type <i>          qual
 %type <t>          type
 %type <lvalue>     lval
 %type <sequence>   decls exprs stmts vars
-%type <var>        var
 
 
 
@@ -95,8 +93,9 @@
 %nonassoc '(' ')' '[' ']'          /* Primary */
 %nonassoc tQUALX                   /* Solves conflict between reducing decl and
                                         shifting [ from the malloc expression.
-                                      Only here becuase qual can produce eps..
-                                        Bit hacky.. but it works. */
+                                      Only here because qual can produce eps..
+                                        Bit hacky.. but it works, bit more
+                                        compact syntax. */
 %nonassoc '{'                      /* Block precedence (always shift {) */
 
 %{
@@ -123,7 +122,7 @@ decl : var ';'   { $$ = $1; }
 
     /* Variable ------------------------------------------------------------- */
 var  : qual type tIDENTIFIER          { $$ = new xpl::vardecl_node(LINE, $1, $2, $3);     }
-     | qual type tIDENTIFIER '=' expr { $$ = new xpl::vardecl_node(LINE, $1, $2, $3, $5); }
+     | qual type tIDENTIFIER '=' expr { $$ = new xpl::var_node(LINE, $1, $2, $3, $5);     }
      ;
 
 

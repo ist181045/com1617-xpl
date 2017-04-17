@@ -99,9 +99,11 @@ public:
 
 public:
   virtual void do_function_node(xpl::function_node * const node, int lvl) = 0;
+  virtual void do_var_node(xpl::var_node * const node, int lvl) = 0;
   virtual void do_evaluation_node(xpl::evaluation_node * const node, int lvl) = 0;
   virtual void do_print_node(xpl::print_node * const node, int lvl) = 0;
   virtual void do_read_node(xpl::read_node * const node, int lvl) = 0;
+
 public:
   virtual void do_while_node(xpl::while_node * const node, int lvl) = 0;
   virtual void do_sweep_up_node(xpl::sweep_up_node * const node, int lvl) = 0;

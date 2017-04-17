@@ -86,6 +86,7 @@ namespace xpl {
 
   public:
     void do_function_node(xpl::function_node * const node, int lvl);
+    void do_var_node(xpl::var_node * const node, int lvl);
     void do_evaluation_node(xpl::evaluation_node * const node, int lvl);
     void do_print_node(xpl::print_node * const node, int lvl);
     void do_read_node(xpl::read_node * const node, int lvl);
