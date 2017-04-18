@@ -1,7 +1,7 @@
 %option c++ yyclass="xpl_scanner" outfile="xpl_scanner.cpp"
 %option stack noyywrap yylineno 8bit
 %{
-/* $Id: xpl_scanner.l,v 1.16 2017/04/17 23:29:18 ist181045 Exp $ */
+/* $Id: xpl_scanner.l,v 1.17 2017/04/18 12:55:19 ist181045 Exp $ */
 // make relevant includes before including the parser's tab file
 #include <string>
 #include <cdk/ast/sequence_node.h>
@@ -107,7 +107,6 @@ EXPROPS    [-+()[\]?*/%<>~&|=!@]
     long l = strtol(yytext, nullptr, b);
 
     if (l > INT_MAX) yyerror("Integer overflow");
-    else if (l < INT_MIN) yyerror("Integer underflow");
     else {
       yylval.i = (int)l;
       return tINTEGER;
