@@ -1,5 +1,5 @@
 %{
-// $Id: xpl_parser.y,v 1.21 2017/04/17 23:48:53 ist181045 Exp $
+// $Id: xpl_parser.y,v 1.22 2017/04/18 13:54:59 ist181045 Exp $
 //-- don't change *any* of these: if you do, you'll break the compiler.
 #include <cdk/compiler.h>
 #include "ast/all.h"
@@ -24,7 +24,6 @@
   cdk::sequence_node   *sequence;   /* sequence nodes */
 
   xpl::block_node *block; /* block nodes */
-  xpl::null_node *null;   /* null nodes */
 };
 
     /* Numeric types */
@@ -35,7 +34,7 @@
 %token <s>    tSTRING
 
     /* Pointers */
-%token <null> tNULL
+%token tNULL
 
     /* Identifier (doesn't belong.. argh!) */
 %token <s> tIDENTIFIER
