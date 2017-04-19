@@ -1,7 +1,7 @@
 %option c++ yyclass="xpl_scanner" outfile="xpl_scanner.cpp"
 %option stack noyywrap yylineno 8bit
 %{
-/* $Id: xpl_scanner.l,v 1.18 2017/04/19 10:37:02 ist181045 Exp $ */
+/* $Id: xpl_scanner.l,v 1.19 2017/04/19 11:11:18 ist181045 Exp $ */
 // make relevant includes before including the parser's tab file
 #include <string>
 #include <cdk/ast/sequence_node.h>
@@ -50,7 +50,7 @@ EXPROPS    [-+()[\]?*/%<>~&|=!@]
 
 
     /* Single-line comments */
-<INITIAL,X_STRMORE>"//".*$ ;
+"//".*$ ;
 
 
     /* 3.3 Keywords --------------------------------------------------------- */
@@ -119,15 +119,15 @@ EXPROPS    [-+()[\]?*/%<>~&|=!@]
     /* 3.8.3 Strings */
 \"                     yy_push_state(X_STR); yylval.s = new std::string("");
 <X_STR>\"              yy_pop_state(); return tSTRING;
+<X_STR>\\t             *yylval.s += '\t'; /* Explicit interpretation.. ugly */
+<X_STR>\\n             *yylval.s += '\n';
+<X_STR>\\r             *yylval.s += '\r';
+<X_STR>\\(\"|\\)       *yylval.s += yytext + 1; /* double quote & backslash */
 <X_STR>\\{HEXDIG}{1,2} {
     long l = strtol((yytext + 1), nullptr, 16);
-    if (l == 0) {
-        yy_push_state(X_STRNO); /* ASCII NULL (either \0 or \00) */
-        return tSTRING;
-    }
+    if (l == 0) yy_push_state(X_STRNO); /* ASCII NULL (either \0 or \00) */
     else *yylval.s += (char)strtol((yytext + 1), nullptr, 16); /* special hex */
 }
-<X_STR>\\\"            *yylval.s += yytext + 1; /* double quote */
 <X_STR>.               *yylval.s += yytext;
 <X_STR,X_STRNO>\n      yyerror("Newline in string");
 
