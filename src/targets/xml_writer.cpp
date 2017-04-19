@@ -23,7 +23,20 @@ void xpl::xml_writer::do_double_node(cdk::double_node * const node, int lvl) {
 }
 
 void xpl::xml_writer::do_string_node(cdk::string_node * const node, int lvl) {
-  process_literal(node, lvl);
+  std::string val = node->value();
+
+  os() << std::string(lvl, ' ') << "<" << node->label() << ">";
+  for (auto it = node->value().begin(); it != node->value().end(); ++it) {
+    switch (*it) {
+      case '\t':
+      case '\n':
+      case '\r':
+        break;
+      default:
+        os() << *it;
+    }
+  }
+  os() << "</" << node->label() << ">" << std::endl;
 }
 
 //---------------------------------------------------------------------------
