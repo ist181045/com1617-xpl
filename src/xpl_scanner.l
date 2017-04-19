@@ -1,15 +1,16 @@
 %option c++ yyclass="xpl_scanner" outfile="xpl_scanner.cpp"
 %option stack noyywrap yylineno 8bit
 %{
-/* $Id: xpl_scanner.l,v 1.19 2017/04/19 11:11:18 ist181045 Exp $ */
+/* $Id: xpl_scanner.l,v 1.20 2017/04/19 14:07:27 ist181045 Exp $ */
 // make relevant includes before including the parser's tab file
+#include <limits>
 #include <string>
+#include <sstream>
+
 #include <cdk/ast/sequence_node.h>
 #include <cdk/ast/expression_node.h>
 #include "xpl_scanner.h"
 #include "xpl_parser.tab.h"
-
-#include <climits>
 
 // don't change this
 #define yyerror LexerError
@@ -103,18 +104,26 @@ EXPROPS    [-+()[\]?*/%<>~&|=!@]
     /* 3.8.1 Integers */
 "0"+{INTEGER}          yyerror("Integers mustn\'t have a single leading 0");
 {INTEGER}|{HEX}        {
-    short b = yytext[1] && yytext[1] == 'x' ? 16 : 10;
-    long l = strtol(yytext, nullptr, b);
-
-    if (l > INT_MAX) yyerror("Integer overflow");
-    else {
-      yylval.i = (int)l;
-      return tINTEGER;
+    try {
+        yylval.i = std::stoi(yytext, nullptr, 0);
+        return tINTEGER;
+    } catch (const std::out_of_range &oor) {
+        std::ostringstream msg;
+        msg << yylineno << ": Integer overflow";
+        yyerror(msg.str().c_str());
     }
 }
 
     /* 3.8.2 Floating point reals */
-({REAL}|{INTEGER}){EXP}? yylval.d = strtod(yytext, nullptr); return tREAL;
+({REAL}|{INTEGER}){EXP}? {
+    try {
+        yylval.d = std::stod(yytext, nullptr);
+    } catch (const std::out_of_range &oor) {
+        std::ostringstream msg;
+        msg << yylineno << ": Double size out of range";
+        yyerror(msg.str().c_str());
+    }
+}
 
     /* 3.8.3 Strings */
 \"                     yy_push_state(X_STR); yylval.s = new std::string("");
@@ -124,9 +133,9 @@ EXPROPS    [-+()[\]?*/%<>~&|=!@]
 <X_STR>\\r             *yylval.s += '\r';
 <X_STR>\\(\"|\\)       *yylval.s += yytext + 1; /* double quote & backslash */
 <X_STR>\\{HEXDIG}{1,2} {
-    long l = strtol((yytext + 1), nullptr, 16);
-    if (l == 0) yy_push_state(X_STRNO); /* ASCII NULL (either \0 or \00) */
-    else *yylval.s += (char)strtol((yytext + 1), nullptr, 16); /* special hex */
+    int hex = std::stoi(yytext + 1, nullptr, 16);
+    if (hex == 0) yy_push_state(X_STRNO);
+    else *yylval.s += static_cast<char>(hex);
 }
 <X_STR>.               *yylval.s += yytext;
 <X_STR,X_STRNO>\n      yyerror("Newline in string");
