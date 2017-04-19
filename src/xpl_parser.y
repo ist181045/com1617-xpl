@@ -1,5 +1,5 @@
 %{
-// $Id: xpl_parser.y,v 1.23 2017/04/19 10:37:02 ist181045 Exp $
+// $Id: xpl_parser.y,v 1.24 2017/04/19 21:12:14 ist181045 Exp $
 //-- don't change *any* of these: if you do, you'll break the compiler.
 #include <cdk/compiler.h>
 #include "ast/all.h"
@@ -23,7 +23,7 @@
   cdk::lvalue_node     *lvalue;     /* lvalue nodes */
   cdk::sequence_node   *sequence;   /* sequence nodes */
 
-  xpl::block_node *block; /* block nodes */
+  xpl::block_node   *block; /* block nodes */
 };
 
     /* Numeric types */
@@ -50,7 +50,7 @@
 %token <t> tPROCEDURE
 
     /* Scope */
-%token tPUBLIC tUSE
+%token <i> tPUBLIC tUSE
 
     /* Conditional */
 %token tIF
@@ -70,14 +70,15 @@
 
 
     /* 4 Syntax ============================================================= */
+%type <s> str  /* string */
+%type <t> type /* return or var type*/
+
 %type <block>      blck body
-%type <node>       cond decl else func iter stmt var
+%type <node>       cond else iter stmt
+%type <node>       arg decl func gvar var /**/
 %type <expression> expr lit
-%type <i>          qual
-%type <s>          str
-%type <t>          type
 %type <lvalue>     lval
-%type <sequence>   decls exprs stmts vars
+%type <sequence>   args decls exprs stmts vars
 
 
 
@@ -91,12 +92,7 @@
 %left     '+' '-'           /* Additive         */
 %left     '*' '/' '%'       /* Multiplicative   */
 %nonassoc '?' tUNARY        /* Unary precedence */
-%nonassoc '(' ')' '[' ']'   /* Primary          */
-%nonassoc tQUALX            /* Solves conflict between reducing decl and
-                                shifting [ from the malloc expression.
-                               Only here because qual can produce eps.. Bit
-                                hacky.. but bit more compact syntax */
-%nonassoc '{'               /* Block precedence */
+%nonassoc '['               /* Primary          */
 
 %{
 //-- The rules below will be included in yyparse, the main parsing function.
@@ -109,35 +105,44 @@ file : decls      { compiler->ast($1); }
      | /* eps */  { compiler->ast(new cdk::sequence_node(LINE)); }
      ;
 
-decls: decl       { $$ = new cdk::sequence_node(LINE, $1); }
+decls: decl       { $$ = new cdk::sequence_node(LINE, $1);     }
      | decls decl { $$ = new cdk::sequence_node(LINE, $2, $1); }
      ;
 
 
     /* Declaration ---------------------------------------------------------- */
-decl : var ';'   { $$ = $1; }
-     | func      { $$ = $1; }
+decl : gvar ';'   { $$ = $1; }
+     | func       { $$ = $1; }
      ;
 
 
     /* Variable ------------------------------------------------------------- */
-var  : qual type tIDENTIFIER          { $$ = new xpl::vardecl_node(LINE, $1, $2, $3);     }
-     | qual type tIDENTIFIER '=' expr { $$ = new xpl::var_node(LINE, $1, $2, $3, $5);     }
+gvar : tPUBLIC type tIDENTIFIER          { $$ = new xpl::vardecl_node(LINE, $1, $2, $3); }
+     | tPUBLIC type tIDENTIFIER '=' expr { $$ = new xpl::var_node(LINE, $1, $2, $3, $5); }
+     | tUSE type tIDENTIFIER             { $$ = new xpl::vardecl_node(LINE, $1, $2, $3); }
+     | var                               { $$ = $1; }
+     ;
+
+var  : type tIDENTIFIER          { $$ = new xpl::vardecl_node(LINE, 0, $1, $2); }
+     | type tIDENTIFIER '=' expr { $$ = new xpl::var_node(LINE, 0, $1, $2, $4); }
      ;
 
 
     /* Function ------------------------------------------------------------- */
-func : qual tPROCEDURE tIDENTIFIER '(' vars ')'        { $$ = new xpl::fundecl_node (LINE, $1, $2, $3, $5);         }
-     | qual tPROCEDURE tIDENTIFIER '(' vars ')' body   { $$ = new xpl::function_node(LINE, $1, $2, $3, $5, $7);     }
-     | qual type tIDENTIFIER '(' vars ')'              { $$ = new xpl::fundecl_node (LINE, $1, $2, $3, $5);         }
-     | qual type tIDENTIFIER '(' vars ')' body         { $$ = new xpl::function_node(LINE, $1, $2, $3, $5, $7);     }
-     | qual type tIDENTIFIER '(' vars ')' '=' lit body { $$ = new xpl::function_node(LINE, $1, $2, $3, $5, $9, $8); }
+func : tPUBLIC tPROCEDURE tIDENTIFIER '(' args ')'        { $$ = new xpl::fundecl_node (LINE, $1, $2, $3, $5);         }
+     | tPUBLIC tPROCEDURE tIDENTIFIER '(' args ')' body   { $$ = new xpl::function_node(LINE, $1, $2, $3, $5, $7);     }
+     | tPUBLIC type tIDENTIFIER '(' args ')'              { $$ = new xpl::fundecl_node (LINE, $1, $2, $3, $5);         }
+     | tPUBLIC type tIDENTIFIER '(' args ')' body         { $$ = new xpl::function_node(LINE, $1, $2, $3, $5, $7);     }
+     | tPUBLIC type tIDENTIFIER '(' args ')' '=' lit body { $$ = new xpl::function_node(LINE, $1, $2, $3, $5, $9, $8); }
+     | tUSE tPROCEDURE tIDENTIFIER '(' args ')'           { $$ = new xpl::fundecl_node (LINE, $1, $2, $3, $5);         }
+     | tUSE type tIDENTIFIER '(' args ')'                 { $$ = new xpl::fundecl_node (LINE, $1, $2, $3, $5);         }
+     | tPROCEDURE tIDENTIFIER '(' args ')'                { $$ = new xpl::fundecl_node (LINE,  0, $1, $2, $4);         }
+     | tPROCEDURE tIDENTIFIER '(' args ')' body           { $$ = new xpl::function_node(LINE,  0, $1, $2, $4, $6);     }
+     | type tIDENTIFIER '(' args ')'                      { $$ = new xpl::fundecl_node (LINE,  0, $1, $2, $4);         }
+     | type tIDENTIFIER '(' args ')' body                 { $$ = new xpl::function_node(LINE,  0, $1, $2, $4, $6);     }
+     | type tIDENTIFIER '(' args ')' '=' lit body         { $$ = new xpl::function_node(LINE,  0, $1, $2, $4, $8, $7); }
      ;
 
-qual : tPUBLIC      { $$ = 1; }
-     | tUSE         { $$ = 2; }
-     | %prec tQUALX { $$ = 0; }
-     ;
 
 type : tTYPEINTEGER { $$ = $1; }
      | tTYPEREAL    { $$ = $1; }
@@ -145,10 +150,15 @@ type : tTYPEINTEGER { $$ = $1; }
      | '[' type ']' { $$ = $2; $$->_subtype = $2; }
      ;
 
-vars : var          { $$ = new cdk::sequence_node(LINE, $1);     }
-     | vars ',' var { $$ = new cdk::sequence_node(LINE, $3, $1); }
+
+args : arg          { $$ = new cdk::sequence_node(LINE, $1);     }
+     | args ',' arg { $$ = new cdk::sequence_node(LINE, $3, $1); }
      | /* eps */    { $$ = new cdk::sequence_node(LINE);         }
      ;
+
+arg  : type tIDENTIFIER { $$ = new xpl::vardecl_node(LINE, 0, $1, $2); }
+     ;
+
 
 lit  : str          { $$ = new cdk::string_node(LINE, $1);  }
      | tINTEGER     { $$ = new cdk::integer_node(LINE, $1); }
@@ -167,14 +177,18 @@ body : blck      { $$ = $1; }
 
 
     /* Block ---------------------------------------------------------------- */
-blck : '{' decls stmts '}' { $$ = new xpl::block_node(LINE, $2, $3); }
-     | '{' decls '}'       { $$ = new xpl::block_node(LINE, $2, new cdk::sequence_node(LINE)); }
-     | '{' stmts '}'       { $$ = new xpl::block_node(LINE, new cdk::sequence_node(LINE), $2); }
-     | '{' '}'             { $$ = new xpl::block_node(LINE, new cdk::sequence_node(LINE), new cdk::sequence_node(LINE)); }
+blck : '{' vars stmts '}'   { $$ = new xpl::block_node(LINE, $2, $3); }
+     | '{' vars  '}'        { $$ = new xpl::block_node(LINE, $2, new cdk::sequence_node(LINE)); }
+     | '{' stmts '}'        { $$ = new xpl::block_node(LINE, new cdk::sequence_node(LINE), $2); }
+     | '{' '}'              { $$ = new xpl::block_node(LINE, new cdk::sequence_node(LINE), new cdk::sequence_node(LINE)); }
      ;
 
-stmts: stmt                { $$ = new cdk::sequence_node(LINE, $1);     }
-     | stmts stmt          { $$ = new cdk::sequence_node(LINE, $2, $1); }
+vars : var ';'              { $$ = new cdk::sequence_node(LINE, $1);     }
+     | vars var ';'         { $$ = new cdk::sequence_node(LINE, $2, $1); }
+     ;
+
+stmts: stmt                 { $$ = new cdk::sequence_node(LINE, $1);     }
+     | stmts stmt           { $$ = new cdk::sequence_node(LINE, $2, $1); }
      ;
 
 
