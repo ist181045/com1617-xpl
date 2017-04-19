@@ -1,7 +1,7 @@
 %option c++ yyclass="xpl_scanner" outfile="xpl_scanner.cpp"
 %option stack noyywrap yylineno 8bit
 %{
-/* $Id: xpl_scanner.l,v 1.20 2017/04/19 14:07:27 ist181045 Exp $ */
+/* $Id: xpl_scanner.l,v 1.21 2017/04/19 14:53:54 ist181045 Exp $ */
 // make relevant includes before including the parser's tab file
 #include <limits>
 #include <string>
@@ -19,7 +19,6 @@
     /* Helpful rules */
 DECDIG     [0-9]
 HEXDIG     [0-9A-Fa-f]
-HEX        "0x"{HEXDIG}+
 
     /* Literal regex rules */
     /* Integers (see 3.8.1 Integers) */
@@ -103,15 +102,20 @@ EXPROPS    [-+()[\]?*/%<>~&|=!@]
     /* 3.8 Literals --------------------------------------------------------- */
     /* 3.8.1 Integers */
 "0"+{INTEGER}          yyerror("Integers mustn\'t have a single leading 0");
-{INTEGER}|{HEX}        {
+{INTEGER}              {
     try {
-        yylval.i = std::stoi(yytext, nullptr, 0);
-        return tINTEGER;
+        yylval.i = std::stoi(yytext, nullptr); return tINTEGER;
     } catch (const std::out_of_range &oor) {
         std::ostringstream msg;
         msg << yylineno << ": Integer overflow";
         yyerror(msg.str().c_str());
     }
+}
+"0x"{HEXDIG}{1,8}      yylval.i = static_cast<int>(std::stol(yytext, nullptr, 16)); return tINTEGER;
+"0x"{HEXDIG}{9,}       {
+    std::ostringstream msg;
+    msg << yylineno << ": Hex integer can't be bigger than 4 bytes";
+    yyerror(msg.str().c_str());
 }
 
     /* 3.8.2 Floating point reals */
