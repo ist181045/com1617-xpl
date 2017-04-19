@@ -1,7 +1,7 @@
 %option c++ yyclass="xpl_scanner" outfile="xpl_scanner.cpp"
 %option stack noyywrap yylineno 8bit
 %{
-/* $Id: xpl_scanner.l,v 1.17 2017/04/18 12:55:19 ist181045 Exp $ */
+/* $Id: xpl_scanner.l,v 1.18 2017/04/19 10:37:02 ist181045 Exp $ */
 // make relevant includes before including the parser's tab file
 #include <string>
 #include <cdk/ast/sequence_node.h>
@@ -36,14 +36,14 @@ BLANK      [\t\n\r ]
     /* Expression operators (see 7 Expressions) */
 EXPROPS    [-+()[\]?*/%<>~&|=!@]
 
-%x X_COMMENT X_STR X_STRMORE X_STRNO
+%x X_COMMENT X_STR X_STRNO
 
 %%
 
     /* Lexical conventions (3) ============================================== */
     /* Comments (3.2) ------------------------------------------------------- */
     /* Multi-line nested comments */
-<INITIAL,X_STRMORE>"/*"    yy_push_state(X_COMMENT);
+"/*"                       yy_push_state(X_COMMENT);
 <X_COMMENT>"/*"            yy_push_state(X_COMMENT);
 <X_COMMENT>"*/"            yy_pop_state();
 <X_COMMENT>.|\n            ;
@@ -119,22 +119,19 @@ EXPROPS    [-+()[\]?*/%<>~&|=!@]
     /* 3.8.3 Strings */
 \"                     yy_push_state(X_STR); yylval.s = new std::string("");
 <X_STR>\"              yy_pop_state(); return tSTRING;
-<X_STR>\"{BLANK}       yy_push_state(X_STRMORE); /* Is there more? */
 <X_STR>\\{HEXDIG}{1,2} {
     long l = strtol((yytext + 1), nullptr, 16);
-    if (l == 0) yy_push_state(X_STRNO); /* ASCII NULL (either \0 or \00) */
+    if (l == 0) {
+        yy_push_state(X_STRNO); /* ASCII NULL (either \0 or \00) */
+        return tSTRING;
+    }
     else *yylval.s += (char)strtol((yytext + 1), nullptr, 16); /* special hex */
 }
 <X_STR>\\\"            *yylval.s += yytext + 1; /* double quote */
 <X_STR>.               *yylval.s += yytext;
 <X_STR,X_STRNO>\n      yyerror("Newline in string");
 
-<X_STRMORE>\"          yy_pop_state(); /* There's more! */
-<X_STRMORE>{BLANK}     ; /* Keep looking */
-<X_STRMORE>.           yy_pop_state(); yy_pop_state(); return tSTRING; /* end */
-
 <X_STRNO>\"            yy_pop_state(); yy_pop_state(); return tSTRING;
-<X_STRNO>\"{BLANK}     yy_pop_state(); yy_push_state(X_STRMORE);
 <X_STRNO>.             ; /* Ignore whatever is found */
 
 

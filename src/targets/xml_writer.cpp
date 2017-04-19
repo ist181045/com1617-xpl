@@ -99,7 +99,10 @@ void xpl::xml_writer::do_or_node(cdk::or_node * const node, int lvl) {
 
 void xpl::xml_writer::do_identifier_node(cdk::identifier_node * const node, int lvl) {
   //ASSERT_SAFE_EXPRESSIONS;
-  os() << std::string(lvl, ' ') << "<" << node->label() << ">" << node->name() << "</" << node->label() << ">" << std::endl;
+  os() << std::string(lvl, ' ')
+      << "<"  << node->label() << ">"
+      << node->name()
+      << "</" << node->label() << ">" << std::endl;
 }
 
 void xpl::xml_writer::do_rvalue_node(cdk::rvalue_node * const node, int lvl) {
@@ -148,7 +151,7 @@ void xpl::xml_writer::do_function_node(xpl::function_node * const node, int lvl)
 }
 
 void xpl::xml_writer::do_var_node(xpl::var_node * const node, int lvl) {
-//  ASSERT_SAFE_EXPRESSIONS;
+  //ASSERT_SAFE_EXPRESSIONS;
   os() << std::string(lvl, ' ')
       << "<var_node scope='" << node->scope()
       << "' type='" << node->type()->name()

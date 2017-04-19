@@ -1,5 +1,5 @@
 %{
-// $Id: xpl_parser.y,v 1.22 2017/04/18 13:54:59 ist181045 Exp $
+// $Id: xpl_parser.y,v 1.23 2017/04/19 10:37:02 ist181045 Exp $
 //-- don't change *any* of these: if you do, you'll break the compiler.
 #include <cdk/compiler.h>
 #include "ast/all.h"
@@ -74,6 +74,7 @@
 %type <node>       cond decl else func iter stmt var
 %type <expression> expr lit
 %type <i>          qual
+%type <s>          str
 %type <t>          type
 %type <lvalue>     lval
 %type <sequence>   decls exprs stmts vars
@@ -149,10 +150,14 @@ vars : var          { $$ = new cdk::sequence_node(LINE, $1);     }
      | /* eps */    { $$ = new cdk::sequence_node(LINE);         }
      ;
 
-lit  : tINTEGER     { $$ = new cdk::integer_node(LINE, $1); }
+lit  : str          { $$ = new cdk::string_node(LINE, $1);  }
+     | tINTEGER     { $$ = new cdk::integer_node(LINE, $1); }
      | tREAL        { $$ = new cdk::double_node(LINE, $1);  }
-     | tSTRING      { $$ = new cdk::string_node(LINE, $1);  }
      | tNULL        { $$ = new xpl::null_node(LINE);        }
+     ;
+
+str  : tSTRING     { $$ = $1; }
+     | str tSTRING { $$ = new std::string(*$1 + *$2); delete $1; delete $2; }
      ;
 
 
