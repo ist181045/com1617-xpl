@@ -1,7 +1,7 @@
 %option c++ yyclass="xpl_scanner" outfile="xpl_scanner.cpp"
 %option stack noyywrap yylineno 8bit
 %{
-/* $Id: xpl_scanner.l,v 1.21 2017/04/19 14:53:54 ist181045 Exp $ */
+/* $Id: xpl_scanner.l,v 1.22 2017/04/19 21:02:53 ist181045 Exp $ */
 // make relevant includes before including the parser's tab file
 #include <limits>
 #include <string>
@@ -64,8 +64,8 @@ EXPROPS    [-+()[\]?*/%<>~&|=!@]
 "procedure"            yylval.t = new basic_type(0, basic_type::TYPE_VOID); return tPROCEDURE;
 
     /* Scope */
-"public"               return tPUBLIC;
-"use"                  return tUSE;
+"public"               yylval.i = 1; return tPUBLIC;
+"use"                  yylval.i = 2; return tUSE;
 
     /* Conditional */
 "if"                   return tIF;
@@ -104,7 +104,8 @@ EXPROPS    [-+()[\]?*/%<>~&|=!@]
 "0"+{INTEGER}          yyerror("Integers mustn\'t have a single leading 0");
 {INTEGER}              {
     try {
-        yylval.i = std::stoi(yytext, nullptr); return tINTEGER;
+        yylval.i = std::stoi(yytext, nullptr);
+        return tINTEGER;
     } catch (const std::out_of_range &oor) {
         std::ostringstream msg;
         msg << yylineno << ": Integer overflow";
@@ -122,6 +123,7 @@ EXPROPS    [-+()[\]?*/%<>~&|=!@]
 ({REAL}|{INTEGER}){EXP}? {
     try {
         yylval.d = std::stod(yytext, nullptr);
+        return tREAL;
     } catch (const std::out_of_range &oor) {
         std::ostringstream msg;
         msg << yylineno << ": Double size out of range";
