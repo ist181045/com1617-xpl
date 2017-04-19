@@ -1,4 +1,4 @@
-// $Id: var_node.h,v 1.1 2017/04/17 15:35:35 ist181045 Exp $ -*- c++ -*-
+// $Id: var_node.h,v 1.2 2017/04/19 21:04:07 ist181045 Exp $ -*- c++ -*-
 #ifndef __XPL_VARNODE_H__
 #define __XPL_VARNODE_H__
 
@@ -14,13 +14,13 @@ namespace xpl {
     int _scope;
     basic_type *_type;
     std::string *_name;
-    cdk::expression_node *_val;
+    cdk::expression_node *_value;
 
   public:
     inline var_node(int lineno, int scope, basic_type *type,
-        std::string *name, cdk::expression_node *val)
+        std::string *name, cdk::expression_node *value)
         : cdk::basic_node(lineno), _scope(scope), _type(type), _name(name),
-        _val(val) {
+        _value(value) {
     }
 
   public:
@@ -33,8 +33,8 @@ namespace xpl {
     inline const std::string &name() const {
       return *_name;
     }
-    inline cdk::expression_node *val() {
-      return _val;
+    inline cdk::expression_node *value() {
+      return _value;
     }
 
     void accept(basic_ast_visitor *sp, int level) {
