@@ -26,3 +26,4 @@ cmake-build-debug/
 *.o
 com-notes.todo
 run_tests
+results/
