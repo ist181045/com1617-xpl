@@ -1,7 +1,7 @@
 %option c++ yyclass="xpl_scanner" outfile="xpl_scanner.cpp"
 %option stack noyywrap yylineno 8bit
 %{
-/* $Id: xpl_scanner.l,v 1.24 2017/04/20 17:50:14 ist181045 Exp $ */
+/* $Id: xpl_scanner.l,v 1.25 2017/04/20 17:53:31 ist181045 Exp $ */
 // make relevant includes before including the parser's tab file
 #include <limits>
 #include <string>
@@ -121,7 +121,7 @@ EXPROPS    [-+()[\]?*/%<>~&|=!@]
         return tREAL;
     } catch (const std::out_of_range &oor) {
         std::ostringstream msg;
-        msg << yylineno << ": Double size out of range";
+        msg << yylineno << ": Real too large";
         yyerror(msg.str().c_str());
     }
 }
