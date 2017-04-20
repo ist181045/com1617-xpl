@@ -1,5 +1,5 @@
 %{
-// $Id: xpl_parser.y,v 1.24 2017/04/19 21:12:14 ist181045 Exp $
+// $Id: xpl_parser.y,v 1.25 2017/04/20 07:05:15 ist181045 Exp $
 //-- don't change *any* of these: if you do, you'll break the compiler.
 #include <cdk/compiler.h>
 #include "ast/all.h"
@@ -70,12 +70,12 @@
 
 
     /* 4 Syntax ============================================================= */
-%type <s> str  /* string */
-%type <t> type /* return or var type*/
+%type <s> str
+%type <t> type
 
 %type <block>      blck body
 %type <node>       cond else iter stmt
-%type <node>       arg decl func gvar var /**/
+%type <node>       arg decl func gvar var
 %type <expression> expr lit
 %type <lvalue>     lval
 %type <sequence>   args decls exprs stmts vars

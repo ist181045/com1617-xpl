@@ -1,7 +1,7 @@
 %option c++ yyclass="xpl_scanner" outfile="xpl_scanner.cpp"
 %option stack noyywrap yylineno 8bit
 %{
-/* $Id: xpl_scanner.l,v 1.22 2017/04/19 21:02:53 ist181045 Exp $ */
+/* $Id: xpl_scanner.l,v 1.23 2017/04/20 07:05:15 ist181045 Exp $ */
 // make relevant includes before including the parser's tab file
 #include <limits>
 #include <string>
@@ -43,10 +43,10 @@ EXPROPS    [-+()[\]?*/%<>~&|=!@]
     /* Lexical conventions (3) ============================================== */
     /* Comments (3.2) ------------------------------------------------------- */
     /* Multi-line nested comments */
-"/*"                       yy_push_state(X_COMMENT);
-<X_COMMENT>"/*"            yy_push_state(X_COMMENT);
-<X_COMMENT>"*/"            yy_pop_state();
-<X_COMMENT>.|\n            ;
+"/*"                   yy_push_state(X_COMMENT);
+<X_COMMENT>"/*"        yy_push_state(X_COMMENT);
+<X_COMMENT>"*/"        yy_pop_state();
+<X_COMMENT>.|\n        ;
 
 
     /* Single-line comments */
