@@ -1,5 +1,5 @@
 %{
-// $Id: xpl_parser.y,v 1.25 2017/04/20 07:05:15 ist181045 Exp $
+// $Id: xpl_parser.y,v 1.26 2017/04/20 08:40:13 ist181045 Exp $
 //-- don't change *any* of these: if you do, you'll break the compiler.
 #include <cdk/compiler.h>
 #include "ast/all.h"
@@ -147,7 +147,7 @@ func : tPUBLIC tPROCEDURE tIDENTIFIER '(' args ')'        { $$ = new xpl::fundec
 type : tTYPEINTEGER { $$ = $1; }
      | tTYPEREAL    { $$ = $1; }
      | tTYPESTRING  { $$ = $1; }
-     | '[' type ']' { $$ = $2; $$->_subtype = $2; }
+     | '[' type ']' { $$ = new basic_type(4, basic_type::TYPE_POINTER); $$->_subtype = $2; }
      ;
 
 
