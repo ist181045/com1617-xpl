@@ -172,7 +172,7 @@ void xpl::xml_writer::do_var_node(xpl::var_node * const node, int lvl) {
       << "'>" << std::endl;
   
   openTag("value", lvl + 2);
-  node->val()->accept(this, lvl + 4);
+  node->value()->accept(this, lvl + 4);
   closeTag("value", lvl + 2);
   
   closeTag(node, lvl);
