@@ -1,19 +1,19 @@
 #!/bin/sh
 
-PROJ="$PWD" # Your project home
+PROJ="$PWD" # Project home
 
 SRCDIR="$PROJ/src"     # Sources directory (presumably the home to the Makefile)
 TESTDIR="$PROJ/tests"  # Tests directory   (expected in here too)
 RESDIR="$PROJ/results" # Results directory (test results, per target)
 if [ ! -d "$RESDIR" ]; then mkdir -p "$RESDIR/xml"; fi
 
+
 # Setup
 # Compile the compiler, if need be
 cd "$SRCDIR"
-echo "Compiling xpl.."
-make 2>&1 >/dev/null
-cd "$CURRDIR"
-
+echo -n "Compiling xpl.. "
+make >/dev/null
+if [ $? -ne 0 ]; then echo "KO" && exit 1; else echo "OK"; fi
 
 # Run tests
 for i in `ls $TESTDIR/*.xpl`; do
@@ -21,7 +21,7 @@ for i in `ls $TESTDIR/*.xpl`; do
   test_name="${test_name%.xpl}"
 
   echo "Running $test_name.."
-  ./xpl -o "$RESDIR/xml/$test_name.xml" $i
+  $SRCDIR/xpl -o "$RESDIR/xml/$test_name.xml" $i
 
   java -cp "$SRCDIR/xml2dot.jar" xml2dot.xml2dot "$RESDIR/xml/$test_name.xml"
   ps aux|grep dotty|head -n1|kill `awk '{print $2}'`
