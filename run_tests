@@ -12,7 +12,7 @@ if [ ! -d "$RESDIR" ]; then mkdir -p "$RESDIR/xml"; fi
 # Compile the compiler, if need be
 cd "$SRCDIR"
 echo -n "Compiling xpl.. "
-make 2>&1 >/dev/null
+make >/dev/null 2>&1
 if [ $? -ne 0 ]; then echo "KO" && exit 1; else echo "OK"; fi
 
 # Run tests
