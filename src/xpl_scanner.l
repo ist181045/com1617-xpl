@@ -1,7 +1,7 @@
 %option c++ yyclass="xpl_scanner" outfile="xpl_scanner.cpp"
 %option stack noyywrap yylineno 8bit
 %{
-/* $Id: xpl_scanner.l,v 1.28 2017/04/21 11:33:34 ist181045 Exp $ */
+/* $Id: xpl_scanner.l,v 1.29 2017/04/21 12:55:37 ist181045 Exp $ */
 // make relevant includes before including the parser's tab file
 #include <limits>
 #include <string>
@@ -101,8 +101,8 @@ EXPROPS    [-+()[\]?*/%<>~&|=!@]
 
     /* 3.8 Literals --------------------------------------------------------- */
     /* 3.8.1 Integers */
-(0x)?0+{HEXDIG}+       yyerror("Integers mustn\'t start with 0");
-{INT}|{HEX}            {
+0+{INT}                yyerror("Integers mustn\'t start with 0");
+0|{INT}|{HEX}          {
     try {
         yylval.i = std::stoi(yytext, nullptr, 0);
         return tINTEGER;
