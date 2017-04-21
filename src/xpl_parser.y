@@ -1,5 +1,5 @@
 %{
-// $Id: xpl_parser.y,v 1.26 2017/04/20 08:40:13 ist181045 Exp $
+// $Id: xpl_parser.y,v 1.27 2017/04/21 11:33:34 ist181045 Exp $
 //-- don't change *any* of these: if you do, you'll break the compiler.
 #include <cdk/compiler.h>
 #include "ast/all.h"
@@ -58,7 +58,7 @@
 %nonassoc tELSE tELSIF
 
     /* Iteration */
-%token tWHILE tSWEEPD tSWEEPU
+%token tWHILE tSWEEP
 
     /* Control */
 %token tSTOP tNEXT tRETURN
@@ -217,11 +217,11 @@ else : tELSE stmt                          { $$ = $2; }
 
 
     /* Iteration statements */
-iter : tWHILE '(' expr ')' stmt                             { $$ = new xpl::while_node(LINE, $3, $5); }
-     | tSWEEPU '(' lval ':' expr ':' expr ')' stmt          { $$ = new xpl::sweep_up_node(LINE, $3, $5, $7, $9);        }
-     | tSWEEPU '(' lval ':' expr ':' expr ':' expr ')' stmt { $$ = new xpl::sweep_up_node(LINE, $3, $5, $7, $11, $9);   }
-     | tSWEEPD '(' lval ':' expr ':' expr ')' stmt          { $$ = new xpl::sweep_down_node(LINE, $3, $5, $7, $9);      }
-     | tSWEEPD '(' lval ':' expr ':' expr ':' expr ')' stmt { $$ = new xpl::sweep_down_node(LINE, $3, $5, $7, $11, $9); }
+iter : tWHILE '(' expr ')' stmt                                { $$ = new xpl::while_node(LINE, $3, $5); }
+     | tSWEEP '+' '(' lval ':' expr ':' expr ')' stmt          { $$ = new xpl::sweep_up_node(LINE, $4, $6, $8, $10);        }
+     | tSWEEP '+' '(' lval ':' expr ':' expr ':' expr ')' stmt { $$ = new xpl::sweep_up_node(LINE, $4, $6, $8, $12, $10);   }
+     | tSWEEP '-' '(' lval ':' expr ':' expr ')' stmt          { $$ = new xpl::sweep_down_node(LINE, $4, $6, $8, $10);      }
+     | tSWEEP '-' '(' lval ':' expr ':' expr ':' expr ')' stmt { $$ = new xpl::sweep_down_node(LINE, $4, $6, $8, $12, $10); }
      ;
 
 

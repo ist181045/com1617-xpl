@@ -1,7 +1,7 @@
 %option c++ yyclass="xpl_scanner" outfile="xpl_scanner.cpp"
 %option stack noyywrap yylineno 8bit
 %{
-/* $Id: xpl_scanner.l,v 1.27 2017/04/21 10:54:25 ist181045 Exp $ */
+/* $Id: xpl_scanner.l,v 1.28 2017/04/21 11:33:34 ist181045 Exp $ */
 // make relevant includes before including the parser's tab file
 #include <limits>
 #include <string>
@@ -75,8 +75,7 @@ EXPROPS    [-+()[\]?*/%<>~&|=!@]
 
     /* Iteration */
 "while"                return tWHILE;
-"sweep+"               return tSWEEPU;
-"sweep-"               return tSWEEPD;
+"sweep"                return tSWEEP;
 
     /* Control */
 "stop"                 return tSTOP;
