@@ -1,7 +1,7 @@
 %option c++ yyclass="xpl_scanner" outfile="xpl_scanner.cpp"
 %option stack noyywrap yylineno 8bit
 %{
-/* $Id: xpl_scanner.l,v 1.26 2017/04/20 22:02:38 ist181045 Exp $ */
+/* $Id: xpl_scanner.l,v 1.27 2017/04/21 10:54:25 ist181045 Exp $ */
 // make relevant includes before including the parser's tab file
 #include <limits>
 #include <string>
@@ -18,12 +18,12 @@
 
     /* Helpful rules */
 DECDIG     [0-9]
-HEXDIG     [0-9A-Fa-f]
-HEX        "0x"{HEXDIG}+
+HEXDIG     {DECDIG}|[A-Fa-f]
 
     /* Literal regex rules */
     /* Integers (see 3.8.1 Integers) */
-INTEGER    [1-9]{DECDIG}*|"0"
+INT        {DECDIG}+
+HEX        0x{HEXDIG}+
 
     /* Reals (see 3.8.2 Floating point reals) */
 REAL       {DECDIG}+"."{DECDIG}*|"."{DECDIG}+
@@ -102,8 +102,8 @@ EXPROPS    [-+()[\]?*/%<>~&|=!@]
 
     /* 3.8 Literals --------------------------------------------------------- */
     /* 3.8.1 Integers */
-"0"+{INTEGER}          yyerror("Integers mustn\'t start with 0");
-{INTEGER}|{HEX}        {
+(0x)?0+{HEXDIG}+       yyerror("Integers mustn\'t start with 0");
+{INT}|{HEX}            {
     try {
         yylval.i = std::stoi(yytext, nullptr, 0);
         return tINTEGER;
@@ -115,7 +115,7 @@ EXPROPS    [-+()[\]?*/%<>~&|=!@]
 }
 
     /* 3.8.2 Floating point reals */
-({REAL}|{INTEGER}){EXP}? {
+({REAL}|{INT}){EXP}?   {
     try {
         yylval.d = std::stod(yytext, nullptr);
         return tREAL;
