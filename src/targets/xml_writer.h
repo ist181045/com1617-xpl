@@ -39,6 +39,12 @@ namespace xpl {
     inline void closeTag(const cdk::basic_node *node, int lvl) {
       closeTag(node->label(), lvl);
     }
+    inline void singleTag(const std::string &tag, int lvl) {
+      os() << std::string(lvl, ' ') + "<" + tag + "/>" << std::endl;
+    }
+    inline void singleTag(const cdk::basic_node *node, int lvl) {
+      singleTag(node->label(), lvl);
+    }
 
   public:
     void do_sequence_node(cdk::sequence_node * const node, int lvl);
