@@ -114,9 +114,9 @@ void xpl::xml_writer::do_or_node(cdk::or_node * const node, int lvl) {
 void xpl::xml_writer::do_identifier_node(cdk::identifier_node * const node, int lvl) {
   //ASSERT_SAFE_EXPRESSIONS;
   os() << std::string(lvl, ' ')
-      << "<"  << node->label() << ">"
-      << node->name()
-      << "</" << node->label() << ">" << std::endl;
+      << "<" << node->label() << " "
+      << "name='" << node->name() << "'"
+      << "/>" << std::endl;
 }
 
 void xpl::xml_writer::do_rvalue_node(cdk::rvalue_node * const node, int lvl) {
@@ -142,10 +142,11 @@ void xpl::xml_writer::do_assignment_node(cdk::assignment_node * const node, int 
 void xpl::xml_writer::do_function_node(xpl::function_node * const node, int lvl) {
   //ASSERT_SAFE_EXPRESSIONS;
   os() << std::string(lvl, ' ')
-      << "<function_node scope='" << node->scope()
-      << "' type='" << node->type()->name()
-      << "' name='" << node->name()
-      << "'>" << std::endl;
+      << "<" << node->label() << " "
+      << "scope='" << node->scope() << "' "
+      <<  "type='" << node->type()->name() << "' "
+      <<  "name='" << node->name()  << "'"
+      << ">" << std::endl;
 
   openTag("arguments", lvl + 2);
   node->arguments()->accept(this, lvl + 4);
@@ -167,10 +168,11 @@ void xpl::xml_writer::do_function_node(xpl::function_node * const node, int lvl)
 void xpl::xml_writer::do_var_node(xpl::var_node * const node, int lvl) {
   //ASSERT_SAFE_EXPRESSIONS;
   os() << std::string(lvl, ' ')
-      << "<var_node scope='" << node->scope()
-      << "' type='" << node->type()->name()
-      << "' name='" << node->name()
-      << "'>" << std::endl;
+      << "<" << node->label() << " "
+      << "scope='" << node->scope() << "' "
+      <<  "type='" << node->type()->name() << "' "
+      <<  "name='" << node->name() << "'"
+      << ">" << std::endl;
 
   openTag("value", lvl + 2);
   node->value()->accept(this, lvl + 4);
@@ -191,8 +193,9 @@ void xpl::xml_writer::do_evaluation_node(xpl::evaluation_node * const node, int 
 void xpl::xml_writer::do_print_node(xpl::print_node * const node, int lvl) {
   //ASSERT_SAFE_EXPRESSIONS;
   os() << std::string(lvl, ' ')
-      << "<print_node newline='" << (node->newline() ? "yes" : "no")
-      << "'>" << std::endl;
+      << "<" << node->label() << " "
+      << "newline='" << node->newline() << "'"
+      << ">" << std::endl;
   node->argument()->accept(this, lvl + 2);
   closeTag(node, lvl);
 }
@@ -341,20 +344,22 @@ void xpl::xml_writer::do_return_node(xpl::return_node * const node, int lvl) {
 void xpl::xml_writer::do_vardecl_node(xpl::vardecl_node * const node, int lvl) {
   //ASSERT_SAFE_EXPRESSIONS;
   os() << std::string(lvl, ' ')
-      << "<vardecl_node scope='" << node->scope()
-      << "' type='" << node->type()->name()
-      << "' name='" << node->name()
-      << "'>" << std::endl;
+      << "<" << node->label() << " "
+      << "scope='" << node->scope() << "' "
+      <<  "type='" << node->type()->name() << "' "
+      <<  "name='" << node->name() << "'"
+      << ">" << std::endl;
   closeTag(node, lvl);
 }
 
 void xpl::xml_writer::do_fundecl_node(xpl::fundecl_node * const node, int lvl) {
   //ASSERT_SAFE_EXPRESSIONS;
   os() << std::string(lvl, ' ')
-      << "<fundecl_node scope='" << node->scope()
-      << "' type='" << node->type()->name()
-      << "' name='" << node->name()
-      << "'>" << std::endl;
+      << "<" << node->label() << " "
+      << "scope='" << node->scope() << "' "
+      <<  "type='" << node->type()->name() << "' "
+      <<  "name='" << node->name() << "'"
+      << ">" << std::endl;
 
   openTag("arguments", lvl + 2);
   node->arguments()->accept(this, lvl + 4);
@@ -412,8 +417,9 @@ void xpl::xml_writer::do_identity_node(xpl::identity_node * const node, int lvl)
 void xpl::xml_writer::do_funcall_node(xpl::funcall_node * const node, int lvl) {
   //ASSERT_SAFE_EXPRESSIONS;
   os() << std::string(lvl, ' ')
-      << "<funcall_node name='" << node->name()
-      << "'>" << std::endl;
+      << "<" << node->label() << " "
+      << "name='" << node->name() << "'"
+      << ">" << std::endl;
   node->arguments()->accept(this, lvl + 2);
   closeTag(node, lvl);
 }
