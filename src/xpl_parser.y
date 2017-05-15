@@ -1,5 +1,5 @@
 %{
-// $Id: xpl_parser.y,v 1.27 2017/04/21 11:33:34 ist181045 Exp $
+// $Id: xpl_parser.y,v 1.28 2017/05/15 15:04:51 ist181045 Exp $
 //-- don't change *any* of these: if you do, you'll break the compiler.
 #include <cdk/compiler.h>
 #include "ast/all.h"
@@ -188,7 +188,16 @@ vars : var ';'              { $$ = new cdk::sequence_node(LINE, $1);     }
      ;
 
 stmts: stmt                 { $$ = new cdk::sequence_node(LINE, $1);     }
-     | stmts stmt           { $$ = new cdk::sequence_node(LINE, $2, $1); }
+     | stmts stmt           {
+        cdk::basic_node *node = $1->node($1->size() - 1);
+        if (dynamic_cast<xpl::return_node*>(node))
+            yyerror("Code following 'return' is unreachable");
+        else if (dynamic_cast<xpl::stop_node*>(node))
+            yyerror("Code following 'stop' is unreachable");
+        else if (dynamic_cast<xpl::next_node*>(node))
+            yyerror("Code following 'next' is unreachable");
+        $$ = new cdk::sequence_node(LINE, $2, $1);
+     }
      ;
 
 
