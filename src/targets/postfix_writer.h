@@ -69,7 +69,9 @@ namespace xpl {
 
   public:
     void do_identifier_node(cdk::identifier_node * const node, int lvl);
-    void do_rvalue_node(cdk::rvalue_node * const node, int lvl);
+    void do_rvalue_node(cdk::rvalue_node * const node, int lvl) {
+      // not used in XPL syntax
+    }
     void do_assignment_node(cdk::assignment_node * const node, int lvl);
 
   public:

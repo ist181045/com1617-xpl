@@ -141,12 +141,6 @@ void xpl::postfix_writer::do_identifier_node(cdk::identifier_node * const node, 
   _pf.ADDR(node->name());
 }
 
-void xpl::postfix_writer::do_rvalue_node(cdk::rvalue_node * const node, int lvl) {
-  ASSERT_SAFE_EXPRESSIONS;
-  node->lvalue()->accept(this, lvl);
-  _pf.LOAD(); // depends on type size
-}
-
 void xpl::postfix_writer::do_assignment_node(cdk::assignment_node * const node, int lvl) {
   ASSERT_SAFE_EXPRESSIONS;
   node->rvalue()->accept(this, lvl); // determine the new value
@@ -167,29 +161,32 @@ void xpl::postfix_writer::do_assignment_node(cdk::assignment_node * const node, 
 //---------------------------------------------------------------------------
 
 void xpl::postfix_writer::do_function_node(xpl::function_node * const node, int lvl) {
-  // The ProgramNode (representing the whole program) is the
-  // main function node.
+  std::string name = node->name();
+  if (name == "xpl") name = "_main";
 
   // generate the main function (RTS mandates that its name be "_main")
   _pf.TEXT();
   _pf.ALIGN();
-  _pf.GLOBAL("_main", _pf.FUNC());
-  _pf.LABEL("_main");
-  // _pf.ENTER(0);  // XPL doesn't implement local variables
+  _pf.GLOBAL(name, _pf.FUNC());
+  _pf.LABEL(name);
+  
+  cdk::sequence_node *decls = node->body()->declarations();
+  int stack_size = 0;
+  for (size_t ix = 0; ix < decls->size(); ++ix) {
+    xpl::vardecl_node *decl = dynamic_cast<xpl::vardecl_node*>(decls->node(ix));
+    xpl::var_node *var  = dynamic_cast<xpl::var_node*>(decls->node(ix));
 
-  // node->statements()->accept(this, lvl);
+    stack_size += var ? var->type()->size() : decl->type()->size();
+  }
+  _pf.ENTER(stack_size);
+
+  node->body()->accept(this, lvl);
 
   // end the main function
   _pf.INT(0);
   _pf.POP();
   _pf.LEAVE();
   _pf.RET();
-
-  // these are just a few library function imports
-  _pf.EXTERN("readi");
-  _pf.EXTERN("printi");
-  _pf.EXTERN("prints");
-  _pf.EXTERN("println");
 }
 
 void xpl::postfix_writer::do_var_node(xpl::var_node * const node, int lvl) {}
