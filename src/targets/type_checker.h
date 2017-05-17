@@ -1,4 +1,4 @@
-// $Id: type_checker.h,v 1.21 2017/04/17 15:35:35 ist181045 Exp $ -*- c++ -*-
+// $Id: type_checker.h,v 1.22 2017/05/15 15:04:51 ist181045 Exp $ -*- c++ -*-
 #ifndef __XPL_SEMANTICS_TYPE_CHECKER_H__
 #define __XPL_SEMANTICS_TYPE_CHECKER_H__
 
@@ -70,7 +70,9 @@ namespace xpl {
 
   public:
     void do_identifier_node(cdk::identifier_node * const node, int lvl);
-    void do_rvalue_node(cdk::rvalue_node * const node, int lvl);
+    void do_rvalue_node(cdk::rvalue_node * const node, int lvl) {
+      // Not in XPL's syntax
+    }
     void do_assignment_node(cdk::assignment_node * const node, int lvl);
 
   public:
@@ -89,11 +91,17 @@ namespace xpl {
 
   public:
     void do_block_node(xpl::block_node * const node, int lvl);
-    void do_next_node(xpl::next_node * const node, int lvl);
-    void do_stop_node(xpl::stop_node * const node, int lvl);
     void do_vardecl_node(xpl::vardecl_node * const node, int lvl);
     void do_fundecl_node(xpl::fundecl_node * const node, int lvl);
-    void do_return_node(xpl::return_node * const node, int lvl);
+    void do_next_node(xpl::next_node * const node, int lvl) {
+      // No need
+    }
+    void do_stop_node(xpl::stop_node * const node, int lvl) {
+      // No need
+    }
+    void do_return_node(xpl::return_node * const node, int lvl) {
+      // No need
+    }
 
   public:
     void do_malloc_node(xpl::malloc_node * const node, int lvl);
