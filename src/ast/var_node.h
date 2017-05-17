@@ -1,4 +1,4 @@
-// $Id: var_node.h,v 1.2 2017/04/19 21:04:07 ist181045 Exp $ -*- c++ -*-
+// $Id: var_node.h,v 1.3 2017/05/17 17:06:44 ist181045 Exp $ -*- c++ -*-
 #ifndef __XPL_VARNODE_H__
 #define __XPL_VARNODE_H__
 
@@ -13,13 +13,23 @@ namespace xpl {
   class var_node: public cdk::basic_node {
     int _scope;
     basic_type *_type;
-    std::string *_name;
+    std::string _name;
     cdk::expression_node *_value;
 
   public:
     inline var_node(int lineno, int scope, basic_type *type,
-        std::string *name, cdk::expression_node *value)
+        const char *name, cdk::expression_node *value)
         : cdk::basic_node(lineno), _scope(scope), _type(type), _name(name),
+        _value(value) {
+    }
+    inline var_node(int lineno, int scope, basic_type *type,
+        const std::string &name, cdk::expression_node *value)
+        : cdk::basic_node(lineno), _scope(scope), _type(type), _name(name),
+        _value(value) {
+    }
+    inline var_node(int lineno, int scope, basic_type *type,
+        const std::string *name, cdk::expression_node *value)
+        : cdk::basic_node(lineno), _scope(scope), _type(type), _name(*name),
         _value(value) {
     }
 
@@ -31,7 +41,7 @@ namespace xpl {
       return _type;
     }
     inline const std::string &name() const {
-      return *_name;
+      return _name;
     }
     inline cdk::expression_node *value() {
       return _value;

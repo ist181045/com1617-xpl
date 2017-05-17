@@ -1,4 +1,4 @@
-// $Id: fundecl_node.h,v 1.6 2017/04/17 10:32:23 ist181045 Exp $ -*- c++ -*-
+// $Id: fundecl_node.h,v 1.7 2017/05/17 17:06:44 ist181045 Exp $ -*- c++ -*-
 #ifndef __XPL_FUNDECLNODE_H__
 #define __XPL_FUNDECLNODE_H__
 
@@ -13,13 +13,23 @@ namespace xpl {
   class fundecl_node: public cdk::basic_node {
     int _scope;
     basic_type *_type;
-    std::string *_name;
+    std::string _name;
     cdk::sequence_node *_arguments;
 
   public:
     inline fundecl_node(int lineno, int scope, basic_type *type,
-        std::string *name, cdk::sequence_node *arguments)
+        const char *name, cdk::sequence_node *arguments)
         : cdk::basic_node(lineno), _scope(scope), _type(type), _name(name),
+        _arguments(arguments) {
+    }
+    inline fundecl_node(int lineno, int scope, basic_type *type,
+        const std::string &name, cdk::sequence_node *arguments)
+        : cdk::basic_node(lineno), _scope(scope), _type(type), _name(name),
+        _arguments(arguments) {
+    }
+    inline fundecl_node(int lineno, int scope, basic_type *type,
+        std::string *name, cdk::sequence_node *arguments)
+        : cdk::basic_node(lineno), _scope(scope), _type(type), _name(*name),
         _arguments(arguments) {
     }
 
@@ -31,7 +41,7 @@ namespace xpl {
       return _type;
     }
     inline const std::string &name() const {
-      return *_name;
+      return _name;
     }
     inline cdk::sequence_node *arguments() {
       return _arguments;

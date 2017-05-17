@@ -1,4 +1,4 @@
-// $Id: function_node.h,v 1.12 2017/04/15 12:02:29 ist181045 Exp $ -*- c++ -*-
+// $Id: function_node.h,v 1.13 2017/05/17 17:06:44 ist181045 Exp $ -*- c++ -*-
 #ifndef __XPL_FUNCTIONNODE_H__
 #define __XPL_FUNCTIONNODE_H__
 
@@ -17,23 +17,41 @@ namespace xpl {
   class function_node: public cdk::basic_node {
     int _scope;
     basic_type *_type;
-    std::string *_name;
+    std::string _name;
     cdk::sequence_node *_arguments;
     block_node *_body;
     cdk::expression_node *_retval;
 
+    inline void check_retval() {
+      if (_retval == nullptr) {
+        if (_type->name() == basic_type::TYPE_INT)
+          _retval = new cdk::integer_node(this->lineno(), 0);
+        else if (_type->name() == basic_type::TYPE_POINTER)
+          _retval = new null_node(this->lineno());
+      }
+    }
+
   public:
     inline function_node(int lineno, int scope, basic_type *type,
-        std::string *name, cdk::sequence_node *arguments, block_node *body,
-        cdk::expression_node *retval = nullptr)
+        const char *name, cdk::sequence_node *arguments,
+        block_node *body, cdk::expression_node *retval = nullptr)
         : cdk::basic_node(lineno), _scope(scope), _type(type), _name(name),
         _arguments(arguments), _body(body), _retval(retval) {
-      if (retval == nullptr) {
-        if (type->name() == basic_type::TYPE_INT)
-          _retval = new cdk::integer_node(lineno, 0);
-        else if (type->name() == basic_type::TYPE_POINTER)
-          _retval = new null_node(lineno);
-      }
+      check_retval();
+    }
+    inline function_node(int lineno, int scope, basic_type *type,
+        const std::string &name, cdk::sequence_node *arguments,
+        block_node *body, cdk::expression_node *retval = nullptr)
+        : cdk::basic_node(lineno), _scope(scope), _type(type), _name(name),
+        _arguments(arguments), _body(body), _retval(retval) {
+      check_retval();
+    }
+    inline function_node(int lineno, int scope, basic_type *type,
+        const std::string *name, cdk::sequence_node *arguments,
+        block_node *body, cdk::expression_node *retval = nullptr)
+        : cdk::basic_node(lineno), _scope(scope), _type(type), _name(*name),
+        _arguments(arguments), _body(body), _retval(retval) {
+      check_retval();
     }
 
     ~function_node() {
@@ -48,7 +66,7 @@ namespace xpl {
       return _type;
     }
     inline const std::string &name() const {
-      return *_name;
+      return _name;
     }
     inline cdk::sequence_node *arguments() {
       return _arguments;

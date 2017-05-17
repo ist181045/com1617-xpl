@@ -1,4 +1,4 @@
-// $Id: vardecl_node.h,v 1.10 2017/04/17 15:35:35 ist181045 Exp $ -*- c++ -*-
+// $Id: vardecl_node.h,v 1.11 2017/05/17 17:06:44 ist181045 Exp $ -*- c++ -*-
 #ifndef __XPL_VARDECLNODE_H__
 #define __XPL_VARDECLNODE_H__
 
@@ -12,12 +12,20 @@ namespace xpl {
   class vardecl_node: public cdk::basic_node {
     int _scope;
     basic_type *_type;
-    std::string *_name;
+    std::string _name;
 
   public:
     inline vardecl_node(int lineno, int scope, basic_type *type,
-        std::string *name)
+        const char *name)
         : cdk::basic_node(lineno), _scope(scope), _type(type), _name(name) {
+    }
+    inline vardecl_node(int lineno, int scope, basic_type *type,
+        const std::string &name)
+        : cdk::basic_node(lineno), _scope(scope), _type(type), _name(name) {
+    }
+    inline vardecl_node(int lineno, int scope, basic_type *type,
+        const std::string *name)
+        : cdk::basic_node(lineno), _scope(scope), _type(type), _name(*name) {
     }
 
   public:
@@ -28,7 +36,7 @@ namespace xpl {
       return _type;
     }
     inline const std::string &name() const {
-      return *_name;
+      return _name;
     }
 
     void accept(basic_ast_visitor *sp, int level) {
