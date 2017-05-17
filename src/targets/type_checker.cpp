@@ -8,6 +8,13 @@
 
 //---------------------------------------------------------------------------
 
+void xpl::type_checker::do_sequence_node(cdk::sequence_node * const node, int lvl) {
+  for (size_t ix = 0; ix < node->size(); ++ix)
+    node->node(ix)->accept(this, lvl);
+}
+
+//---------------------------------------------------------------------------
+
 void xpl::type_checker::do_integer_node(cdk::integer_node * const node, int lvl) {
   ASSERT_UNSPEC;
   node->type(new basic_type(4, basic_type::TYPE_INT));

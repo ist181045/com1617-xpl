@@ -1,4 +1,4 @@
-// $Id: type_checker.h,v 1.22 2017/05/15 15:04:51 ist181045 Exp $ -*- c++ -*-
+// $Id: type_checker.h,v 1.23 2017/05/17 17:55:05 ist181045 Exp $ -*- c++ -*-
 #ifndef __XPL_SEMANTICS_TYPE_CHECKER_H__
 #define __XPL_SEMANTICS_TYPE_CHECKER_H__
 
@@ -30,8 +30,7 @@ namespace xpl {
     }
 
   public:
-    void do_sequence_node(cdk::sequence_node * const node, int lvl) {
-    }
+    void do_sequence_node(cdk::sequence_node * const node, int lvl);
 
   protected:
     template<typename T>
