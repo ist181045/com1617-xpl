@@ -262,17 +262,27 @@ void xpl::type_checker::do_mod_node(cdk::mod_node * const node, int lvl) {
 
 //---------------------------------------------------------------------------
 
-void xpl::type_checker::do_lt_node(cdk::lt_node * const node, int lvl) {
+inline void xpl::type_checker::processBinaryComparisonExpression(cdk::binary_expression_node * const node, int lvl) {
   processBinaryExpression(node, lvl);
+  if (node->left()->type()->name() == basic_type::TYPE_POINTER
+      || node->right()->type()->name() == basic_type::TYPE_POINTER)
+    throw std::string("incompatible types in '"
+      + node->label().substr(0, node->label().find("_node")
+      + "' expression, pointers unsupported"));
+  node->type(new basic_type(4, basic_type::TYPE_INT));
+}
+
+void xpl::type_checker::do_lt_node(cdk::lt_node * const node, int lvl) {
+  processBinaryComparisonExpression(node, lvl);
 }
 void xpl::type_checker::do_le_node(cdk::le_node * const node, int lvl) {
-  processBinaryExpression(node, lvl);
+  processBinaryComparisonExpression(node, lvl);
 }
 void xpl::type_checker::do_ge_node(cdk::ge_node * const node, int lvl) {
-  processBinaryExpression(node, lvl);
+  processBinaryComparisonExpression(node, lvl);
 }
 void xpl::type_checker::do_gt_node(cdk::gt_node * const node, int lvl) {
-  processBinaryExpression(node, lvl);
+  processBinaryComparisonExpression(node, lvl);
 }
 void xpl::type_checker::do_ne_node(cdk::ne_node * const node, int lvl) {
   processBinaryExpression(node, lvl);
