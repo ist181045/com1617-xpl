@@ -1,5 +1,5 @@
 %{
-// $Id: xpl_parser.y,v 1.30 2017/05/17 17:06:44 ist181045 Exp $
+// $Id: xpl_parser.y,v 1.31 2017/05/20 16:28:58 ist181045 Exp $
 //-- don't change *any* of these: if you do, you'll break the compiler.
 #include <cdk/compiler.h>
 #include "ast/all.h"
@@ -161,7 +161,7 @@ arg  : type tIDENTIFIER { $$ = new xpl::vardecl_node(LINE, 0, $1, $2); }
      ;
 
 
-lit  : str          { $$ = new cdk::string_node(LINE, $1); delete $1; }
+lit  : str          { $$ = new cdk::string_node(LINE, *$1); delete $1; }
      | tINTEGER     { $$ = new cdk::integer_node(LINE, $1); }
      | tREAL        { $$ = new cdk::double_node(LINE, $1);  }
      | tNULL        { $$ = new xpl::null_node(LINE);        }
