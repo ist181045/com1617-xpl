@@ -410,12 +410,6 @@ void xpl::type_checker::do_if_else_node(xpl::if_else_node * const node, int lvl)
 
 //---------------------------------------------------------------------------
 
-void xpl::type_checker::do_block_node(xpl::block_node * const node, int lvl) {
-  _symtab.push();
-  node->declarations()->accept(this, lvl + 2);
-  node->statements()->accept(this, lvl + 2);
-  _symtab.pop();
-}
 void xpl::type_checker::do_vardecl_node(xpl::vardecl_node * const node, int lvl) {}
 void xpl::type_checker::do_fundecl_node(xpl::fundecl_node * const node, int lvl) {}
 
