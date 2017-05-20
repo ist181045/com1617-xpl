@@ -34,16 +34,22 @@ void xpl::type_checker::do_sequence_node(cdk::sequence_node * const node, int lv
 //===========================================================================
 
 /** Literals */
+/* Real (NOT DOUBLE) */
+void xpl::type_checker::do_double_node(cdk::double_node * const node, int lvl) {
+  ASSERT_UNSPEC;
+  node->type(new basic_type(8, basic_type::TYPE_DOUBLE));
+}
+
 /* Integer */
 void xpl::type_checker::do_integer_node(cdk::integer_node * const node, int lvl) {
   ASSERT_UNSPEC;
   node->type(new basic_type(4, basic_type::TYPE_INT));
 }
 
-/* Real (NOT DOUBLE) */
-void xpl::type_checker::do_double_node(cdk::double_node * const node, int lvl) {
+/* Null (null pointer) */
+void xpl::type_checker::do_null_node(xpl::null_node * const node, int lvl) {
   ASSERT_UNSPEC;
-  node->type(new basic_type(8, basic_type::TYPE_DOUBLE));
+  node->type(new basic_type(4, basic_type::TYPE_POINTER));
 }
 
 /* String */
@@ -283,13 +289,6 @@ void xpl::type_checker::do_index_node(xpl::index_node * const node, int lvl) {
   ASSERT_UNSPEC;
   node->expression()->accept(this, lvl + 2);
   node->offset()->accept(this, lvl + 2);
-}
-
-//---------------------------------------------------------------------------
-
-void xpl::type_checker::do_null_node(xpl::null_node * const node, int lvl) {
-  ASSERT_UNSPEC;
-  node->type(new basic_type(4, basic_type::TYPE_POINTER));
 }
 
 //---------------------------------------------------------------------------
