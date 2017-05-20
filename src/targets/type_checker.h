@@ -1,4 +1,4 @@
-// $Id: type_checker.h,v 1.25 2017/05/20 23:12:25 ist181045 Exp $ -*- c++ -*-
+// $Id: type_checker.h,v 1.26 2017/05/20 23:17:54 ist181045 Exp $ -*- c++ -*-
 #ifndef __XPL_SEMANTICS_TYPE_CHECKER_H__
 #define __XPL_SEMANTICS_TYPE_CHECKER_H__
 
@@ -54,6 +54,7 @@ namespace xpl {
     void processBinaryArithmeticExpression(cdk::binary_expression_node * const node, int lvl);
     void processBinaryComparisonExpression(cdk::binary_expression_node * const node, int lvl);
     void processBinaryEqualityExpression(cdk::binary_expression_node * const node, int lvl);
+    void processBinaryLogicalExpression(cdk::binary_expression_node * const node, int lvl);
 
   public:
     void do_add_node(cdk::add_node * const node, int lvl);
