@@ -15,17 +15,14 @@ void xpl::xml_writer::do_sequence_node(cdk::sequence_node * const node, int lvl)
 //---------------------------------------------------------------------------
 
 void xpl::xml_writer::do_integer_node(cdk::integer_node * const node, int lvl) {
-  ASSERT_SAFE_EXPRESSIONS;
   process_literal(node, lvl);
 }
 
 void xpl::xml_writer::do_double_node(cdk::double_node * const node, int lvl) {
-  ASSERT_SAFE_EXPRESSIONS;
   process_literal(node, lvl);
 }
 
 void xpl::xml_writer::do_string_node(cdk::string_node * const node, int lvl) {
-  ASSERT_SAFE_EXPRESSIONS;
   const std::string &value = node->value();
 
   os() << std::string(lvl, ' ') << "<" << node->label() << ">";
@@ -46,7 +43,6 @@ void xpl::xml_writer::do_string_node(cdk::string_node * const node, int lvl) {
 //---------------------------------------------------------------------------
 
 inline void xpl::xml_writer::do_unary_expression(cdk::unary_expression_node * const node, int lvl) {
-  ASSERT_SAFE_EXPRESSIONS;
   openTag(node, lvl);
   node->argument()->accept(this, lvl + 2);
   closeTag(node, lvl);
@@ -63,7 +59,6 @@ void xpl::xml_writer::do_neg_node(cdk::neg_node * const node, int lvl) {
 //---------------------------------------------------------------------------
 
 inline void xpl::xml_writer::do_binary_expression(cdk::binary_expression_node * const node, int lvl) {
-  ASSERT_SAFE_EXPRESSIONS;
   openTag(node, lvl);
   node->left()->accept(this, lvl + 2);
   node->right()->accept(this, lvl + 2);
@@ -115,7 +110,6 @@ void xpl::xml_writer::do_or_node(cdk::or_node * const node, int lvl) {
 //---------------------------------------------------------------------------
 
 void xpl::xml_writer::do_identifier_node(cdk::identifier_node * const node, int lvl) {
-  ASSERT_SAFE_EXPRESSIONS;
   os() << std::string(lvl, ' ')
       << "<" << node->label() << " "
       << "name='" << node->name() << "'"
@@ -123,14 +117,12 @@ void xpl::xml_writer::do_identifier_node(cdk::identifier_node * const node, int 
 }
 
 void xpl::xml_writer::do_rvalue_node(cdk::rvalue_node * const node, int lvl) {
-  ASSERT_SAFE_EXPRESSIONS;
   openTag(node, lvl);
   node->lvalue()->accept(this, lvl + 4);
   closeTag(node, lvl);
 }
 
 void xpl::xml_writer::do_assignment_node(cdk::assignment_node * const node, int lvl) {
-  ASSERT_SAFE_EXPRESSIONS;
   openTag(node, lvl);
 
   node->lvalue()->accept(this, lvl);
@@ -143,7 +135,6 @@ void xpl::xml_writer::do_assignment_node(cdk::assignment_node * const node, int 
 //---------------------------------------------------------------------------
 
 void xpl::xml_writer::do_function_node(xpl::function_node * const node, int lvl) {
-  ASSERT_SAFE_EXPRESSIONS;
   os() << std::string(lvl, ' ')
       << "<" << node->label() << " "
       << "scope='" << node->scope() << "' "
@@ -169,7 +160,6 @@ void xpl::xml_writer::do_function_node(xpl::function_node * const node, int lvl)
 }
 
 void xpl::xml_writer::do_var_node(xpl::var_node * const node, int lvl) {
-  ASSERT_SAFE_EXPRESSIONS;
   os() << std::string(lvl, ' ')
       << "<" << node->label() << " "
       << "scope='" << node->scope() << "' "
@@ -187,14 +177,12 @@ void xpl::xml_writer::do_var_node(xpl::var_node * const node, int lvl) {
 //---------------------------------------------------------------------------
 
 void xpl::xml_writer::do_evaluation_node(xpl::evaluation_node * const node, int lvl) {
-  ASSERT_SAFE_EXPRESSIONS;
   openTag(node, lvl);
   node->argument()->accept(this, lvl + 2);
   closeTag(node, lvl);
 }
 
 void xpl::xml_writer::do_print_node(xpl::print_node * const node, int lvl) {
-  ASSERT_SAFE_EXPRESSIONS;
   os() << std::string(lvl, ' ')
       << "<" << node->label() << " "
       << "newline='" << node->newline() << "'"
@@ -206,14 +194,12 @@ void xpl::xml_writer::do_print_node(xpl::print_node * const node, int lvl) {
 //---------------------------------------------------------------------------
 
 void xpl::xml_writer::do_read_node(xpl::read_node * const node, int lvl) {
-  ASSERT_SAFE_EXPRESSIONS;
   singleTag(node, lvl);
 }
 
 //---------------------------------------------------------------------------
 
 void xpl::xml_writer::do_while_node(xpl::while_node * const node, int lvl) {
-  ASSERT_SAFE_EXPRESSIONS;
   openTag(node, lvl);
 
   openTag("condition", lvl + 2);
@@ -227,7 +213,6 @@ void xpl::xml_writer::do_while_node(xpl::while_node * const node, int lvl) {
   closeTag(node, lvl);
 }
 void xpl::xml_writer::do_sweep_up_node(xpl::sweep_up_node * const node, int lvl) {
-  ASSERT_SAFE_EXPRESSIONS;
   openTag(node, lvl);
 
   openTag("lvalue", lvl + 2);
@@ -254,7 +239,6 @@ void xpl::xml_writer::do_sweep_up_node(xpl::sweep_up_node * const node, int lvl)
 }
 
 void xpl::xml_writer::do_sweep_down_node(xpl::sweep_down_node * const node, int lvl) {
-  ASSERT_SAFE_EXPRESSIONS;
   openTag(node, lvl);
 
   openTag("lvalue", lvl + 2);
@@ -283,7 +267,6 @@ void xpl::xml_writer::do_sweep_down_node(xpl::sweep_down_node * const node, int 
 //---------------------------------------------------------------------------
 
 void xpl::xml_writer::do_if_node(xpl::if_node * const node, int lvl) {
-  ASSERT_SAFE_EXPRESSIONS;
   openTag(node, lvl);
 
   openTag("condition", lvl + 2);
@@ -298,7 +281,6 @@ void xpl::xml_writer::do_if_node(xpl::if_node * const node, int lvl) {
 }
 
 void xpl::xml_writer::do_if_else_node(xpl::if_else_node * const node, int lvl) {
-  ASSERT_SAFE_EXPRESSIONS;
   openTag(node, lvl);
 
   openTag("condition", lvl + 2);
@@ -345,7 +327,6 @@ void xpl::xml_writer::do_return_node(xpl::return_node * const node, int lvl) {
 }
 
 void xpl::xml_writer::do_vardecl_node(xpl::vardecl_node * const node, int lvl) {
-  ASSERT_SAFE_EXPRESSIONS;
   os() << std::string(lvl, ' ')
       << "<" << node->label() << " "
       << "scope='" << node->scope() << "' "
@@ -356,7 +337,6 @@ void xpl::xml_writer::do_vardecl_node(xpl::vardecl_node * const node, int lvl) {
 }
 
 void xpl::xml_writer::do_fundecl_node(xpl::fundecl_node * const node, int lvl) {
-  ASSERT_SAFE_EXPRESSIONS;
   os() << std::string(lvl, ' ')
       << "<" << node->label() << " "
       << "scope='" << node->scope() << "' "
@@ -374,7 +354,6 @@ void xpl::xml_writer::do_fundecl_node(xpl::fundecl_node * const node, int lvl) {
 //---------------------------------------------------------------------------
 
 void xpl::xml_writer::do_malloc_node(xpl::malloc_node * const node, int lvl) {
-  ASSERT_SAFE_EXPRESSIONS;
   openTag(node, lvl);
 
   openTag("size", lvl + 2);
@@ -387,7 +366,6 @@ void xpl::xml_writer::do_malloc_node(xpl::malloc_node * const node, int lvl) {
 //---------------------------------------------------------------------------
 
 void xpl::xml_writer::do_index_node(xpl::index_node * const node, int lvl) {
-  ASSERT_SAFE_EXPRESSIONS;
   openTag(node, lvl);
 
   openTag("expression", lvl + 2);
@@ -404,21 +382,18 @@ void xpl::xml_writer::do_index_node(xpl::index_node * const node, int lvl) {
 //---------------------------------------------------------------------------
 
 void xpl::xml_writer::do_null_node(xpl::null_node * const node, int lvl) {
-  ASSERT_SAFE_EXPRESSIONS;
   singleTag(node, lvl);
 }
 
 //---------------------------------------------------------------------------
 
 void xpl::xml_writer::do_identity_node(xpl::identity_node * const node, int lvl) {
-  ASSERT_SAFE_EXPRESSIONS;
   openTag(node, lvl);
   node->argument()->accept(this, lvl + 2);
   closeTag(node, lvl);
 }
 
 void xpl::xml_writer::do_funcall_node(xpl::funcall_node * const node, int lvl) {
-  ASSERT_SAFE_EXPRESSIONS;
   os() << std::string(lvl, ' ')
       << "<" << node->label() << " "
       << "name='" << node->name() << "'"
@@ -428,7 +403,6 @@ void xpl::xml_writer::do_funcall_node(xpl::funcall_node * const node, int lvl) {
 }
 
 void xpl::xml_writer::do_address_of_node(xpl::address_of_node * const node, int lvl) {
-  ASSERT_SAFE_EXPRESSIONS;
   openTag(node, lvl);
   node->argument()->accept(this, lvl + 2);
   closeTag(node, lvl);
