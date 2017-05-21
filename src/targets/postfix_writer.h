@@ -51,7 +51,8 @@ namespace xpl {
     postfix_writer(std::shared_ptr<cdk::compiler> compiler, cdk::symbol_table<xpl::symbol> &symtab,
         cdk::basic_postfix_emitter &pf)
         : basic_ast_visitor(compiler), _symtab(symtab), _pf(pf), _lbl(0),
-        _old_segment(NONE), _curr_segment(NONE) {
+        _local_offset(0), _args_offset(0), _is_var_public(false),
+        _curr_function(nullptr), _old_segment(NONE), _curr_segment(NONE) {
       _externs = new std::set<std::string>();
       _next_labels = new std::stack<std::string>();
       _stop_labels = new std::stack<std::string>();

@@ -15,25 +15,71 @@ void xpl::postfix_writer::do_sequence_node(cdk::sequence_node * const node, int 
 //---------------------------------------------------------------------------
 
 void xpl::postfix_writer::do_integer_node(cdk::integer_node * const node, int lvl) {
-  _pf.INT(node->value()); // push an integer
+  ASSERT_SAFE_EXPRESSIONS;
+
+  // if we're not inside a function (global context)
+  if (!_curr_function) {
+    change_segment(DATA); // change segments
+    _pf.ALIGN(); // align
+    if (_is_var_public) // if public
+      _pf.GLOBAL(_label, _pf.OBJ()); // make it global
+    _pf.LABEL(_label); // label of the identifier
+    _pf.CONST(node->value()); // "store" value
+    previous_segment(); // return
+  } else {
+    _pf.INT(node->value()); // push the integer on the stack
+  }
 }
 
 void xpl::postfix_writer::do_double_node(cdk::double_node * const node, int lvl) {
-  _pf.DOUBLE(node->value()); // push a double
+  ASSERT_SAFE_EXPRESSIONS;
+  int lbl;
+
+  // if we're not inside a function (global context)
+  if (!_curr_function) {
+    change_segment(DATA); // change segments
+    _pf.ALIGN(); // align
+    if (_is_var_public) // if public
+      _pf.GLOBAL(_label, _pf.OBJ()); // make it global
+    _pf.LABEL(_label); // label of the identifier
+    _pf.DOUBLE(node->value()); // "store" value
+    previous_segment(); // return
+  } else {
+    change_segment(RODATA); // change segments
+    _pf.ALIGN(); // align
+    if (_is_var_public)
+      _pf.GLOBAL(mklbl(lbl = ++_lbl), _pf.OBJ()); // make it global
+    _pf.LABEL(mklbl(lbl)); // give it a label
+    _pf.DOUBLE(node->value()); // "store" value
+    previous_segment(); // return
+
+    _pf.ADDR(mklbl(lbl)); // reference it
+    _pf.DLOAD(); // load its value onto the stack
+  }
 }
 
 void xpl::postfix_writer::do_string_node(cdk::string_node * const node, int lvl) {
-  int lbl1;
+  int lbl;
 
   /* generate the string */
-  _pf.RODATA(); // strings are DATA readonly
+  change_segment(RODATA); // strings are DATA readonly
   _pf.ALIGN(); // make sure we are aligned
-  _pf.LABEL(mklbl(lbl1 = ++_lbl)); // give the string a name
+  _pf.LABEL(mklbl(lbl = ++_lbl)); // give the string a name
   _pf.STR(node->value()); // output string characters
+  previous_segment(); // return
 
-  /* leave the address on the stack */
-  _pf.TEXT(); // return to the TEXT segment
-  _pf.ADDR(mklbl(lbl1)); // the string to be printed
+  // if we're not inside a function (global context)
+  if (!_curr_function) {
+    change_segment(DATA); // change segments
+    _pf.ALIGN(); // align
+    if (_is_var_public) // if public
+      _pf.GLOBAL(_label, _pf.OBJ()); // make it global
+    _pf.LABEL(_label); // label of the identifier
+    _pf.ID(mklbl(lbl)); // give it an id
+    previous_segment(); // return
+  } else {
+    _pf.ADDR(mklbl(lbl)); // load a reference onto the stack
+  }
 }
 
 //---------------------------------------------------------------------------
@@ -189,7 +235,9 @@ void xpl::postfix_writer::do_function_node(xpl::function_node * const node, int 
   _pf.RET();
 }
 
-void xpl::postfix_writer::do_var_node(xpl::var_node * const node, int lvl) {}
+void xpl::postfix_writer::do_var_node(xpl::var_node * const node, int lvl) {
+  node->value()->accept(this, lvl);
+}
 
 //---------------------------------------------------------------------------
 
