@@ -1,4 +1,4 @@
-// $Id: type_checker.cpp,v 1.33 2017/05/21 12:34:54 ist181045 Exp $ -*- c++ -*-
+// $Id: type_checker.cpp,v 1.34 2017/05/21 14:17:43 ist181045 Exp $ -*- c++ -*-
 #include <string>
 #include "targets/type_checker.h"
 #include "ast/all.h"  // automatically generated
@@ -97,7 +97,7 @@ bool check_compatible(cdk::expression_node * const target, cdk::expression_node 
 }
 
 /* Checks and processes the types of two expression nodes. */
-void xpl::type_checker::check_types(cdk::expression_node * const left, cdk::expression_node * const right, int lvl) {
+inline void xpl::type_checker::check_types(cdk::expression_node * const left, cdk::expression_node * const right, int lvl) {
   left->accept(this, lvl + 2);
   switch (left->type()->name()) {
     case basic_type::TYPE_INT:
@@ -415,17 +415,33 @@ void xpl::type_checker::do_read_node(xpl::read_node * const node, int lvl) {
 void xpl::type_checker::do_while_node(xpl::while_node * const node, int lvl) {
   node->condition()->accept(this, lvl + 4);
 }
+
 void xpl::type_checker::do_sweep_up_node(xpl::sweep_up_node * const node, int lvl) {
   node->lvalue()->accept(this, lvl + 2);
   node->initial()->accept(this, lvl + 2);
+  auto *assign = new cdk::assignment_node(node->lineno(), node->lvalue(), node->initial());
+  assign->accept(this, lvl);
+
   node->upper()->accept(this, lvl + 2);
+  auto *le = new cdk::le_node(node->lineno(), node->initial(), node->upper());
+  le->accept(this, lvl);
+
   node->step()->accept(this, lvl + 2);
+  check_compatible(node->lvalue(), node->step());
 }
+
 void xpl::type_checker::do_sweep_down_node(xpl::sweep_down_node * const node, int lvl) {
   node->lvalue()->accept(this, lvl + 2);
   node->initial()->accept(this, lvl + 2);
+  auto *assign = new cdk::assignment_node(node->lineno(), node->lvalue(), node->initial());
+  assign->accept(this, lvl);
+
   node->lower()->accept(this, lvl + 2);
+  auto *ge = new cdk::ge_node(node->lineno(), node->initial(), node->lower());
+  ge->accept(this, lvl);
+
   node->step()->accept(this, lvl + 2);  
+  check_compatible(node->lvalue(), node->step());
 }
 
 //---------------------------------------------------------------------------
