@@ -1,4 +1,4 @@
-// $Id: symbol.h,v 1.2 2017/05/20 16:59:45 ist181045 Exp $ -*- c++ -*-
+// $Id: symbol.h,v 1.3 2017/05/21 16:04:34 ist181045 Exp $ -*- c++ -*-
 #ifndef __XPL_SEMANTICS_SYMBOL_H__
 #define __XPL_SEMANTICS_SYMBOL_H__
 
@@ -16,6 +16,7 @@ namespace xpl {
       int _scope;
 
       bool _is_global;
+      bool _is_defined;
       int _offset;
 
       bool _is_function;
@@ -23,10 +24,11 @@ namespace xpl {
 
     public:
       inline symbol(basic_type *type, const std::string &name, int scope = 0,
-          bool is_global = false, int offset = 0, bool is_function = false,
-          cdk::sequence_node * params = nullptr)
+          bool is_global = false, bool is_defined = false, int offset = 0,
+          bool is_function = false, cdk::sequence_node * params = nullptr)
           : _type(type), _name(name), _offset(offset), _scope(scope),
-          _is_global(is_global), _is_function(is_function), _params(params) {
+          _is_global(is_global), _is_defined(is_defined),
+          _is_function(is_function), _params(params) {
       }
 
       virtual ~symbol() {
@@ -45,11 +47,18 @@ namespace xpl {
       inline void scope(int scope) {
         _scope = scope;
       }
+
       inline bool isglobal() const {
         return _is_global;
       }
       inline void isglobal(bool is_global) {
         _is_global = is_global;
+      }
+      inline bool isdefined() const {
+        return _is_defined;
+      }
+      inline void isdefined(bool is_defined) {
+        _is_defined = is_defined;
       }
       inline int offset() const {
         return _offset;
@@ -57,6 +66,7 @@ namespace xpl {
       inline void offset(int offset) {
         _offset = offset;
       }
+      
       inline bool isfunction() const {
         return _is_function;
       }
