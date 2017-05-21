@@ -21,6 +21,17 @@ namespace xpl {
     cdk::basic_postfix_emitter &_pf;
     int _lbl;
 
+    // offset counters
+    int _local_offset;
+    int _args_offset;
+
+    // useful for when visiting literals for globals
+    bool _is_var_public;
+    std::string _label; 
+
+    // current function (nullptr means we're in the global context)
+    std::shared_ptr<xpl::symbol> _curr_function;
+
     // keep track of segments
     enum segment {
       NONE, BSS, DATA, RODATA, TEXT
