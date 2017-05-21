@@ -1,8 +1,11 @@
 #ifndef __XPL_SEMANTICS_POSTFIX_WRITER_H__
 #define __XPL_SEMANTICS_POSTFIX_WRITER_H__
 
-#include <string>
 #include <iostream>
+#include <set>
+#include <stack>
+#include <string>
+
 #include <cdk/symbol_table.h>
 #include <cdk/emitters/basic_postfix_emitter.h>
 #include "targets/basic_ast_visitor.h"
@@ -18,15 +21,37 @@ namespace xpl {
     cdk::basic_postfix_emitter &_pf;
     int _lbl;
 
+    // keep track of segments
+    enum segment {
+      NONE, BSS, DATA, RODATA, TEXT
+    };
+
+    segment _old_segment;
+    segment _curr_segment;
+
+    // set of externs
+    std::set<std::string> *_externs;
+
+    // label stacks for nexts and stops
+    std::stack<std::string> *_next_labels;
+    std::stack<std::string> *_stop_labels;
+
   public:
     postfix_writer(std::shared_ptr<cdk::compiler> compiler, cdk::symbol_table<xpl::symbol> &symtab,
-                   cdk::basic_postfix_emitter &pf) :
-        basic_ast_visitor(compiler), _symtab(symtab), _pf(pf), _lbl(0) {
+        cdk::basic_postfix_emitter &pf)
+        : basic_ast_visitor(compiler), _symtab(symtab), _pf(pf), _lbl(0),
+        _old_segment(NONE), _curr_segment(NONE) {
+      _externs = new std::set<std::string>();
+      _next_labels = new std::stack<std::string>();
+      _stop_labels = new std::stack<std::string>();
     }
 
   public:
     ~postfix_writer() {
       os().flush();
+      delete _externs;
+      delete _next_labels;
+      delete _stop_labels;
     }
 
   private:
@@ -38,6 +63,37 @@ namespace xpl {
       else
         oss << "_L" << lbl;
       return oss.str();
+    }
+
+    inline void change_segment(segment new_segment) {
+      if (_curr_segment == new_segment) return; // do nothing
+      
+      switch (new_segment) {
+        case BSS:    _pf.BSS();    break;
+        case DATA:   _pf.DATA();   break;
+        case RODATA: _pf.RODATA(); break;
+        case TEXT:   _pf.TEXT();   break;
+        default:
+          throw std::string("Failed to change segment, shouldn't have happened");
+      }
+      _curr_segment = new_segment;
+
+      if (_old_segment == NONE)
+        _old_segment = _curr_segment;
+    }
+
+    inline void previous_segment() {
+      change_segment(_old_segment);
+    }
+
+  public:
+    void declare_externs() {
+      // just in case, register these anyway
+      _externs->insert("argc");
+      _externs->insert("argv");
+      _externs->insert("envp");
+      for (const std::string &lbl : *_externs)
+        _pf.EXTERN(lbl);
     }
 
   public:

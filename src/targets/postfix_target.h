@@ -31,6 +31,7 @@ namespace xpl {
       // generate assembly code from the syntax tree
       postfix_writer writer(compiler, symtab, pf);
       compiler->ast()->accept(&writer, 0);
+      writer.declare_externs();
 
       return true;
     }
