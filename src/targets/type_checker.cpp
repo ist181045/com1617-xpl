@@ -1,4 +1,4 @@
-// $Id: type_checker.cpp,v 1.39 2017/05/21 17:44:27 ist181045 Exp $ -*- c++ -*-
+// $Id: type_checker.cpp,v 1.40 2017/05/21 19:06:48 ist181045 Exp $ -*- c++ -*-
 #include <string>
 #include "targets/type_checker.h"
 #include "ast/all.h"  // automatically generated
@@ -486,11 +486,11 @@ void xpl::type_checker::do_function_node(xpl::function_node * const node, int lv
 
   if (node->retval()) {
     node->retval()->accept(this, lvl);
-  if (!check_compatible(node->type(), node->retval()->type())) {
-    if (node->type()->name() == basic_type::TYPE_POINTER
-        && !dynamic_cast<xpl::null_node*>(node->retval()))
-      throw std::string("incompatible types in variable definition");
-  }
+    if (!check_compatible(node->type(), node->retval()->type())) {
+      if (node->type()->name() == basic_type::TYPE_POINTER
+          && !dynamic_cast<xpl::null_node*>(node->retval()))
+        throw std::string("incompatible types in variable definition");
+    }
   }
 }
 
