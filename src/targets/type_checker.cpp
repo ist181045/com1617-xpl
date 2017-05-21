@@ -1,4 +1,4 @@
-// $Id: type_checker.cpp,v 1.37 2017/05/21 16:05:05 ist181045 Exp $ -*- c++ -*-
+// $Id: type_checker.cpp,v 1.38 2017/05/21 16:39:49 ist181045 Exp $ -*- c++ -*-
 #include <string>
 #include "targets/type_checker.h"
 #include "ast/all.h"  // automatically generated
@@ -138,6 +138,13 @@ inline void xpl::type_checker::check_types(cdk::expression_node * const left, cd
 void xpl::type_checker::do_sequence_node(cdk::sequence_node * const node, int lvl) {
   for (size_t ix = 0; ix < node->size(); ++ix)
     node->node(ix)->accept(this, lvl);
+}
+
+void xpl::type_checker::do_block_node(xpl::block_node * const node, int lvl) {
+  _symtab.push();
+  node->declarations()->accept(this, lvl + 2);
+  node->statements()->accept(this, lvl + 2);
+  _symtab.pop();
 }
 
 //===========================================================================
@@ -467,6 +474,18 @@ void xpl::type_checker::do_index_node(xpl::index_node * const node, int lvl) {
 }
 
 //===========================================================================
+
+void xpl::type_checker::do_identifier_node(cdk::identifier_node * const node, int lvl) {
+  ASSERT_UNSPEC;
+  const std::string &id = node->name();
+  auto symbol = _symtab.find(id);
+  
+  if (!symbol) {
+    throw id;
+  } else {
+    node->type(symbol->type());
+  }
+}
 
 void xpl::type_checker::do_var_node(xpl::var_node * const node, int lvl) {
   node->value()->accept(this, lvl);
