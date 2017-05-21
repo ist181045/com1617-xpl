@@ -111,6 +111,9 @@ namespace xpl {
   public:
     void do_sequence_node(cdk::sequence_node * const node, int lvl);
 
+  protected:
+    void processBinaryLogicalExpression(cdk::binary_expression_node * const node, int lvl);
+
   public:
     void do_integer_node(cdk::integer_node * const node, int lvl);
     void do_double_node(cdk::double_node * const node, int lvl);

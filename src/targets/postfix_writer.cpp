@@ -4,7 +4,7 @@
 #include "targets/postfix_writer.h"
 #include "ast/all.h"  // all.h is automatically generated
 
-//---------------------------------------------------------------------------
+//===========================================================================
 
 void xpl::postfix_writer::do_sequence_node(cdk::sequence_node * const node, int lvl) {
   for (size_t i = 0; i < node->size(); i++) {
@@ -12,7 +12,7 @@ void xpl::postfix_writer::do_sequence_node(cdk::sequence_node * const node, int 
   }
 }
 
-//---------------------------------------------------------------------------
+//===========================================================================
 
 void xpl::postfix_writer::do_integer_node(cdk::integer_node * const node, int lvl) {
   ASSERT_SAFE_EXPRESSIONS;
@@ -59,6 +59,7 @@ void xpl::postfix_writer::do_double_node(cdk::double_node * const node, int lvl)
 }
 
 void xpl::postfix_writer::do_string_node(cdk::string_node * const node, int lvl) {
+  ASSERT_SAFE_EXPRESSIONS;
   int lbl;
 
   /* generate the string */
@@ -82,7 +83,7 @@ void xpl::postfix_writer::do_string_node(cdk::string_node * const node, int lvl)
   }
 }
 
-//---------------------------------------------------------------------------
+//==========================================================================-
 
 void xpl::postfix_writer::do_not_node(cdk::not_node * const node, int lvl) {
   ASSERT_SAFE_EXPRESSIONS;
@@ -96,87 +97,180 @@ void xpl::postfix_writer::do_neg_node(cdk::neg_node * const node, int lvl) {
   _pf.NEG(); // 2-complement
 }
 
-//---------------------------------------------------------------------------
+//===========================================================================
 
 void xpl::postfix_writer::do_add_node(cdk::add_node * const node, int lvl) {
   ASSERT_SAFE_EXPRESSIONS;
   node->left()->accept(this, lvl);
+  if (node->type()->name() == basic_type::TYPE_DOUBLE
+      && node->left()->type()->name() == basic_type::TYPE_INT) {
+    _pf.I2D();
+  } else if (node->type()->name() == basic_type::TYPE_POINTER
+      && node->left()->type()->name() == basic_type::TYPE_INT) {
+    _pf.INT(node->type()->subtype()->size());
+    _pf.MUL();
+  }
+
   node->right()->accept(this, lvl);
-  _pf.ADD();
+  if (node->type()->name() == basic_type::TYPE_DOUBLE
+      && node->right()->type()->name() == basic_type::TYPE_INT) {
+    _pf.I2D();
+  } else if (node->type()->name() == basic_type::TYPE_POINTER
+      && node->right()->type()->name() == basic_type::TYPE_INT) {
+    _pf.INT(node->type()->subtype()->size());
+    _pf.MUL();
+  }
+
+  if (node->type()->name() == basic_type::TYPE_DOUBLE)
+    _pf.DADD();
+  else
+    _pf.ADD();
 }
+
 void xpl::postfix_writer::do_sub_node(cdk::sub_node * const node, int lvl) {
   ASSERT_SAFE_EXPRESSIONS;
   node->left()->accept(this, lvl);
+  if (node->type()->name() == basic_type::TYPE_DOUBLE
+      && node->left()->type()->name() == basic_type::TYPE_INT) {
+    _pf.I2D();
+  } else if (node->type()->name() == basic_type::TYPE_POINTER
+      && node->left()->type()->name() == basic_type::TYPE_INT) {
+    _pf.INT(node->type()->subtype()->size());
+    _pf.MUL();
+  }
+
   node->right()->accept(this, lvl);
-  _pf.SUB();
+  if (node->type()->name() == basic_type::TYPE_DOUBLE
+      && node->left()->type()->name() == basic_type::TYPE_INT) {
+    _pf.I2D();
+  }
+
+  if (node->type()->name() == basic_type::TYPE_DOUBLE)
+    _pf.DSUB();
+  else
+    _pf.SUB();
 }
+
 void xpl::postfix_writer::do_mul_node(cdk::mul_node * const node, int lvl) {
   ASSERT_SAFE_EXPRESSIONS;
   node->left()->accept(this, lvl);
+  if (node->type()->name() == basic_type::TYPE_DOUBLE
+      && node->left()->type()->name() == basic_type::TYPE_INT) {
+    _pf.I2D();
+  }
+
   node->right()->accept(this, lvl);
-  _pf.MUL();
+  if (node->type()->name() == basic_type::TYPE_DOUBLE
+      && node->left()->type()->name() == basic_type::TYPE_INT) {
+    _pf.I2D();
+  }
+
+  if (node->type()->name() == basic_type::TYPE_DOUBLE)
+    _pf.DMUL();
+  else
+    _pf.MUL();
 }
+
 void xpl::postfix_writer::do_div_node(cdk::div_node * const node, int lvl) {
   ASSERT_SAFE_EXPRESSIONS;
   node->left()->accept(this, lvl);
+  if (node->type()->name() == basic_type::TYPE_DOUBLE
+      && node->left()->type()->name() == basic_type::TYPE_INT) {
+    _pf.I2D();
+  }
+
   node->right()->accept(this, lvl);
-  _pf.DIV();
+  if (node->type()->name() == basic_type::TYPE_DOUBLE
+      && node->left()->type()->name() == basic_type::TYPE_INT) {
+    _pf.I2D();
+  }
+
+  if (node->type()->name() == basic_type::TYPE_DOUBLE)
+    _pf.DDIV();
+  else
+    _pf.DIV();
 }
+
 void xpl::postfix_writer::do_mod_node(cdk::mod_node * const node, int lvl) {
   ASSERT_SAFE_EXPRESSIONS;
   node->left()->accept(this, lvl);
   node->right()->accept(this, lvl);
   _pf.MOD();
 }
-void xpl::postfix_writer::do_lt_node(cdk::lt_node * const node, int lvl) {
+
+//---------------------------------------------------------------------------
+
+/* Process most of the (both) binary logical (and comparison) binary expressions */
+inline void xpl::postfix_writer::processBinaryLogicalExpression(cdk::binary_expression_node * const node, int lvl) {
   ASSERT_SAFE_EXPRESSIONS;
+  bool promote_to_double = false; // by default, no need for I2D
+
   node->left()->accept(this, lvl);
+  if ((promote_to_double = node->left()->type()->name() == basic_type::TYPE_DOUBLE))
+    _pf.I2D();
+
   node->right()->accept(this, lvl);
+  if ((promote_to_double = node->right()->type()->name() == basic_type::TYPE_DOUBLE))
+    _pf.I2D();
+
+  if (promote_to_double) {
+    _pf.DCMP();
+    _pf.INT(0);
+  }
+}
+
+void xpl::postfix_writer::do_lt_node(cdk::lt_node * const node, int lvl) {
+  processBinaryLogicalExpression(node, lvl);
   _pf.LT();
 }
+
 void xpl::postfix_writer::do_le_node(cdk::le_node * const node, int lvl) {
-  ASSERT_SAFE_EXPRESSIONS;
-  node->left()->accept(this, lvl);
-  node->right()->accept(this, lvl);
+  processBinaryLogicalExpression(node, lvl);
   _pf.LE();
 }
+
 void xpl::postfix_writer::do_ge_node(cdk::ge_node * const node, int lvl) {
-  ASSERT_SAFE_EXPRESSIONS;
-  node->left()->accept(this, lvl);
-  node->right()->accept(this, lvl);
+  processBinaryLogicalExpression(node, lvl);
   _pf.GE();
 }
+
 void xpl::postfix_writer::do_gt_node(cdk::gt_node * const node, int lvl) {
-  ASSERT_SAFE_EXPRESSIONS;
-  node->left()->accept(this, lvl);
-  node->right()->accept(this, lvl);
+  processBinaryLogicalExpression(node, lvl);
   _pf.GT();
 }
+
 void xpl::postfix_writer::do_ne_node(cdk::ne_node * const node, int lvl) {
-  ASSERT_SAFE_EXPRESSIONS;
-  node->left()->accept(this, lvl);
-  node->right()->accept(this, lvl);
+  processBinaryLogicalExpression(node, lvl);
   _pf.NE();
 }
+
 void xpl::postfix_writer::do_eq_node(cdk::eq_node * const node, int lvl) {
-  ASSERT_SAFE_EXPRESSIONS;
-  node->left()->accept(this, lvl);
-  node->right()->accept(this, lvl);
+  processBinaryLogicalExpression(node, lvl);
   _pf.EQ();
 }
 
+//---------------------------------------------------------------------------
+
 void xpl::postfix_writer::do_and_node(cdk::and_node * const node, int lvl) {
   ASSERT_SAFE_EXPRESSIONS;
+  int lbl;
+
   node->left()->accept(this, lvl);
+  _pf.JZ(mklbl(lbl = ++_lbl)); // if 0 (false), just jump over rhs
   node->right()->accept(this, lvl);
-  _pf.AND();
+  _pf.ALIGN();
+  _pf.LABEL(mklbl(lbl));
 }
 
 void xpl::postfix_writer::do_or_node(cdk::or_node * const node, int lvl) {
   ASSERT_SAFE_EXPRESSIONS;
+  int lbl;
+
   node->left()->accept(this, lvl);
+  _pf.JNZ(mklbl(lbl = ++_lbl)); // if not 0 (true), just jump over rhs
   node->right()->accept(this, lvl);
-  _pf.ADD();
+  _pf.ALIGN();
+  _pf.LABEL(mklbl(lbl));
 }
 
 //---------------------------------------------------------------------------
