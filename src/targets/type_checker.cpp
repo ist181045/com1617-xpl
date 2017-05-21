@@ -1,4 +1,4 @@
-// $Id: type_checker.cpp,v 1.32 2017/05/21 11:16:30 ist181045 Exp $ -*- c++ -*-
+// $Id: type_checker.cpp,v 1.33 2017/05/21 12:34:54 ist181045 Exp $ -*- c++ -*-
 #include <string>
 #include "targets/type_checker.h"
 #include "ast/all.h"  // automatically generated
@@ -63,7 +63,9 @@ inline void numeric_conversion(cdk::binary_expression_node * const node) {
       || (ltype->name() == basic_type::TYPE_INT && rtype->name() == basic_type::TYPE_DOUBLE)) {
     node->type(new basic_type(8, basic_type::TYPE_DOUBLE));
   } else {
-    throw std::string("incompatible types in binary expression");
+    throw std::string("incompatible types in '"
+      + node->label().substr(0, node->label().find("_node"))
+      + "' expression");
   }
 }
 
@@ -75,6 +77,52 @@ bool matching_pointers(basic_type * const ltype, basic_type * const rtype) {
     return ltype->name() == rtype->name()
       && ltype->subtype() == rtype->subtype();
   }
+}
+
+/*
+ * Checks if non commutative binary expression is compatible. Used in
+ * assignments, decls, and so forth.
+ */
+bool check_compatible(cdk::expression_node * const target, cdk::expression_node * const other) {
+  if (target->type()->name() == other->type()->name()) {
+    if (target->type()->name() == basic_type::TYPE_POINTER) {
+      return matching_pointers(target->type(), other->type())
+        || dynamic_cast<xpl::null_node*>(other);
+    }
+    return true;
+  }
+
+  return target->type()->name() == basic_type::TYPE_DOUBLE
+    && other->type()->name() == basic_type::TYPE_INT;
+}
+
+/* Checks and processes the types of two expression nodes. */
+void xpl::type_checker::check_types(cdk::expression_node * const left, cdk::expression_node * const right, int lvl) {
+  left->accept(this, lvl + 2);
+  switch (left->type()->name()) {
+    case basic_type::TYPE_INT:
+    case basic_type::TYPE_DOUBLE:
+    case basic_type::TYPE_POINTER:
+      break;
+    default:
+      throw std::string("wrong type in left argument of '"
+        + left->label().substr(0, left->label().find("_node"))
+        + "' expression");
+  }
+
+  right->accept(this, lvl + 2);
+  switch (right->type()->name()) {
+    case basic_type::TYPE_INT:
+    case basic_type::TYPE_DOUBLE:
+    case basic_type::TYPE_POINTER:
+      break;
+    default:
+      throw std::string("wrong type in right argument of '"
+        + right->label().substr(0, right->label().find("_node"))
+        + "' expression");
+  }
+
+  default_if_unspec(left->type(), right->type());
 }
 
 //===========================================================================
@@ -167,32 +215,7 @@ void xpl::type_checker::do_malloc_node(xpl::malloc_node * const node, int lvl) {
 
 void xpl::type_checker::processBinaryExpression(cdk::binary_expression_node * const node, int lvl) {
   ASSERT_UNSPEC;
-
-  node->left()->accept(this, lvl + 2);
-  switch (node->left()->type()->name()) {
-    case basic_type::TYPE_INT:
-    case basic_type::TYPE_DOUBLE:
-    case basic_type::TYPE_POINTER:
-      break;
-    default:
-      throw std::string("wrong type in left argument of '"
-        + node->label().substr(0, node->label().find("_node"))
-        + "' expression");
-  }
-
-  node->right()->accept(this, lvl + 2);
-  switch (node->right()->type()->name()) {
-    case basic_type::TYPE_INT:
-    case basic_type::TYPE_DOUBLE:
-    case basic_type::TYPE_POINTER:
-      break;
-    default:
-      throw std::string("wrong type in right argument of '"
-        + node->label().substr(0, node->label().find("_node"))
-        + "' expression");
-  }
-
-  default_if_unspec(node->left()->type(), node->right()->type());
+  check_types(node->left(), node->right(), lvl);
 }
 
 inline void xpl::type_checker::processBinaryArithmeticExpression(cdk::binary_expression_node * const node, int lvl) {
@@ -344,26 +367,28 @@ void xpl::type_checker::do_assignment_node(cdk::assignment_node * const node, in
   ASSERT_UNSPEC;
 
   try {
-    node->lvalue()->accept(this, lvl);
+    node->lvalue()->accept(this, lvl + 2);
   } catch (const std::string &id) {
-    basic_type *type = node->lvalue()->type();
-    std::shared_ptr<xpl::symbol> symbol =
-      std::make_shared<xpl::symbol>(new basic_type(type->size(), type->name()), id, 0);
-    _symtab.insert(id, symbol);
-    _parent->set_new_symbol(symbol);  // advise parent that a symbol has been inserted
-    node->lvalue()->accept(this, lvl);  //DAVID: bah!
+    throw std::string(id + " was never declared");
+  }
+  node->rvalue()->accept(this, lvl + 2);
+
+  if (node->lvalue()->type()->name() == basic_type::TYPE_STRING
+      || node->rvalue()->type()->name() == basic_type::TYPE_STRING) {
+    default_if_unspec(node->lvalue()->type(), node->rvalue()->type());
+    if (node->lvalue()->type()->name() != node->rvalue()->type()->name())
+      throw std::string("mismatching types in assignment expression");
+  } else {
+    check_types(node->lvalue(), node->rvalue(), lvl);
   }
 
-  node->rvalue()->accept(this, lvl + 2);
-  if (node->lvalue()->type()->name() != node->rvalue()->type()->name())
-    throw std::string("mismatching types in arguments of assignment expression");
-
-  // in XPL, expressions are always int
-  node->type(new basic_type(
-    node->lvalue()->type()->size(), node->lvalue()->type()->name()));
+  if (check_compatible(node->lvalue(), node->rvalue()))
+    node->type(create_type(node->lvalue()->type()));
+  else
+    throw std::string("incompatible types in assignment expression");
 }
 
-//---------------------------------------------------------------------------
+//===========================================================================
 
 void xpl::type_checker::do_function_node(xpl::function_node * const node, int lvl) {}
 void xpl::type_checker::do_var_node(xpl::var_node * const node, int lvl) {}
