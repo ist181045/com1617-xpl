@@ -14,23 +14,6 @@ void xpl::postfix_writer::do_sequence_node(cdk::sequence_node * const node, int 
 
 //===========================================================================
 
-void xpl::postfix_writer::do_integer_node(cdk::integer_node * const node, int lvl) {
-  ASSERT_SAFE_EXPRESSIONS;
-
-  // if we're not inside a function (global context)
-  if (!_curr_function) {
-    change_segment(DATA); // change segments
-    _pf.ALIGN(); // align
-    if (_is_var_public) // if public
-      _pf.GLOBAL(_label, _pf.OBJ()); // make it global
-    _pf.LABEL(_label); // label of the identifier
-    _pf.CONST(node->value()); // "store" value
-    previous_segment(); // return
-  } else {
-    _pf.INT(node->value()); // push the integer on the stack
-  }
-}
-
 void xpl::postfix_writer::do_double_node(cdk::double_node * const node, int lvl) {
   ASSERT_SAFE_EXPRESSIONS;
   int lbl;
@@ -55,6 +38,39 @@ void xpl::postfix_writer::do_double_node(cdk::double_node * const node, int lvl)
 
     _pf.ADDR(mklbl(lbl)); // reference it
     _pf.DLOAD(); // load its value onto the stack
+  }
+}
+
+void xpl::postfix_writer::do_integer_node(cdk::integer_node * const node, int lvl) {
+  ASSERT_SAFE_EXPRESSIONS;
+
+  // if we're not inside a function (global context)
+  if (!_curr_function) {
+    change_segment(DATA); // change segments
+    _pf.ALIGN(); // align
+    if (_is_var_public) // if public
+      _pf.GLOBAL(_label, _pf.OBJ()); // make it global
+    _pf.LABEL(_label); // label of the identifier
+    _pf.CONST(node->value()); // "store" value
+    previous_segment(); // return
+  } else {
+    _pf.INT(node->value()); // push the integer on the stack
+  }
+}
+
+void xpl::postfix_writer::do_null_node(xpl::null_node * const node, int lvl) {
+  ASSERT_SAFE_EXPRESSIONS;
+  if (!_curr_function) {
+    int lbl;
+    change_segment(DATA);
+    _pf.ALIGN();
+    if (_is_var_public)
+      _pf.GLOBAL(mklbl(lbl = ++_lbl), _pf.OBJ());
+    _pf.LABEL(mklbl(lbl));
+    _pf.CONST(node->value());
+    previous_segment();
+  } else {
+    _pf.INT(node->value());
   }
 }
 
@@ -273,12 +289,18 @@ void xpl::postfix_writer::do_or_node(cdk::or_node * const node, int lvl) {
   _pf.LABEL(mklbl(lbl));
 }
 
-//---------------------------------------------------------------------------
+//===========================================================================
 
 void xpl::postfix_writer::do_identifier_node(cdk::identifier_node * const node, int lvl) {
-  ASSERT_SAFE_EXPRESSIONS;
-  // simplified generation: all variables are global
-  _pf.ADDR(node->name());
+  std::shared_ptr<xpl::symbol> symbol = _symtab.find(node->name());
+  if (symbol) {
+    if (!_curr_function)
+      _pf.ADDR(symbol->name());
+    else
+      _pf.LOCAL(symbol->offset());
+  } else {
+    throw "'" + node->name() + "'' was never declared";
+  }
 }
 
 void xpl::postfix_writer::do_assignment_node(cdk::assignment_node * const node, int lvl) {
@@ -431,12 +453,16 @@ void xpl::postfix_writer::do_malloc_node(xpl::malloc_node * const node, int lvl)
 
 void xpl::postfix_writer::do_index_node(xpl::index_node * const node, int lvl) {}
 
-//---------------------------------------------------------------------------
-
-void xpl::postfix_writer::do_null_node(xpl::null_node * const node, int lvl) {}
 
 //---------------------------------------------------------------------------
 
-void xpl::postfix_writer::do_identity_node(xpl::identity_node * const node, int lvl) {}
+void xpl::postfix_writer::do_identity_node(xpl::identity_node * const node, int lvl) {
+  ASSERT_SAFE_EXPRESSIONS;
+  node->argument()->accept(this, lvl);
+}
+
 void xpl::postfix_writer::do_funcall_node(xpl::funcall_node * const node, int lvl) {}
-void xpl::postfix_writer::do_address_of_node(xpl::address_of_node * const node, int lvl) {}
+void xpl::postfix_writer::do_address_of_node(xpl::address_of_node * const node, int lvl) {
+  ASSERT_SAFE_EXPRESSIONS;
+  node->argument()->accept(this, lvl);
+}
