@@ -1,4 +1,4 @@
-// $Id: type_checker.cpp,v 1.34 2017/05/21 14:17:43 ist181045 Exp $ -*- c++ -*-
+// $Id: type_checker.cpp,v 1.35 2017/05/21 14:31:43 ist181045 Exp $ -*- c++ -*-
 #include <string>
 #include "targets/type_checker.h"
 #include "ast/all.h"  // automatically generated
@@ -208,7 +208,7 @@ void xpl::type_checker::do_malloc_node(xpl::malloc_node * const node, int lvl) {
 
   node->type(new basic_type(4, basic_type::TYPE_POINTER));
   // context dependent
-  node->type()->_subtype = new basic_type(0, basic_type::TYPE_UNSPEC);
+  node->type()->_subtype = new basic_type();
 }
 
 //===========================================================================
@@ -407,13 +407,14 @@ void xpl::type_checker::do_print_node(xpl::print_node * const node, int lvl) {
 
 void xpl::type_checker::do_read_node(xpl::read_node * const node, int lvl) {
   ASSERT_UNSPEC;
-  node->type(new basic_type(0, basic_type::TYPE_UNSPEC));
+  node->type(new basic_type());
 }
 
 //---------------------------------------------------------------------------
 
 void xpl::type_checker::do_while_node(xpl::while_node * const node, int lvl) {
   node->condition()->accept(this, lvl + 4);
+  default_if_unspec(node->condition->type());
 }
 
 void xpl::type_checker::do_sweep_up_node(xpl::sweep_up_node * const node, int lvl) {
@@ -448,10 +449,12 @@ void xpl::type_checker::do_sweep_down_node(xpl::sweep_down_node * const node, in
 
 void xpl::type_checker::do_if_node(xpl::if_node * const node, int lvl) {
   node->condition()->accept(this, lvl + 4);
+  default_if_unspec(node->condition->type());
 }
 
 void xpl::type_checker::do_if_else_node(xpl::if_else_node * const node, int lvl) {
   node->condition()->accept(this, lvl + 4);
+  default_if_unspec(node->condition->type());
 }
 
 //---------------------------------------------------------------------------
