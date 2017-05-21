@@ -1,4 +1,4 @@
-// $Id: type_checker.cpp,v 1.31 2017/05/20 23:24:48 ist181045 Exp $ -*- c++ -*-
+// $Id: type_checker.cpp,v 1.32 2017/05/21 11:16:30 ist181045 Exp $ -*- c++ -*-
 #include <string>
 #include "targets/type_checker.h"
 #include "ast/all.h"  // automatically generated
@@ -72,7 +72,8 @@ bool matching_pointers(basic_type * const ltype, basic_type * const rtype) {
   if (ltype->subtype() && rtype->subtype()) {
     return matching_pointers(ltype->subtype(), rtype->subtype());
   } else {
-    return ltype->name() == rtype->name();
+    return ltype->name() == rtype->name()
+      && ltype->subtype() == rtype->subtype();
   }
 }
 
@@ -369,16 +370,19 @@ void xpl::type_checker::do_var_node(xpl::var_node * const node, int lvl) {}
 
 void xpl::type_checker::do_evaluation_node(xpl::evaluation_node * const node, int lvl) {
   node->argument()->accept(this, lvl + 2);
+  default_if_unspec(node->argument()->type());
 }
 
 void xpl::type_checker::do_print_node(xpl::print_node * const node, int lvl) {
   node->argument()->accept(this, lvl + 2);
+  default_if_unspec(node->argument()->type());
 }
 
 //---------------------------------------------------------------------------
 
 void xpl::type_checker::do_read_node(xpl::read_node * const node, int lvl) {
-  // dunno
+  ASSERT_UNSPEC;
+  node->type(new basic_type(0, basic_type::TYPE_UNSPEC));
 }
 
 //---------------------------------------------------------------------------
@@ -419,7 +423,16 @@ void xpl::type_checker::do_fundecl_node(xpl::fundecl_node * const node, int lvl)
 void xpl::type_checker::do_index_node(xpl::index_node * const node, int lvl) {
   ASSERT_UNSPEC;
   node->expression()->accept(this, lvl + 2);
+  if (node->expression()->type()->name() != basic_type::TYPE_POINTER
+      || !node->expression()->type()->subtype())
+    throw std::string("wrong type in index expression, expected a valid "\
+      "pointer");
+
   node->offset()->accept(this, lvl + 2);
+  if (node->offset()->type()->name() != basic_type::TYPE_INT)
+    throw std::string("wrong type in index offset, expected int");
+
+  node->type(create_type(node->expression()->type()->subtype()));
 }
 
 //---------------------------------------------------------------------------
