@@ -43,30 +43,29 @@ else
 fi
 
 # Run tests
-cd "$RESDIR/$TARGET" # change dir for ease of use
 for i in $(ls "$TESTDIR/$SUITE"*.xpl); do
   test_name="$(basename $i)"
   test_name="${test_name%.xpl}"
 
   echo "Running $test_name.."
-  "$SRCDIR"/xpl --target $TARGET -o "$test_name.$TARGET" $i
+  "$SRCDIR"/xpl --target $TARGET -o "$RESDIR/$TARGET/$test_name.$TARGET" $i
 
   if [ $TARGET = "xml" ]; then
-    java -cp "$SRCDIR"/xml2dot.jar xml2dot.xml2dot "$test_name.xml"
+    java -cp "$SRCDIR"/xml2dot.jar xml2dot.xml2dot "$RESDIR/xml/$test_name.xml"
     ps aux | grep dotty | head -n1 | kill $(awk '{print $2}')
-    dot -Tpng -o "img/$test_name.png" "$test_name.xml.dot"
+    dot -Tpng -o "$RESDIR/xml/img/$test_name.png" "$RESDIR/xml/$test_name.xml.dot"
   else
-  	yasm -felf32 -o "$test_name.o" "$test_name.asm"
-	ld -melf_i386 -o "$test_name" "$test_name.o" -lrts
-	chmod +x "$test_name"
-	./$test_name > "out/$test_name.out"
-	rm -f "$test_name"
+  	yasm -felf32 -o "$RESDIR/asm/$test_name.o" "$RESDIR/asm/$test_name.asm"
+	ld -melf_i386 -o "$RESDIR/asm/$test_name" "$RESDIR/asm/$test_name.o" -lrts
+	chmod +x "$RESDIR/asm/$test_name"
+	"$RESDIR/asm/"$test_name > "$RESDIR/asm/out/$test_name.out"
+	rm -f "$RESDIR/asm/$test_name"
   fi
 done
 
 if [ $TARGET = "xml" ]; then
-  rm -rf *.xml.dot
+  rm -rf "$RESDIR/xml/"*.xml.dot
 else
-  rm -rf *.o
+  rm -rf "$RESDIR/asm/"*.o
 fi
 
