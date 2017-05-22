@@ -1,4 +1,4 @@
-// $Id: type_checker.cpp,v 1.41 2017/05/22 00:09:56 ist181045 Exp $ -*- c++ -*-
+// $Id: type_checker.cpp,v 1.42 2017/05/22 09:29:04 ist181045 Exp $ -*- c++ -*-
 #include <string>
 #include "targets/type_checker.h"
 #include "ast/all.h"  // automatically generated
@@ -259,7 +259,7 @@ void xpl::type_checker::do_sub_node(cdk::sub_node * const node, int lvl) {
   } else if (ltype->name() == basic_type::TYPE_POINTER
       && rtype->name() == basic_type::TYPE_POINTER) {
     if (matching_pointers(ltype, rtype)) {
-      node->type(create_type(ltype));
+      node->type(new basic_type(4, basic_type::TYPE_INT));
     } else {
       throw std::string("incompatible pointer types in sub expression");
     }

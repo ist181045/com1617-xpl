@@ -104,7 +104,8 @@ void xpl::postfix_writer::do_string_node(cdk::string_node * const node, int lvl)
 void xpl::postfix_writer::do_not_node(cdk::not_node * const node, int lvl) {
   ASSERT_SAFE_EXPRESSIONS;
   node->argument()->accept(this, lvl);
-  _pf.NOT();
+  _pf.INT(0);
+  _pf.EQ();
 }
 
 void xpl::postfix_writer::do_neg_node(cdk::neg_node * const node, int lvl) {
@@ -165,6 +166,12 @@ void xpl::postfix_writer::do_sub_node(cdk::sub_node * const node, int lvl) {
     _pf.DSUB();
   else
     _pf.SUB();
+
+  if (node->left()->type()->name() == basic_type::TYPE_POINTER
+      && node->right()->type()->name() == basic_type::TYPE_POINTER) {
+    _pf.INT(node->left()->type()->subtype()->size());
+    _pf.DIV();
+  }
 }
 
 void xpl::postfix_writer::do_mul_node(cdk::mul_node * const node, int lvl) {
@@ -329,14 +336,14 @@ void xpl::postfix_writer::do_assignment_node(cdk::assignment_node * const node, 
 //---------------------------------------------------------------------------
 
 void xpl::postfix_writer::do_function_node(xpl::function_node * const node, int lvl) {
-  std::string name = node->name();
-  if (name == "xpl") name = "_main";
+  std::string id = node->name();
+  std::shared_ptr<xpl::symbol> symbol = _symtab.find(id);
+  if (id == "xpl") id = "_main";
 
-  // generate the main function (RTS mandates that its name be "_main")
   _pf.TEXT();
   _pf.ALIGN();
-  _pf.GLOBAL(name, _pf.FUNC());
-  _pf.LABEL(name);
+  _pf.GLOBAL(id, _pf.FUNC());
+  _pf.LABEL(id);
   
   cdk::sequence_node *decls = node->body()->declarations();
   int stack_size = 0;
@@ -425,6 +432,7 @@ void xpl::postfix_writer::do_while_node(xpl::while_node * const node, int lvl) {
   _pf.JMP(mklbl(lbl1));
   _pf.LABEL(mklbl(lbl2));
 }
+
 void xpl::postfix_writer::do_sweep_up_node(xpl::sweep_up_node * const node, int lvl) {
   ASSERT_SAFE_EXPRESSIONS;
   int lbl1, lbl2, lbl3;
@@ -531,12 +539,15 @@ void xpl::postfix_writer::do_index_node(xpl::index_node * const node, int lvl) {
   _pf.ADD(); // &lval + offset * sizeof(type)
 }
 
-
 //---------------------------------------------------------------------------
 
 void xpl::postfix_writer::do_identity_node(xpl::identity_node * const node, int lvl) {
   ASSERT_SAFE_EXPRESSIONS;
   node->argument()->accept(this, lvl);
+  if (node->argument()->type()->name() == basic_type::TYPE_DOUBLE)
+    _pf.DDUP();
+  else
+    _pf.DUP();
 }
 
 void xpl::postfix_writer::do_funcall_node(xpl::funcall_node * const node, int lvl) {}
