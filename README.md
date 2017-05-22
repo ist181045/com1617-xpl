@@ -3,7 +3,5 @@
 
 ---
 
-### Descrição do Problema
-
-*Coming soon...*
+### Wiki [here](https://github.com/rgcv/com1617-xpl/wiki)
 
