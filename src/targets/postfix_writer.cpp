@@ -306,18 +306,24 @@ void xpl::postfix_writer::do_identifier_node(cdk::identifier_node * const node, 
 void xpl::postfix_writer::do_assignment_node(cdk::assignment_node * const node, int lvl) {
   ASSERT_SAFE_EXPRESSIONS;
   node->rvalue()->accept(this, lvl); // determine the new value
-  _pf.DUP();
-  if (new_symbol() == nullptr) {
-    node->lvalue()->accept(this, lvl); // where to store the value
-  } else {
-    _pf.DATA(); // variables are all global and live in DATA
-    _pf.ALIGN(); // make sure we are aligned
-    _pf.LABEL(new_symbol()->name()); // name variable location
-    _pf.CONST(0); // initialize it to 0 (zero)
-    _pf.TEXT(); // return to the TEXT segment
-    node->lvalue()->accept(this, lvl);  //DAVID: bah!
-  }
-  _pf.STORE(); // store the value at address
+  if (node->rvalue()->type()->name() == basic_type::TYPE_DOUBLE)
+    _pf.DDUP();
+  else
+    _pf.DUP();
+
+  if (node->type()->name() == basic_type::TYPE_DOUBLE
+      && node->rvalue()->type()->name() == basic_type::TYPE_INT)
+    _pf.I2D();
+
+  node->lvalue()->accept(this, lvl);
+  if (node->type()->name() == basic_type::TYPE_DOUBLE
+      && node->lvalue()->type()->name() == basic_type::TYPE_INT)
+    _pf.I2D();
+
+  if (node->type()->name() == basic_type::TYPE_DOUBLE)
+    _pf.DSTORE();
+  else
+    _pf.STORE();
 }
 
 //---------------------------------------------------------------------------
@@ -360,40 +366,51 @@ void xpl::postfix_writer::do_var_node(xpl::var_node * const node, int lvl) {
 void xpl::postfix_writer::do_evaluation_node(xpl::evaluation_node * const node, int lvl) {
   ASSERT_SAFE_EXPRESSIONS;
   node->argument()->accept(this, lvl); // determine the value
-  if (node->argument()->type()->name() == basic_type::TYPE_INT) {
-    _pf.TRASH(4); // delete the evaluated value
-  } else if (node->argument()->type()->name() == basic_type::TYPE_STRING) {
-    _pf.TRASH(4); // delete the evaluated value's address
-  } else {
-    std::cerr << "ERROR: CANNOT HAPPEN!" << std::endl;
-    exit(1);
-  }
+  _pf.TRASH(node->argument()->type()->size());
 }
 
 void xpl::postfix_writer::do_print_node(xpl::print_node * const node, int lvl) {
   ASSERT_SAFE_EXPRESSIONS;
+  std::string func;
+
   node->argument()->accept(this, lvl); // determine the value to print
-  if (node->argument()->type()->name() == basic_type::TYPE_INT) {
-    _pf.CALL("printi");
-    _pf.TRASH(4); // delete the printed value
-  } else if (node->argument()->type()->name() == basic_type::TYPE_STRING) {
-    _pf.CALL("prints");
-    _pf.TRASH(4); // delete the printed value's address
-  } else {
-    std::cerr << "ERROR: CANNOT HAPPEN!" << std::endl;
-    exit(1);
+  switch (node->argument()->type()->name()) {
+    case basic_type::TYPE_INT:    func = "printi"; break;
+    case basic_type::TYPE_DOUBLE: func = "printd"; break;
+    case basic_type::TYPE_STRING: func = "prints"; break;
+    default:
+      std::cerr << "ERROR: CANNOT PRINT THAT" << std::endl;
+      exit(1);
   }
-  _pf.CALL("println"); // print a newline
+
+  register_extern(func); // register function
+  _pf.CALL(func); // call it
+  _pf.TRASH(node->argument()->type()->size()); // trash return
+
+  if (node->newline()) { // if a newline is to be printed
+    register_extern("println"); // register additional function
+    _pf.CALL("println"); // call it
+  }
 }
 
 //---------------------------------------------------------------------------
 
 void xpl::postfix_writer::do_read_node(xpl::read_node * const node, int lvl) {
   ASSERT_SAFE_EXPRESSIONS;
-  _pf.CALL("readi");
-  _pf.PUSH();
-  //node->argument()->accept(this, lvl);
-  _pf.STORE();
+  std::string func;
+  switch (node->type()->name()) {
+    case basic_type::TYPE_INT:    func = "readi"; break;
+    case basic_type::TYPE_DOUBLE: func = "readd"; break;
+    default:
+      std::cerr << "ERROR: CANNOT READ THAT!" << std::endl;
+      exit(1);
+  }
+
+  register_extern(func);
+  if (node->type()->name() == basic_type::TYPE_DOUBLE)
+    _pf.DPUSH();
+  else
+    _pf.PUSH();
 }
 
 //---------------------------------------------------------------------------
@@ -408,8 +425,55 @@ void xpl::postfix_writer::do_while_node(xpl::while_node * const node, int lvl) {
   _pf.JMP(mklbl(lbl1));
   _pf.LABEL(mklbl(lbl2));
 }
-void xpl::postfix_writer::do_sweep_up_node(xpl::sweep_up_node * const node, int lvl) {}
-void xpl::postfix_writer::do_sweep_down_node(xpl::sweep_down_node * const node, int lvl) {}
+void xpl::postfix_writer::do_sweep_up_node(xpl::sweep_up_node * const node, int lvl) {
+  ASSERT_SAFE_EXPRESSIONS;
+  int lbl1, lbl2, lbl3;
+
+  cdk::assignment_node assign(node->lineno(), node->lvalue(), node->initial());
+  assign.accept(this, lvl);
+  _pf.ALIGN();
+  _pf.LABEL(mklbl(lbl1 = ++_lbl));
+
+  cdk::le_node le(node->lineno(), node->lvalue(), node->upper());
+  le.accept(this, lvl);
+  _pf.JZ(mklbl(lbl3 = ++_lbl));
+
+  _pf.JMP(mklbl(lbl1));
+  _pf.LABEL(mklbl(lbl2 = ++_lbl));
+  node->step()->accept(this, lvl);
+  _pf.ALIGN();
+  _pf.LABEL(mklbl(lbl3));
+
+  _next_labels->push(mklbl(lbl2));
+  _stop_labels->push(mklbl(lbl3));
+
+  node->block()->accept(this, lvl);
+}
+
+void xpl::postfix_writer::do_sweep_down_node(xpl::sweep_down_node * const node, int lvl) {
+  ASSERT_SAFE_EXPRESSIONS;
+  int lbl1, lbl2, lbl3;
+
+  cdk::assignment_node assign(node->lineno(), node->lvalue(), node->initial());
+  assign.accept(this, lvl);
+  _pf.ALIGN();
+  _pf.LABEL(mklbl(lbl1 = ++_lbl));
+
+  cdk::ge_node ge(node->lineno(), node->lvalue(), node->lower());
+  ge.accept(this, lvl);
+  _pf.JZ(mklbl(lbl3 = ++_lbl));
+
+  _pf.JMP(mklbl(lbl1));
+  _pf.LABEL(mklbl(lbl2 = ++_lbl));
+  node->step()->accept(this, lvl);
+  _pf.ALIGN();
+  _pf.LABEL(mklbl(lbl3));
+
+  _next_labels->push(mklbl(lbl2));
+  _stop_labels->push(mklbl(lbl3));
+
+  node->block()->accept(this, lvl);
+}
 
 //---------------------------------------------------------------------------
 
@@ -447,11 +511,25 @@ void xpl::postfix_writer::do_return_node(xpl::return_node * const node, int lvl)
 
 //---------------------------------------------------------------------------
 
-void xpl::postfix_writer::do_malloc_node(xpl::malloc_node * const node, int lvl) {}
+void xpl::postfix_writer::do_malloc_node(xpl::malloc_node * const node, int lvl) {
+  ASSERT_SAFE_EXPRESSIONS;
+  node->expression()->accept(this, lvl); // size
+  _pf.INT(node->type()->subtype()->size()); // sizeof(subtype)
+  _pf.MUL(); // size * sizeof(subtype)
+  _pf.ALLOC(); // push size bytes onto the stack
+  _pf.SP(); // push stack pointer address
+}
 
 //---------------------------------------------------------------------------
 
-void xpl::postfix_writer::do_index_node(xpl::index_node * const node, int lvl) {}
+void xpl::postfix_writer::do_index_node(xpl::index_node * const node, int lvl) {
+  ASSERT_SAFE_EXPRESSIONS;
+  node->expression()->accept(this, lvl); // &lval
+  node->offset()->accept(this, lvl); // offset
+  _pf.INT(node->expression()->type()->size()); // sizeof(type)
+  _pf.MUL(); // offset * sizeof(type)
+  _pf.ADD(); // &lval + offset * sizeof(type)
+}
 
 
 //---------------------------------------------------------------------------

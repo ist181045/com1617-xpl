@@ -99,6 +99,10 @@ namespace xpl {
     }
 
   public:
+    inline void register_extern(const std::string &name) {
+      _externs->insert(name);
+    }
+    
     void declare_externs() {
       // just in case, register these anyway
       _externs->insert("argc");
