@@ -1,4 +1,4 @@
-// $Id: type_checker.cpp,v 1.43 2017/05/22 11:18:50 ist181045 Exp $ -*- c++ -*-
+// $Id: type_checker.cpp,v 1.44 2017/05/22 14:42:19 ist181045 Exp $ -*- c++ -*-
 #include <string>
 #include "targets/type_checker.h"
 #include "ast/all.h"  // automatically generated
@@ -478,21 +478,74 @@ void xpl::type_checker::do_index_node(xpl::index_node * const node, int lvl) {
 
 //===========================================================================
 
+void xpl::type_checker::do_identifier_node(cdk::identifier_node * const node, int lvl) {
+  ASSERT_UNSPEC;
+  const std::string &id = node->name();
+  std::shared_ptr<xpl::symbol> symbol = _symtab.find(id);
+
+  if (!symbol)
+    throw id;
+  else
+    node->type(symbol->type());
+}
+
 void xpl::type_checker::do_var_node(xpl::var_node * const node, int lvl) {
+  const std::string &id = node->name();
+  std::shared_ptr<xpl::symbol> symbol = _symtab.find_local(id);
+  if (symbol) {
+    throw "'" + id + "' was already declared";
+  }
+
   node->value()->accept(this, lvl);
   if (!check_compatible(node->type(), node->value()->type())) {
     if (node->type()->name() == basic_type::TYPE_POINTER
         && !dynamic_cast<xpl::null_node*>(node->value()))
       throw std::string("incompatible types in variable definition");
   }
+  symbol = std::make_shared<xpl::symbol>(node->type(), node->name(),
+    node->scope(), false, true);
+  _symtab.insert(id, symbol);
 }
 
 void xpl::type_checker::do_fundecl_node(xpl::fundecl_node * const node, int lvl) {
+  const std::string &id = node->name();
+  std::shared_ptr<xpl::symbol> symbol = _symtab.find(id);
+  if (symbol)
+    throw "'" + id + "' was already declared";
+  
+  symbol = std::make_shared<xpl::symbol>(node->type(), node->name(),
+    node->scope(), true, false, 0, true, node->arguments());
+  _symtab.insert(id, symbol);
+  
+  _symtab.push();
+  _symtab.insert(id, symbol);
   node->arguments()->accept(this, lvl + 2);
+  _symtab.pop();
 }
 
 void xpl::type_checker::do_function_node(xpl::function_node * const node, int lvl) {
+  const std::string &id = node->name();
+  std::shared_ptr<xpl::symbol> symbol = _symtab.find(id);
+  if (symbol) {
+    if (symbol->isdefined())
+      throw "'" + id + "' was alread defined";
+    else if (symbol->scope() == 2)
+      throw "Can't define external function '" + id + "'";
+  }
+
+  symbol = std::make_shared<xpl::symbol>(node->type(), node->name(),
+    node->scope(), true, false, 0, true, node->arguments());
+  _symtab.insert(id, symbol);
+  
+  _symtab.push();
+  _symtab.insert(id, symbol);
   node->arguments()->accept(this, lvl + 2);
+  for (size_t ix = 0; ix < node->arguments()->size(); ++ix) {
+    xpl::vardecl_node *var =
+      dynamic_cast<xpl::vardecl_node*>(node->arguments()->node(ix));
+    symbol = std::make_shared<xpl::symbol>(var->type(), var->name(), 0);
+    _symtab.insert(var->name(), symbol);
+  }
 
   if (node->retval()) {
     node->retval()->accept(this, lvl);
@@ -502,8 +555,42 @@ void xpl::type_checker::do_function_node(xpl::function_node * const node, int lv
         throw std::string("incompatible types in variable definition");
     }
   }
+  _symtab.pop();
+  _symtab.pop();
 }
 
 void xpl::type_checker::do_funcall_node(xpl::funcall_node * const node, int lvl) {
-  node->arguments()->accept(this, lvl);
+  const std::string &id = node->name();
+  std::shared_ptr<xpl::symbol> symbol = _symtab.find(id);
+  if (!symbol)
+    throw "'" + id + "' function wasn't declared";
+  else if (!symbol->isfunction())
+    throw "'" + id + "' is not a function";
+  else if (!symbol->isdefined() && symbol->scope() != 2)
+    throw "'" + id + "' function wasn't defined";
+
+  cdk::sequence_node *params = symbol->params();
+  cdk::sequence_node *args = node->arguments();
+  if (params) {
+    if (!args)
+      throw std::string("missing arguments");
+    else if (params->size() != args->size())
+      throw std::string("number of arguments differ");
+  } else if (args) {
+    throw "'" + id + "' doesn't take any arguments";
+  }
+
+  args->accept(this, lvl);
+  for (size_t ix = 0; ix < args->size(); ++ix) {
+    cdk::expression_node *arg =
+      dynamic_cast<cdk::expression_node*>(args->node(ix));
+    xpl::vardecl_node *param =
+      dynamic_cast<xpl::vardecl_node*>(params->node(ix));
+
+    if (!check_compatible(arg->type(), param->type())) {
+      if (param->type()->name() == basic_type::TYPE_POINTER
+          && !dynamic_cast<xpl::null_node*>(arg))
+        throw std::string("incompatible types");
+    }
+  }
 }

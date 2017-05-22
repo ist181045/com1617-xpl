@@ -299,15 +299,12 @@ void xpl::postfix_writer::do_or_node(cdk::or_node * const node, int lvl) {
 //===========================================================================
 
 void xpl::postfix_writer::do_identifier_node(cdk::identifier_node * const node, int lvl) {
+  ASSERT_SAFE_EXPRESSIONS;
   std::shared_ptr<xpl::symbol> symbol = _symtab.find(node->name());
-  if (symbol) {
-    if (!_curr_function)
-      _pf.ADDR(symbol->name());
-    else
-      _pf.LOCAL(symbol->offset());
-  } else {
-    throw "'" + node->name() + "'' was never declared";
-  }
+  if (!_curr_function)
+    _pf.ADDR(symbol->name());
+  else
+    _pf.LOCAL(symbol->offset());
 }
 
 void xpl::postfix_writer::do_assignment_node(cdk::assignment_node * const node, int lvl) {
@@ -350,9 +347,10 @@ void xpl::postfix_writer::do_function_node(xpl::function_node * const node, int 
     _pf.GLOBAL(id == "xpl" ? "_main" : id, _pf.FUNC());
   _pf.LABEL(id == "xpl" ? "_main" : id);
   
-  _local_offset -= node->type()->size(); // if procedure, 0
+  _local_offset = -node->type()->size(); // if procedure, 0
   symbol = std::make_shared<xpl::symbol>(node->type(), id, node->scope(),
     true, true, _local_offset, true, node->arguments());
+  _curr_function = symbol;
   _symtab.insert(id, symbol); // register in global namespace
 
   // function's parameters
@@ -372,18 +370,18 @@ void xpl::postfix_writer::do_function_node(xpl::function_node * const node, int 
   }
   
   cdk::sequence_node *decls = node->body()->declarations();
-  size_t stack_size = -node->type()->size();
+  size_t stack_size = node->type()->size();
   for (size_t ix = 0; ix < decls->size(); ++ix) {
     xpl::vardecl_node *decl = dynamic_cast<xpl::vardecl_node*>(decls->node(ix));
     xpl::var_node *var  = dynamic_cast<xpl::var_node*>(decls->node(ix));
     std::shared_ptr<xpl::symbol> param =
       _symtab.find_local(var ? var->name() : decl->name());
     if (param) throw param->name() + " already declared";
-
-    stack_size += var ? var->type()->size() : decl->type()->size();
+    stack_size += param->type()->size();
+    symbol->offset(-stack_size);
   }
 
-  _pf.ENTER(stack_size + node->type()->size());
+  _pf.ENTER(stack_size);
 
   if (node->body()->declarations())
     node->body()->declarations()->accept(this, lvl);
@@ -391,6 +389,7 @@ void xpl::postfix_writer::do_function_node(xpl::function_node * const node, int 
     node->body()->statements()->accept(this, lvl);
 
   _symtab.pop();
+  _curr_function = nullptr;
 
   // end the main function
   _pf.ALIGN();
@@ -402,11 +401,56 @@ void xpl::postfix_writer::do_function_node(xpl::function_node * const node, int 
   previous_segment();
 }
 
-void xpl::postfix_writer::do_funcall_node(xpl::funcall_node * const node, int lvl) {}
+void xpl::postfix_writer::do_funcall_node(xpl::funcall_node * const node, int lvl) {
+  ASSERT_SAFE_EXPRESSIONS;
 
-void xpl::postfix_writer::do_vardecl_node(xpl::vardecl_node * const node, int lvl) {}
+}
+
+void xpl::postfix_writer::do_vardecl_node(xpl::vardecl_node * const node, int lvl) {
+  ASSERT_SAFE_EXPRESSIONS;
+  const std::string &id = node->name();
+  std::shared_ptr<xpl::symbol> symbol = _symtab.find_local(id);
+  if (symbol)
+    throw "'" + id + "' was already declared";
+  symbol = std::make_shared<xpl::symbol>(node->type(), id, node->scope(),
+    _curr_function == nullptr);
+
+  if (!_curr_function) {
+    change_segment(BSS);
+    _pf.ALIGN();
+    if (symbol->scope() > 0)
+      _pf.GLOBAL(id, _pf.OBJ());
+    _pf.LABEL(id);
+    _pf.BYTE(node->type()->size());
+    previous_segment();
+  }
+}
+
 void xpl::postfix_writer::do_var_node(xpl::var_node * const node, int lvl) {
+  ASSERT_SAFE_EXPRESSIONS;
+  const std::string &id = node->name();
+  std::shared_ptr<xpl::symbol> symbol = _symtab.find_local(id);
+  symbol->isglobal(_curr_function == nullptr);
+
+  _label = id; _is_var_public = (node->scope() > 0);
   node->value()->accept(this, lvl);
+  if (_curr_function) {
+    if (symbol->type()->name() == basic_type::TYPE_INT
+        && node->type()->name() == basic_type::TYPE_DOUBLE) {
+      _pf.I2D();
+    }
+    
+    if (symbol->isglobal())
+      _pf.ADDR(id);
+    else
+      _pf.LOCAL(symbol->offset());
+    
+    if (symbol->type()->name() == basic_type::TYPE_INT
+        && node->type()->name() == basic_type::TYPE_DOUBLE)
+      _pf.DSTORE();
+    else
+      _pf.STORE();
+  }
 }
 
 //---------------------------------------------------------------------------
@@ -489,23 +533,24 @@ void xpl::postfix_writer::do_sweep_up_node(xpl::sweep_up_node * const node, int 
 
   cdk::assignment_node assign(node->lineno(), node->lvalue(), node->initial());
   assign.accept(this, lvl);
+  
   _pf.ALIGN();
   _pf.LABEL(mklbl(lbl1 = ++_lbl));
-
   cdk::le_node le(node->lineno(), node->lvalue(), node->upper());
   le.accept(this, lvl);
   _pf.JZ(mklbl(lbl3 = ++_lbl));
 
-  _pf.JMP(mklbl(lbl1));
-  _pf.LABEL(mklbl(lbl2 = ++_lbl));
-  node->step()->accept(this, lvl);
-  _pf.ALIGN();
-  _pf.LABEL(mklbl(lbl3));
-
   _next_labels->push(lbl2);
   _stop_labels->push(lbl3);
-
   node->block()->accept(this, lvl);
+  
+  _pf.ALIGN();
+  _pf.LABEL(mklbl(lbl2 = ++_lbl));
+  cdk::add_node add(node->lineno(), node->lvalue(), node->step());
+  cdk::assignment_node incr(node->lineno(), node->lvalue(), &add);
+  incr.accept(this, lvl);
+  _pf.JMP(mklbl(lbl1));
+  _pf.LABEL(mklbl(lbl3));
 }
 
 void xpl::postfix_writer::do_sweep_down_node(xpl::sweep_down_node * const node, int lvl) {
@@ -514,23 +559,24 @@ void xpl::postfix_writer::do_sweep_down_node(xpl::sweep_down_node * const node, 
 
   cdk::assignment_node assign(node->lineno(), node->lvalue(), node->initial());
   assign.accept(this, lvl);
+  
   _pf.ALIGN();
   _pf.LABEL(mklbl(lbl1 = ++_lbl));
-
   cdk::ge_node ge(node->lineno(), node->lvalue(), node->lower());
   ge.accept(this, lvl);
   _pf.JZ(mklbl(lbl3 = ++_lbl));
 
-  _pf.JMP(mklbl(lbl1));
-  _pf.LABEL(mklbl(lbl2 = ++_lbl));
-  node->step()->accept(this, lvl);
-  _pf.ALIGN();
-  _pf.LABEL(mklbl(lbl3));
-
   _next_labels->push(lbl2);
   _stop_labels->push(lbl3);
-
   node->block()->accept(this, lvl);
+  
+  _pf.ALIGN();
+  _pf.LABEL(mklbl(lbl2 = ++_lbl));
+  cdk::sub_node sub(node->lineno(), node->lvalue(), node->step());
+  cdk::assignment_node incr(node->lineno(), node->lvalue(), &sub);
+  incr.accept(this, lvl);
+  _pf.JMP(mklbl(lbl1));
+  _pf.LABEL(mklbl(lbl3));
 }
 
 //---------------------------------------------------------------------------
