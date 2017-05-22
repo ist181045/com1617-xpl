@@ -323,10 +323,6 @@ void xpl::postfix_writer::do_assignment_node(cdk::assignment_node * const node, 
     _pf.I2D();
 
   node->lvalue()->accept(this, lvl);
-  if (node->type()->name() == basic_type::TYPE_DOUBLE
-      && node->lvalue()->type()->name() == basic_type::TYPE_INT)
-    _pf.I2D();
-
   if (node->type()->name() == basic_type::TYPE_DOUBLE)
     _pf.DSTORE();
   else
@@ -365,8 +361,9 @@ void xpl::postfix_writer::do_function_node(xpl::function_node * const node, int 
   if (node->arguments()->size() > 0) {
     _args_offset = 8;
     for (size_t ix = 0; ix < node->arguments()->size(); ++ix) {
-      xpl::vardecl_node decl = node->arguments()->node(ix);
-      std::shared_ptr<xpl::symbol> arg = _symtab.find(decl);
+      xpl::vardecl_node *decl =
+        dynamic_cast<xpl::vardecl_node*>(node->arguments()->node(ix));
+      std::shared_ptr<xpl::symbol> arg = _symtab.find(decl->name());
       if (arg) throw "'" + arg->name() + "' already declared";
       auto symbol = std::make_shared<xpl::symbol>(
         decl->type(), decl->name(), decl->scope(), false, false, _args_offset);
@@ -380,7 +377,7 @@ void xpl::postfix_writer::do_function_node(xpl::function_node * const node, int 
     xpl::vardecl_node *decl = dynamic_cast<xpl::vardecl_node*>(decls->node(ix));
     xpl::var_node *var  = dynamic_cast<xpl::var_node*>(decls->node(ix));
     std::shared_ptr<xpl::symbol> param =
-      _symtab.find_local(var ? var->name() : decl->name())
+      _symtab.find_local(var ? var->name() : decl->name());
     if (param) throw param->name() + " already declared";
 
     stack_size += var ? var->type()->size() : decl->type()->size();
@@ -388,8 +385,10 @@ void xpl::postfix_writer::do_function_node(xpl::function_node * const node, int 
 
   _pf.ENTER(stack_size + node->type()->size());
 
-
-
+  if (node->body()->declarations())
+    node->body()->declarations()->accept(this, lvl);
+  if (node->body()->statements())
+    node->body()->statements()->accept(this, lvl);
 
   _symtab.pop();
 
@@ -421,7 +420,7 @@ void xpl::postfix_writer::do_evaluation_node(xpl::evaluation_node * const node, 
 void xpl::postfix_writer::do_rvalue_node(cdk::rvalue_node * const node, int lvl) {
   ASSERT_SAFE_EXPRESSIONS;
   node->lvalue()->accept(this, lvl);
-  if (node->type()->name == basic_type::TYPE_DOUBLE)
+  if (node->type()->name() == basic_type::TYPE_DOUBLE)
     _pf.DLOAD();
   else
     _pf.LOAD();
