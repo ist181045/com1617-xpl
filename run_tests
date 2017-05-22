@@ -5,26 +5,68 @@ PROJ="$PWD" # Project home
 SRCDIR="$PROJ/src"     # Sources directory (presumably the home to the Makefile)
 TESTDIR="$PROJ/tests"  # Tests directory   (expected in here too)
 RESDIR="$PROJ/results" # Results directory (test results, per target)
-if [ ! -d "$RESDIR" ]; then mkdir -p "$RESDIR/xml"; fi
 
+SUITE=""     # suite prefix (all, by default)
+TARGET="asm" # default target is asm
+
+while test -n "$1"; do
+  case "$1" in
+    xml|asm)
+      TARGET="$1"
+      shift
+      ;;
+    *)
+      SUITE="$1"
+	  shift
+      ;;
+  esac
+done
+
+mkdir -p "$RESDIR/$TARGET"
+
+if [ $TARGET = "xml" ]; then
+  mkdir -p "$RESDIR/xml/img"
+else
+  mkdir -p "$RESDIR/asm/out"
+fi
 
 # Setup
 # Compile the compiler, if need be
 cd "$SRCDIR"
 echo -n "Compiling xpl.. "
-make >/dev/null 2>&1
-if [ $? -ne 0 ]; then echo "KO" && exit 1; else echo "OK"; fi
+make >/dev/null
+if [ $? -ne 0 ]; then
+  echo "KO"
+  exit 1
+else
+  echo "OK"
+fi
 
 # Run tests
-for i in `ls $TESTDIR/*.xpl`; do
+cd "$RESDIR/$TARGET" # change dir for ease of use
+for i in $(ls "$TESTDIR/$SUITE"*.xpl); do
   test_name="$(basename $i)"
   test_name="${test_name%.xpl}"
 
   echo "Running $test_name.."
-  $SRCDIR/xpl -o "$RESDIR/xml/$test_name.xml" $i
+  "$SRCDIR"/xpl --target $TARGET -o "$test_name.$TARGET" $i
 
-  java -cp "$SRCDIR/xml2dot.jar" xml2dot.xml2dot "$RESDIR/xml/$test_name.xml"
-  ps aux|grep dotty|head -n1|kill `awk '{print $2}'`
-  dot -Tpng -o "$RESDIR/xml/$test_name.png" "$RESDIR/xml/$test_name.xml.dot"
+  if [ $TARGET = "xml" ]; then
+    java -cp "$SRCDIR"/xml2dot.jar xml2dot.xml2dot "$test_name.xml"
+    ps aux | grep dotty | head -n1 | kill $(awk '{print $2}')
+    dot -Tpng -o "img/$test_name.png" "$test_name.xml.dot"
+  else
+  	yasm -felf32 -o "$test_name.o" "$test_name.asm"
+	ld -melf_i386 -o "$test_name" "$test_name.o" -lrts
+	chmod +x "$test_name"
+	./$test_name > "out/$test_name.out"
+	rm -f "$test_name"
+  fi
 done
+
+if [ $TARGET = "xml" ]; then
+  rm -rf *.xml.dot
+else
+  rm -rf *.o
+fi
 
