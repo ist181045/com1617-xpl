@@ -337,32 +337,70 @@ void xpl::postfix_writer::do_assignment_node(cdk::assignment_node * const node, 
 
 void xpl::postfix_writer::do_fundecl_node(xpl::fundecl_node * const node, int lvl) {}
 void xpl::postfix_writer::do_function_node(xpl::function_node * const node, int lvl) {
-  std::string id = node->name();
+  const std::string &id = node->name();
   std::shared_ptr<xpl::symbol> symbol = _symtab.find(id);
-  if (id == "xpl") id = "_main";
+  if (symbol) {
+    if (symbol->isdefined())
+      throw "'" + id + "' already defined";
+    else if (symbol->scope() == 2) // use
+      throw "Can't define external function '" + id + "'";
+  } else if (id == "_main") {
+    throw std::string("Can't use that name, reserved");
+  }
 
-  _pf.TEXT();
+  change_segment(TEXT);
   _pf.ALIGN();
-  _pf.GLOBAL(id, _pf.FUNC());
-  _pf.LABEL(id);
+  if (node->scope() > 0)
+    _pf.GLOBAL(id == "xpl" ? "_main" : id, _pf.FUNC());
+  _pf.LABEL(id == "xpl" ? "_main" : id);
+  
+  _local_offset -= node->type()->size(); // if procedure, 0
+  symbol = std::make_shared<xpl::symbol>(node->type(), id, node->scope(),
+    true, true, _local_offset, true, node->arguments());
+  _symtab.insert(id, symbol); // register in global namespace
+
+  // function's parameters
+  _symtab.push();
+  _symtab.insert(id, symbol); // known inside this context!
+  if (node->arguments()->size() > 0) {
+    _args_offset = 8;
+    for (size_t ix = 0; ix < node->arguments()->size(); ++ix) {
+      xpl::vardecl_node decl = node->arguments()->node(ix);
+      std::shared_ptr<xpl::symbol> arg = _symtab.find(decl);
+      if (arg) throw "'" + arg->name() + "' already declared";
+      auto symbol = std::make_shared<xpl::symbol>(
+        decl->type(), decl->name(), decl->scope(), false, false, _args_offset);
+      _args_offset += decl->type()->size();
+    }
+  }
   
   cdk::sequence_node *decls = node->body()->declarations();
-  int stack_size = 0;
+  size_t stack_size = -node->type()->size();
   for (size_t ix = 0; ix < decls->size(); ++ix) {
     xpl::vardecl_node *decl = dynamic_cast<xpl::vardecl_node*>(decls->node(ix));
     xpl::var_node *var  = dynamic_cast<xpl::var_node*>(decls->node(ix));
+    std::shared_ptr<xpl::symbol> param =
+      _symtab.find_local(var ? var->name() : decl->name())
+    if (param) throw param->name() + " already declared";
 
     stack_size += var ? var->type()->size() : decl->type()->size();
   }
-  _pf.ENTER(stack_size);
 
-  node->body()->accept(this, lvl);
+  _pf.ENTER(stack_size + node->type()->size());
+
+
+
+
+  _symtab.pop();
 
   // end the main function
+  _pf.ALIGN();
+  _pf.LABEL(id + "ret");
   _pf.INT(0);
   _pf.POP();
   _pf.LEAVE();
   _pf.RET();
+  previous_segment();
 }
 
 void xpl::postfix_writer::do_funcall_node(xpl::funcall_node * const node, int lvl) {}
@@ -378,6 +416,15 @@ void xpl::postfix_writer::do_evaluation_node(xpl::evaluation_node * const node, 
   ASSERT_SAFE_EXPRESSIONS;
   node->argument()->accept(this, lvl); // determine the value
   _pf.TRASH(node->argument()->type()->size());
+}
+
+void xpl::postfix_writer::do_rvalue_node(cdk::rvalue_node * const node, int lvl) {
+  ASSERT_SAFE_EXPRESSIONS;
+  node->lvalue()->accept(this, lvl);
+  if (node->type()->name == basic_type::TYPE_DOUBLE)
+    _pf.DLOAD();
+  else
+    _pf.LOAD();
 }
 
 void xpl::postfix_writer::do_print_node(xpl::print_node * const node, int lvl) {

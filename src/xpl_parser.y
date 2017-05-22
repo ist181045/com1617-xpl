@@ -1,5 +1,5 @@
 %{
-// $Id: xpl_parser.y,v 1.31 2017/05/20 16:28:58 ist181045 Exp $
+// $Id: xpl_parser.y,v 1.32 2017/05/22 11:18:50 ist181045 Exp $
 //-- don't change *any* of these: if you do, you'll break the compiler.
 #include <cdk/compiler.h>
 #include "ast/all.h"
@@ -237,7 +237,6 @@ iter : tWHILE '(' expr ')' stmt                                { $$ = new xpl::w
 
     /* Expressions ---------------------------------------------------------- */
 expr : lit                       { $$ = $1; }
-     | lval                      { $$ = $1; }
      | '(' expr ')'              { $$ = $2; }
      | '[' expr ']'              { $$ = new xpl::malloc_node(LINE, $2);         }
      | '@'                       { $$ = new xpl::read_node(LINE);               }
@@ -260,6 +259,7 @@ expr : lit                       { $$ = $1; }
      | lval '?'                  { $$ = new xpl::address_of_node(LINE, $1);     }
      | lval '=' expr             { $$ = new cdk::assignment_node(LINE, $1, $3); }
 
+     | lval                      { $$ = new cdk::rvalue_node(LINE, $1); }
      | tIDENTIFIER '(' exprs ')' { $$ = new xpl::funcall_node(LINE, *$1, $3); delete $1; }
      ;
 

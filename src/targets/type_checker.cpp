@@ -1,4 +1,4 @@
-// $Id: type_checker.cpp,v 1.42 2017/05/22 09:29:04 ist181045 Exp $ -*- c++ -*-
+// $Id: type_checker.cpp,v 1.43 2017/05/22 11:18:50 ist181045 Exp $ -*- c++ -*-
 #include <string>
 #include "targets/type_checker.h"
 #include "ast/all.h"  // automatically generated
@@ -381,6 +381,16 @@ void xpl::type_checker::do_assignment_node(cdk::assignment_node * const node, in
     node->type(create_type(node->lvalue()->type()));
   else
     throw std::string("incompatible types in assignment expression");
+}
+
+void xpl::type_checker::do_rvalue_node(cdk::rvalue_node * const node, int lvl) {
+  ASSERT_UNSPEC;
+  try {
+    node->lvalue()->accept(this, lvl);
+    node->type(node->lvalue()->type());
+  } catch (const std::string &id) {
+    throw "'" + id + "' was never declared";
+  }
 }
 
 void xpl::type_checker::do_evaluation_node(xpl::evaluation_node * const node, int lvl) {
