@@ -1,4 +1,4 @@
-// $Id: type_checker.cpp,v 1.40 2017/05/21 19:06:48 ist181045 Exp $ -*- c++ -*-
+// $Id: type_checker.cpp,v 1.41 2017/05/22 00:09:56 ist181045 Exp $ -*- c++ -*-
 #include <string>
 #include "targets/type_checker.h"
 #include "ast/all.h"  // automatically generated
@@ -409,8 +409,8 @@ void xpl::type_checker::do_sweep_up_node(xpl::sweep_up_node * const node, int lv
   assign->accept(this, lvl);
 
   node->upper()->accept(this, lvl + 2);
-  auto *le = new cdk::le_node(node->lineno(), node->initial(), node->upper());
-  le->accept(this, lvl);
+  cdk::le_node le(node->lineno(), node->lvalue(), node->upper());
+  le.accept(this, lvl);
 
   node->step()->accept(this, lvl + 2);
   if (!check_compatible(node->lvalue(), node->step()))
@@ -424,8 +424,8 @@ void xpl::type_checker::do_sweep_down_node(xpl::sweep_down_node * const node, in
   assign->accept(this, lvl);
 
   node->lower()->accept(this, lvl + 2);
-  auto *ge = new cdk::ge_node(node->lineno(), node->initial(), node->lower());
-  ge->accept(this, lvl);
+  cdk::ge_node ge(node->lineno(), node->lvalue(), node->lower());
+  ge.accept(this, lvl);
 
   node->step()->accept(this, lvl + 2);  
   if(!check_compatible(node->lvalue(), node->step()))
