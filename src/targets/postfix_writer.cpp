@@ -335,6 +335,7 @@ void xpl::postfix_writer::do_assignment_node(cdk::assignment_node * const node, 
 
 //---------------------------------------------------------------------------
 
+void xpl::postfix_writer::do_fundecl_node(xpl::fundecl_node * const node, int lvl) {}
 void xpl::postfix_writer::do_function_node(xpl::function_node * const node, int lvl) {
   std::string id = node->name();
   std::shared_ptr<xpl::symbol> symbol = _symtab.find(id);
@@ -364,6 +365,9 @@ void xpl::postfix_writer::do_function_node(xpl::function_node * const node, int 
   _pf.RET();
 }
 
+void xpl::postfix_writer::do_funcall_node(xpl::funcall_node * const node, int lvl) {}
+
+void xpl::postfix_writer::do_vardecl_node(xpl::vardecl_node * const node, int lvl) {}
 void xpl::postfix_writer::do_var_node(xpl::var_node * const node, int lvl) {
   node->value()->accept(this, lvl);
 }
@@ -452,8 +456,8 @@ void xpl::postfix_writer::do_sweep_up_node(xpl::sweep_up_node * const node, int 
   _pf.ALIGN();
   _pf.LABEL(mklbl(lbl3));
 
-  _next_labels->push(mklbl(lbl2));
-  _stop_labels->push(mklbl(lbl3));
+  _next_labels->push(lbl2);
+  _stop_labels->push(lbl3);
 
   node->block()->accept(this, lvl);
 }
@@ -477,8 +481,8 @@ void xpl::postfix_writer::do_sweep_down_node(xpl::sweep_down_node * const node, 
   _pf.ALIGN();
   _pf.LABEL(mklbl(lbl3));
 
-  _next_labels->push(mklbl(lbl2));
-  _stop_labels->push(mklbl(lbl3));
+  _next_labels->push(lbl2);
+  _stop_labels->push(lbl3);
 
   node->block()->accept(this, lvl);
 }
@@ -510,12 +514,25 @@ void xpl::postfix_writer::do_if_else_node(xpl::if_else_node * const node, int lv
 
 //---------------------------------------------------------------------------
 
-void xpl::postfix_writer::do_block_node(xpl::block_node * const node, int lvl) {}
-void xpl::postfix_writer::do_next_node(xpl::next_node * const node, int lvl) {}
-void xpl::postfix_writer::do_stop_node(xpl::stop_node * const node, int lvl) {}
-void xpl::postfix_writer::do_vardecl_node(xpl::vardecl_node * const node, int lvl) {}
-void xpl::postfix_writer::do_fundecl_node(xpl::fundecl_node * const node, int lvl) {}
-void xpl::postfix_writer::do_return_node(xpl::return_node * const node, int lvl) {}
+void xpl::postfix_writer::do_block_node(xpl::block_node * const node, int lvl) {
+  _symtab.push();
+  node->declarations()->accept(this, lvl);
+  node->statements()->accept(this, lvl);
+  _symtab.pop();
+}
+
+void xpl::postfix_writer::do_next_node(xpl::next_node * const node, int lvl) {
+  _pf.JMP(mklbl(_next_labels->top()));
+}
+
+void xpl::postfix_writer::do_stop_node(xpl::stop_node * const node, int lvl) {
+  _pf.JMP(mklbl(_stop_labels->top()));
+}
+
+void xpl::postfix_writer::do_return_node(xpl::return_node * const node, int lvl) {
+  _pf.JMP(_curr_function->name() + "ret");
+}
+
 
 //---------------------------------------------------------------------------
 
@@ -550,7 +567,6 @@ void xpl::postfix_writer::do_identity_node(xpl::identity_node * const node, int 
     _pf.DUP();
 }
 
-void xpl::postfix_writer::do_funcall_node(xpl::funcall_node * const node, int lvl) {}
 void xpl::postfix_writer::do_address_of_node(xpl::address_of_node * const node, int lvl) {
   ASSERT_SAFE_EXPRESSIONS;
   node->argument()->accept(this, lvl);

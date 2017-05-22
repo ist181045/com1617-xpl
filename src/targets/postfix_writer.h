@@ -44,8 +44,8 @@ namespace xpl {
     std::set<std::string> *_externs;
 
     // label stacks for nexts and stops
-    std::stack<std::string> *_next_labels;
-    std::stack<std::string> *_stop_labels;
+    std::stack<int> *_next_labels;
+    std::stack<int> *_stop_labels;
 
   public:
     postfix_writer(std::shared_ptr<cdk::compiler> compiler, cdk::symbol_table<xpl::symbol> &symtab,
@@ -54,8 +54,8 @@ namespace xpl {
         _local_offset(0), _args_offset(0), _is_var_public(false),
         _curr_function(nullptr), _old_segment(NONE), _curr_segment(NONE) {
       _externs = new std::set<std::string>();
-      _next_labels = new std::stack<std::string>();
-      _stop_labels = new std::stack<std::string>();
+      _next_labels = new std::stack<int>();
+      _stop_labels = new std::stack<int>();
     }
 
   public:
