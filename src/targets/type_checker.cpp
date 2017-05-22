@@ -1,4 +1,4 @@
-// $Id: type_checker.cpp,v 1.44 2017/05/22 14:42:19 ist181045 Exp $ -*- c++ -*-
+// $Id: type_checker.cpp,v 1.45 2017/05/22 15:41:12 ist181045 Exp $ -*- c++ -*-
 #include <string>
 #include "targets/type_checker.h"
 #include "ast/all.h"  // automatically generated
@@ -97,11 +97,11 @@ bool check_compatible(basic_type * const target, basic_type * const other) {
 
 /* Extra check for if other is a null_node. */
 bool check_compatible(cdk::expression_node * const target, cdk::expression_node * const other) {
-  if (!check_compatible(target->type(), other->type())
-      && target->type()->name() == basic_type::TYPE_POINTER) {
+  bool res = check_compatible(target->type(), other->type());
+  if (!res && target->type()->name() == basic_type::TYPE_POINTER) {
     return dynamic_cast<xpl::null_node*>(other);
   }
-  return false;
+  return res;
 }
 
 /* Checks and processes the types of two expression nodes. */
@@ -364,10 +364,10 @@ void xpl::type_checker::do_assignment_node(cdk::assignment_node * const node, in
   try {
     node->lvalue()->accept(this, lvl + 2);
   } catch (const std::string &id) {
-    throw std::string(id + " was never declared");
+    throw "'" + id + "' was never declared";
   }
-  node->rvalue()->accept(this, lvl + 2);
 
+  node->rvalue()->accept(this, lvl + 2);
   if (node->lvalue()->type()->name() == basic_type::TYPE_STRING
       || node->rvalue()->type()->name() == basic_type::TYPE_STRING) {
     default_if_unspec(node->lvalue()->type(), node->rvalue()->type());
@@ -413,10 +413,8 @@ void xpl::type_checker::do_read_node(xpl::read_node * const node, int lvl) {
 //===========================================================================
 
 void xpl::type_checker::do_sweep_up_node(xpl::sweep_up_node * const node, int lvl) {
-  node->lvalue()->accept(this, lvl + 2);
-  node->initial()->accept(this, lvl + 2);
-  auto *assign = new cdk::assignment_node(node->lineno(), node->lvalue(), node->initial());
-  assign->accept(this, lvl);
+  cdk::assignment_node assign(node->lineno(), node->lvalue(), node->initial());
+  assign.accept(this, lvl);
 
   node->upper()->accept(this, lvl + 2);
   cdk::le_node le(node->lineno(), node->lvalue(), node->upper());
@@ -428,10 +426,8 @@ void xpl::type_checker::do_sweep_up_node(xpl::sweep_up_node * const node, int lv
 }
 
 void xpl::type_checker::do_sweep_down_node(xpl::sweep_down_node * const node, int lvl) {
-  node->lvalue()->accept(this, lvl + 2);
-  node->initial()->accept(this, lvl + 2);
-  auto *assign = new cdk::assignment_node(node->lineno(), node->lvalue(), node->initial());
-  assign->accept(this, lvl);
+  cdk::assignment_node assign(node->lineno(), node->lvalue(), node->initial());
+  assign.accept(this, lvl);
 
   node->lower()->accept(this, lvl + 2);
   cdk::ge_node ge(node->lineno(), node->lvalue(), node->lower());
@@ -481,7 +477,7 @@ void xpl::type_checker::do_index_node(xpl::index_node * const node, int lvl) {
 void xpl::type_checker::do_identifier_node(cdk::identifier_node * const node, int lvl) {
   ASSERT_UNSPEC;
   const std::string &id = node->name();
-  std::shared_ptr<xpl::symbol> symbol = _symtab.find(id);
+  auto symbol = _symtab.find(id);
 
   if (!symbol)
     throw id;
@@ -489,9 +485,19 @@ void xpl::type_checker::do_identifier_node(cdk::identifier_node * const node, in
     node->type(symbol->type());
 }
 
+void xpl::type_checker::do_vardecl_node(xpl::vardecl_node * const node, int lvl) {
+  const std::string &id = node->name();
+  auto symbol = _symtab.find_local(id);
+  if (symbol)
+    throw "'" + id + "' was already declared";
+  
+  symbol = std::make_shared<xpl::symbol>(node->type(), id, node->scope());
+  _symtab.insert(id, symbol);
+}
+
 void xpl::type_checker::do_var_node(xpl::var_node * const node, int lvl) {
   const std::string &id = node->name();
-  std::shared_ptr<xpl::symbol> symbol = _symtab.find_local(id);
+  auto symbol = _symtab.find_local(id);
   if (symbol) {
     throw "'" + id + "' was already declared";
   }
@@ -502,14 +508,14 @@ void xpl::type_checker::do_var_node(xpl::var_node * const node, int lvl) {
         && !dynamic_cast<xpl::null_node*>(node->value()))
       throw std::string("incompatible types in variable definition");
   }
-  symbol = std::make_shared<xpl::symbol>(node->type(), node->name(),
-    node->scope(), false, true);
+  symbol = std::make_shared<xpl::symbol>(node->type(), id, node->scope(),
+    false, true);
   _symtab.insert(id, symbol);
 }
 
 void xpl::type_checker::do_fundecl_node(xpl::fundecl_node * const node, int lvl) {
   const std::string &id = node->name();
-  std::shared_ptr<xpl::symbol> symbol = _symtab.find(id);
+  auto symbol = _symtab.find(id);
   if (symbol)
     throw "'" + id + "' was already declared";
   
@@ -525,7 +531,7 @@ void xpl::type_checker::do_fundecl_node(xpl::fundecl_node * const node, int lvl)
 
 void xpl::type_checker::do_function_node(xpl::function_node * const node, int lvl) {
   const std::string &id = node->name();
-  std::shared_ptr<xpl::symbol> symbol = _symtab.find(id);
+  auto symbol = _symtab.find(id);
   if (symbol) {
     if (symbol->isdefined())
       throw "'" + id + "' was alread defined";
@@ -561,7 +567,7 @@ void xpl::type_checker::do_function_node(xpl::function_node * const node, int lv
 
 void xpl::type_checker::do_funcall_node(xpl::funcall_node * const node, int lvl) {
   const std::string &id = node->name();
-  std::shared_ptr<xpl::symbol> symbol = _symtab.find(id);
+  auto symbol = _symtab.find(id);
   if (!symbol)
     throw "'" + id + "' function wasn't declared";
   else if (!symbol->isfunction())
