@@ -1,4 +1,3 @@
-// $Id: symbol.h,v 1.3 2017/05/21 16:04:34 ist181045 Exp $ -*- c++ -*-
 #ifndef __XPL_SEMANTICS_SYMBOL_H__
 #define __XPL_SEMANTICS_SYMBOL_H__
 

@@ -1,4 +1,3 @@
-// $Id: address_of_node.h,v 1.5 2017/04/11 22:45:15 ist181045 Exp $ -*- c++ -*-
 #ifndef __XPL_ADDRESSOFNODE_H__
 #define __XPL_ADDRESSOFNODE_H__
 

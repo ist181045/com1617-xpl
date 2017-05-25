@@ -1,4 +1,3 @@
-// $Id: block_node.h,v 1.6 2017/04/15 12:01:32 ist181045 Exp $ -*- c++ -*-
 #ifndef __XPL_BLOCKNODE_H__
 #define __XPL_BLOCKNODE_H__
 

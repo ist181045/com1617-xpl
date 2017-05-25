@@ -1,4 +1,3 @@
-// $Id: funcall_node.h,v 1.5 2017/05/17 17:06:44 ist181045 Exp $ -*- c++ -*-
 #ifndef __XPL_FUNCALLNODE_H__
 #define __XPL_FUNCALLNODE_H__
 

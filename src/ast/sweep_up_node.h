@@ -1,4 +1,3 @@
-// $Id: sweep_up_node.h,v 1.6 2017/04/15 11:56:50 ist181045 Exp $ -*- c++ -*-
 #ifndef __XPL_SWEEPUPNODE_H__
 #define __XPL_SWEEPUPNODE_H__
 

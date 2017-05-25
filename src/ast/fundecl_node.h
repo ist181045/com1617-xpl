@@ -1,4 +1,3 @@
-// $Id: fundecl_node.h,v 1.7 2017/05/17 17:06:44 ist181045 Exp $ -*- c++ -*-
 #ifndef __XPL_FUNDECLNODE_H__
 #define __XPL_FUNDECLNODE_H__
 

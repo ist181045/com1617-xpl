@@ -1,4 +1,3 @@
-// $Id: vardecl_node.h,v 1.11 2017/05/17 17:06:44 ist181045 Exp $ -*- c++ -*-
 #ifndef __XPL_VARDECLNODE_H__
 #define __XPL_VARDECLNODE_H__
 

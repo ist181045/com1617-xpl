@@ -1,7 +1,6 @@
 %option c++ yyclass="xpl_scanner" outfile="xpl_scanner.cpp"
 %option stack noyywrap yylineno 8bit
 %{
-/* $Id: xpl_scanner.l,v 1.30 2017/05/15 15:04:51 ist181045 Exp $ */
 // make relevant includes before including the parser's tab file
 #include <string>
 #include <sstream>

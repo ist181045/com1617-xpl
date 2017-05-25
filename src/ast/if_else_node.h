@@ -1,4 +1,3 @@
-// $Id: if_else_node.h,v 1.3 2017/04/11 22:45:15 ist181045 Exp $ -*- c++ -*-
 #ifndef __CDK_IFELSENODE_H__
 #define __CDK_IFELSENODE_H__
 

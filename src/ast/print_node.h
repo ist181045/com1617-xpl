@@ -1,4 +1,3 @@
-// $Id: print_node.h,v 1.4 2017/04/15 12:04:13 ist181045 Exp $ -*- c++ -*-
 #ifndef __XPL_PRINTNODE_H__
 #define __XPL_PRINTNODE_H__
 

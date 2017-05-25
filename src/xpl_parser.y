@@ -1,5 +1,4 @@
 %{
-// $Id: xpl_parser.y,v 1.32 2017/05/22 11:18:50 ist181045 Exp $
 //-- don't change *any* of these: if you do, you'll break the compiler.
 #include <cdk/compiler.h>
 #include "ast/all.h"

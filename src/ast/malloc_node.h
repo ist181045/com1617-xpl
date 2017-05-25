@@ -1,4 +1,3 @@
-// $Id: malloc_node.h,v 1.4 2017/04/11 22:36:30 ist181045 Exp $ -*- c++ -*-
 #ifndef __XPL_MALLOCNODE_H__
 #define __XPL_MALLOCNODE_H__ 
 
