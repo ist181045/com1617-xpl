@@ -39,8 +39,8 @@ EXPROPS    [-+()[\]?*/%<>~&|=!@]
 
 %%
 
-    /* Lexical conventions (3) ============================================== */
-    /* Comments (3.2) ------------------------------------------------------- */
+    /* Lexical conventions (3) ========================================== */
+    /* Comments (3.2) --------------------------------------------------- */
     /* Multi-line nested comments */
 "/*"                   yy_push_state(X_COMMENT);
 <X_COMMENT>"/*"        yy_push_state(X_COMMENT);
@@ -52,7 +52,7 @@ EXPROPS    [-+()[\]?*/%<>~&|=!@]
 "//".*$ ;
 
 
-    /* 3.3 Keywords --------------------------------------------------------- */
+    /* 3.3 Keywords ----------------------------------------------------- */
     /* Literals */
 "int"                  yylval.t = new basic_type(4, basic_type::TYPE_INT);    return tTYPEINTEGER;
 "real"                 yylval.t = new basic_type(8, basic_type::TYPE_DOUBLE); return tTYPEREAL;
@@ -81,7 +81,7 @@ EXPROPS    [-+()[\]?*/%<>~&|=!@]
 "return"               return tRETURN;
 
 
-    /* 3.5 Expression Operators --------------------------------------------- */
+    /* 3.5 Expression Operators ----------------------------------------- */
     /* Comparative and equalty */
 ">="                   return tGE;
 "<="                   return tLE;
@@ -89,15 +89,15 @@ EXPROPS    [-+()[\]?*/%<>~&|=!@]
 "!="                   return tNE;
 
 
-    /* 3.6 Delimiters and terminators --------------------------------------- */
+    /* 3.6 Delimiters and terminators ----------------------------------- */
 "!!"                   return tPRINTLN;
 
 
-    /* 3.7 Identifiers (names) ---------------------------------------------- */
+    /* 3.7 Identifiers (names) ------------------------------------------ */
 [A-Za-z_][A-Za-z0-9_]* yylval.s = new std::string(yytext); return tIDENTIFIER;
 
 
-    /* 3.8 Literals --------------------------------------------------------- */
+    /* 3.8 Literals ----------------------------------------------------- */
     /* 3.8.1 Integers */
 0+{INT}                yyerror("Integers mustn\'t start with 0");
 0|{INT}|{HEX}          {
@@ -143,7 +143,7 @@ EXPROPS    [-+()[\]?*/%<>~&|=!@]
 
 
 
-    /* 7 Expressions ======================================================== */
+    /* 7 Expressions ==================================================== */
     /* Single characters (see table in 7) */
 {EXPROPS}|[{}:;,.]     return *yytext;
 

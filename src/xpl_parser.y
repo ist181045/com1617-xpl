@@ -10,7 +10,7 @@
 //-- don't change *any* of these --- END!
 %}
 
-    /* 1 Data Types ========================================================= */
+    /* 1 Data Types ===================================================== */
 %union {
   int          i;  /* integer value */
   double       d;  /* double/real value */
@@ -40,8 +40,8 @@
 
 
 
-    /* 3 Lexical Conventions ================================================ */
-    /* 3.3 Keywords (mixed with some precedence rules) ---------------------- */
+    /* 3 Lexical Conventions ============================================ */
+    /* 3.3 Keywords (mixed with some precedence rules) ------------------ */
     /* Literals */
 %token <t> tTYPEINTEGER tTYPEREAL tTYPESTRING
 
@@ -63,12 +63,12 @@
 %token tSTOP tNEXT tRETURN
 
 
-    /* 3.6 Delimiters and terminators --------------------------------------- */
+    /* 3.6 Delimiters and terminators ----------------------------------- */
 %token tPRINTLN
 
 
 
-    /* 4 Syntax ============================================================= */
+    /* 4 Syntax ========================================================= */
 %type <s> str
 %type <t> type
 
@@ -81,7 +81,7 @@
 
 
 
-    /* 7 Expressions ======================================================== */
+    /* 7 Expressions ==================================================== */
 %right    '='               /* Assignment       */
 %left     '|'               /* Logical 'or'     */
 %left     '&'               /* Logical 'and'    */
@@ -98,8 +98,8 @@
 %}
 %%
 
-    /* 4 Syntax ============================================================= */
-    /* File ----------------------------------------------------------------- */
+    /* 4 Syntax ========================================================= */
+    /* File ------------------------------------------------------------- */
 file : decls      { compiler->ast($1); }
      | /* eps */  { compiler->ast(new cdk::sequence_node(LINE)); }
      ;
@@ -109,13 +109,13 @@ decls: decl       { $$ = new cdk::sequence_node(LINE, $1);     }
      ;
 
 
-    /* Declaration ---------------------------------------------------------- */
+    /* Declaration ------------------------------------------------------ */
 decl : gvar ';'   { $$ = $1; }
      | func       { $$ = $1; }
      ;
 
 
-    /* Variable ------------------------------------------------------------- */
+    /* Variable --------------------------------------------------------- */
 gvar : tPUBLIC type tIDENTIFIER          { $$ = new xpl::vardecl_node(LINE, $1, $2, *$3); delete $3; }
      | tPUBLIC type tIDENTIFIER '=' expr { $$ = new xpl::var_node(LINE, $1, $2, *$3, $5); delete $3; }
      | tUSE type tIDENTIFIER             { $$ = new xpl::vardecl_node(LINE, $1, $2, *$3); delete $3; }
@@ -127,7 +127,7 @@ var  : type tIDENTIFIER          { $$ = new xpl::vardecl_node(LINE, 0, $1, *$2);
      ;
 
 
-    /* Function ------------------------------------------------------------- */
+    /* Function --------------------------------------------------------- */
 func : tPUBLIC tPROCEDURE tIDENTIFIER '(' args ')'        { $$ = new xpl::fundecl_node (LINE, $1, $2, *$3, $5);         delete $3; }
      | tPUBLIC tPROCEDURE tIDENTIFIER '(' args ')' body   { $$ = new xpl::function_node(LINE, $1, $2, *$3, $5, $7);     delete $3; }
      | tPUBLIC type tIDENTIFIER '(' args ')'              { $$ = new xpl::fundecl_node (LINE, $1, $2, *$3, $5);         delete $3; }
@@ -171,12 +171,12 @@ str  : tSTRING     { $$ = $1; }
      ;
 
 
-    /* Body ----------------------------------------------------------------- */
+    /* Body ------------------------------------------------------------- */
 body : blck      { $$ = $1; }
      ;
 
 
-    /* Block ---------------------------------------------------------------- */
+    /* Block ------------------------------------------------------------ */
 blck : '{' vars stmts '}'   { $$ = new xpl::block_node(LINE, $2, $3); }
      | '{' vars  '}'        { $$ = new xpl::block_node(LINE, $2, new cdk::sequence_node(LINE)); }
      | '{' stmts '}'        { $$ = new xpl::block_node(LINE, new cdk::sequence_node(LINE), $2); }
@@ -201,7 +201,7 @@ stmts: stmt                 { $$ = new cdk::sequence_node(LINE, $1);     }
      ;
 
 
-    /* Statements ----------------------------------------------------------- */
+    /* Statements ------------------------------------------------------- */
 stmt : expr ';'      { $$ = new xpl::evaluation_node(LINE, $1);  }
      | expr '!'      { $$ = new xpl::print_node(LINE, $1);       }
      | expr tPRINTLN { $$ = new xpl::print_node(LINE, $1, true); }
@@ -234,7 +234,7 @@ iter : tWHILE '(' expr ')' stmt                                { $$ = new xpl::w
      ;
 
 
-    /* Expressions ---------------------------------------------------------- */
+    /* Expressions ------------------------------------------------------ */
 expr : lit                       { $$ = $1; }
      | '(' expr ')'              { $$ = $2; }
      | '[' expr ']'              { $$ = new xpl::malloc_node(LINE, $2);         }
