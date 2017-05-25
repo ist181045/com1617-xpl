@@ -4,6 +4,7 @@ CVS
 CVSROOT
 .cvsignore
 
+
 # exec + parser + scanner
 
 xpl
@@ -12,17 +13,19 @@ xpl_parser.tab.h
 xpl_parser.tab.c
 xpl_scanner.cpp
 
+
 # ast defs
 
 **/ast/all.h
+
 
 # JetBrains CLion
 .idea/
 CMakeLists.txt
 cmake-build-debug/
 
+
 # Others
 
 *.o
-com-notes.todo
 results/
