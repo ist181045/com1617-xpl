@@ -141,13 +141,13 @@ void xpl::type_checker::do_sequence_node(cdk::sequence_node * const node, int lv
 
 //===========================================================================
 
-void xpl::type_checker::do_double_node(cdk::double_node * const node, int lvl) {
-  ASSERT_UNSPEC;
-  node->type(new basic_type(8, basic_type::TYPE_DOUBLE));
-}
 void xpl::type_checker::do_integer_node(cdk::integer_node * const node, int lvl) {
   ASSERT_UNSPEC;
   node->type(new basic_type(4, basic_type::TYPE_INT));
+}
+void xpl::type_checker::do_double_node(cdk::double_node * const node, int lvl) {
+  ASSERT_UNSPEC;
+  node->type(new basic_type(8, basic_type::TYPE_DOUBLE));
 }
 void xpl::type_checker::do_string_node(cdk::string_node * const node, int lvl) {
   ASSERT_UNSPEC;
@@ -160,7 +160,7 @@ void xpl::type_checker::do_null_node(xpl::null_node * const node, int lvl) {
 
 //===========================================================================
 
-inline void xpl::type_checker::processUnaryExpression(cdk::unary_expression_node * const node, int lvl) {
+inline void xpl::type_checker::do_unary_expression(cdk::unary_expression_node * const node, int lvl) {
   ASSERT_UNSPEC;
   node->argument()->accept(this, lvl + 2);
   default_if_unspec(node->argument()->type());
@@ -179,32 +179,32 @@ inline void xpl::type_checker::processUnaryExpression(cdk::unary_expression_node
 }
 
 void xpl::type_checker::do_neg_node(cdk::neg_node * const node, int lvl) {
-  processUnaryExpression(node, lvl);
+  do_unary_expression(node, lvl);
 }
 void xpl::type_checker::do_not_node(cdk::not_node * const node, int lvl) {
-  processUnaryExpression(node, lvl);
+  do_unary_expression(node, lvl);
   if (node->type()->name() != basic_type::TYPE_INT)
     throw std::string("wrong type in argument of 'not' expression, expected "\
       "int");
   node->type(new basic_type(4, basic_type::TYPE_INT));
 }
 void xpl::type_checker::do_identity_node(xpl::identity_node * const node, int lvl) {
-  processUnaryExpression(node, lvl);
+  do_unary_expression(node, lvl);
 }
 
 //===========================================================================
 
-void xpl::type_checker::processBinaryExpression(cdk::binary_expression_node * const node, int lvl) {
+void xpl::type_checker::do_binary_expression(cdk::binary_expression_node * const node, int lvl) {
   ASSERT_UNSPEC;
   check_types(node->left(), node->right(), lvl);
 }
 
-inline void xpl::type_checker::processBinaryArithmeticExpression(cdk::binary_expression_node * const node, int lvl) {
-  processBinaryExpression(node, lvl);
+inline void xpl::type_checker::do_binary_arithmetic_expression(cdk::binary_expression_node * const node, int lvl) {
+  do_binary_expression(node, lvl);
 }
 
 void xpl::type_checker::do_add_node(cdk::add_node * const node, int lvl) {
-  processBinaryArithmeticExpression(node, lvl);
+  do_binary_arithmetic_expression(node, lvl);
 
   // additional pointer behavior restrictions
   basic_type *ltype = node->left()->type();
@@ -220,7 +220,7 @@ void xpl::type_checker::do_add_node(cdk::add_node * const node, int lvl) {
 }
 
 void xpl::type_checker::do_sub_node(cdk::sub_node * const node, int lvl) {
-  processBinaryArithmeticExpression(node, lvl);
+  do_binary_arithmetic_expression(node, lvl);
 
   // additional pointer behavior restrictions
   basic_type *ltype = node->left()->type();
@@ -240,7 +240,7 @@ void xpl::type_checker::do_sub_node(cdk::sub_node * const node, int lvl) {
 }
 
 void xpl::type_checker::do_mul_node(cdk::mul_node * const node, int lvl) {
-  processBinaryArithmeticExpression(node, lvl);
+  do_binary_arithmetic_expression(node, lvl);
   if (node->left()->type()->name() == basic_type::TYPE_POINTER
       || node->right()->type()->name() == basic_type::TYPE_POINTER)
     throw std::string("incompatible types, division doesn't support pointer "\
@@ -249,7 +249,7 @@ void xpl::type_checker::do_mul_node(cdk::mul_node * const node, int lvl) {
 }
 
 void xpl::type_checker::do_div_node(cdk::div_node * const node, int lvl) {
-  processBinaryArithmeticExpression(node, lvl);
+  do_binary_arithmetic_expression(node, lvl);
   if (node->left()->type()->name() == basic_type::TYPE_POINTER
       || node->right()->type()->name() == basic_type::TYPE_POINTER)
     throw std::string("incompatible types, multiplication doesn't support "\
@@ -258,7 +258,7 @@ void xpl::type_checker::do_div_node(cdk::div_node * const node, int lvl) {
 }
 
 void xpl::type_checker::do_mod_node(cdk::mod_node * const node, int lvl) {
-  processBinaryArithmeticExpression(node, lvl);
+  do_binary_arithmetic_expression(node, lvl);
   if (node->left()->type()->name() != basic_type::TYPE_INT
       || node->left()->type()->name() != basic_type::TYPE_INT)
     throw std::string("incompatible types, modulo (%%) only supports integer "\
@@ -268,8 +268,8 @@ void xpl::type_checker::do_mod_node(cdk::mod_node * const node, int lvl) {
 
 //---------------------------------------------------------------------------
 
-inline void xpl::type_checker::processBinaryComparisonExpression(cdk::binary_expression_node * const node, int lvl) {
-  processBinaryExpression(node, lvl);
+inline void xpl::type_checker::do_binary_comparison_expression(cdk::binary_expression_node * const node, int lvl) {
+  do_binary_expression(node, lvl);
   if (node->left()->type()->name() == basic_type::TYPE_POINTER
       || node->right()->type()->name() == basic_type::TYPE_POINTER)
     throw std::string("incompatible types in '"
@@ -279,40 +279,40 @@ inline void xpl::type_checker::processBinaryComparisonExpression(cdk::binary_exp
 }
 
 void xpl::type_checker::do_lt_node(cdk::lt_node * const node, int lvl) {
-  processBinaryComparisonExpression(node, lvl);
+  do_binary_comparison_expression(node, lvl);
 }
 
 void xpl::type_checker::do_le_node(cdk::le_node * const node, int lvl) {
-  processBinaryComparisonExpression(node, lvl);
+  do_binary_comparison_expression(node, lvl);
 }
 
 void xpl::type_checker::do_ge_node(cdk::ge_node * const node, int lvl) {
-  processBinaryComparisonExpression(node, lvl);
+  do_binary_comparison_expression(node, lvl);
 }
 
 void xpl::type_checker::do_gt_node(cdk::gt_node * const node, int lvl) {
-  processBinaryComparisonExpression(node, lvl);
+  do_binary_comparison_expression(node, lvl);
 }
 
 //---------------------------------------------------------------------------
 
-inline void xpl::type_checker::processBinaryEqualityExpression(cdk::binary_expression_node * const node, int lvl) {
-  processBinaryExpression(node, lvl);
+inline void xpl::type_checker::do_binary_equality_expression(cdk::binary_expression_node * const node, int lvl) {
+  do_binary_expression(node, lvl);
   node->type(new basic_type(4, basic_type::TYPE_INT));
 }
 
 void xpl::type_checker::do_eq_node(cdk::eq_node * const node, int lvl) {
-  processBinaryEqualityExpression(node, lvl);
+  do_binary_equality_expression(node, lvl);
 }
 
 void xpl::type_checker::do_ne_node(cdk::ne_node * const node, int lvl) {
-  processBinaryEqualityExpression(node, lvl);
+  do_binary_equality_expression(node, lvl);
 }
 
 //---------------------------------------------------------------------------
 
-inline void xpl::type_checker::processBinaryLogicalExpression(cdk::binary_expression_node * const node, int lvl) {
-  processBinaryExpression(node, lvl);
+inline void xpl::type_checker::do_binary_logical_expression(cdk::binary_expression_node * const node, int lvl) {
+  do_binary_expression(node, lvl);
   if (node->left()->type()->name() != basic_type::TYPE_INT
       || node->right()->type()->name() != basic_type::TYPE_INT)
     throw std::string("incompatible types in '"
@@ -322,11 +322,11 @@ inline void xpl::type_checker::processBinaryLogicalExpression(cdk::binary_expres
 }
 
 void xpl::type_checker::do_and_node(cdk::and_node * const node, int lvl) {
-  processBinaryLogicalExpression(node, lvl);
+  do_binary_logical_expression(node, lvl);
 }
 
 void xpl::type_checker::do_or_node(cdk::or_node * const node, int lvl) {
-  processBinaryLogicalExpression(node, lvl);
+  do_binary_logical_expression(node, lvl);
 }
 
 //===========================================================================
