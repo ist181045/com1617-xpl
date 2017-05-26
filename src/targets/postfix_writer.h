@@ -122,7 +122,7 @@ namespace xpl {
     void do_null_node(xpl::null_node * const node, int lvl);
 
   protected:
-    void processBinaryLogicalExpression(cdk::binary_expression_node * const node, int lvl);
+    void do_binary_logical_expression(cdk::binary_expression_node * const node, int lvl);
 
   public:
     void do_neg_node(cdk::neg_node * const node, int lvl);
