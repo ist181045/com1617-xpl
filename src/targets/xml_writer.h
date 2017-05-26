@@ -59,6 +59,7 @@ namespace xpl {
     void do_integer_node(cdk::integer_node * const node, int lvl);
     void do_double_node(cdk::double_node * const node, int lvl);
     void do_string_node(cdk::string_node * const node, int lvl);
+    void do_null_node(xpl::null_node * const node, int lvl);
 
   protected:
     void do_unary_expression(cdk::unary_expression_node * const node, int lvl);
@@ -66,6 +67,7 @@ namespace xpl {
   public:
     void do_neg_node(cdk::neg_node * const node, int lvl);
     void do_not_node(cdk::not_node * const node, int lvl);
+    void do_identity_node(xpl::identity_node * const node, int lvl);
 
   protected:
     void do_binary_expression(cdk::binary_expression_node * const node, int lvl);
@@ -76,55 +78,54 @@ namespace xpl {
     void do_mul_node(cdk::mul_node * const node, int lvl);
     void do_div_node(cdk::div_node * const node, int lvl);
     void do_mod_node(cdk::mod_node * const node, int lvl);
+
     void do_lt_node(cdk::lt_node * const node, int lvl);
     void do_le_node(cdk::le_node * const node, int lvl);
     void do_ge_node(cdk::ge_node * const node, int lvl);
     void do_gt_node(cdk::gt_node * const node, int lvl);
     void do_ne_node(cdk::ne_node * const node, int lvl);
     void do_eq_node(cdk::eq_node * const node, int lvl);
+    
     void do_and_node(cdk::and_node * const node, int lvl);
     void do_or_node(cdk::or_node * const node, int lvl);
 
+  public:
+    void do_address_of_node(xpl::address_of_node * const node, int lvl);
+    void do_malloc_node(xpl::malloc_node * const node, int lvl);
+    void do_index_node(xpl::index_node * const node, int lvl);
+  
   public:
     void do_identifier_node(cdk::identifier_node * const node, int lvl);
     void do_rvalue_node(cdk::rvalue_node * const node, int lvl);
     void do_assignment_node(cdk::assignment_node * const node, int lvl);
 
   public:
-    void do_function_node(xpl::function_node * const node, int lvl);
-    void do_var_node(xpl::var_node * const node, int lvl);
     void do_evaluation_node(xpl::evaluation_node * const node, int lvl);
     void do_print_node(xpl::print_node * const node, int lvl);
     void do_read_node(xpl::read_node * const node, int lvl);
 
   public:
+    void do_if_node(xpl::if_node * const node, int lvl);
+    void do_if_else_node(xpl::if_else_node * const node, int lvl);
     void do_while_node(xpl::while_node * const node, int lvl);
     void do_sweep_up_node(xpl::sweep_up_node * const node, int lvl);
     void do_sweep_down_node(xpl::sweep_down_node * const node, int lvl);
-    void do_if_node(xpl::if_node * const node, int lvl);
-    void do_if_else_node(xpl::if_else_node * const node, int lvl);
 
   public:
     void do_block_node(xpl::block_node * const node, int lvl);
     void do_next_node(xpl::next_node * const node, int lvl);
     void do_stop_node(xpl::stop_node * const node, int lvl);
-    void do_vardecl_node(xpl::vardecl_node * const node, int lvl);
-    void do_fundecl_node(xpl::fundecl_node * const node, int lvl);
     void do_return_node(xpl::return_node * const node, int lvl);
 
   public:
-    void do_malloc_node(xpl::malloc_node * const node, int lvl);
-
-  public:
-    void do_index_node(xpl::index_node * const node, int lvl);
-
-  public:
-    void do_null_node(xpl::null_node * const node, int lvl);
-
-  public:
-    void do_identity_node(xpl::identity_node * const node, int lvl);
     void do_funcall_node(xpl::funcall_node * const node, int lvl);
-    void do_address_of_node(xpl::address_of_node * const node, int lvl);
+
+  public:
+    void do_vardecl_node(xpl::vardecl_node * const node, int lvl);
+    void do_var_node(xpl::var_node * const node, int lvl);
+    void do_fundecl_node(xpl::fundecl_node * const node, int lvl);
+    void do_function_node(xpl::function_node * const node, int lvl);
+
   };
 
 } // xpl

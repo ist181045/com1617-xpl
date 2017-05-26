@@ -145,20 +145,17 @@ void xpl::type_checker::do_double_node(cdk::double_node * const node, int lvl) {
   ASSERT_UNSPEC;
   node->type(new basic_type(8, basic_type::TYPE_DOUBLE));
 }
-
 void xpl::type_checker::do_integer_node(cdk::integer_node * const node, int lvl) {
   ASSERT_UNSPEC;
   node->type(new basic_type(4, basic_type::TYPE_INT));
 }
-
-void xpl::type_checker::do_null_node(xpl::null_node * const node, int lvl) {
-  ASSERT_UNSPEC;
-  node->type(new basic_type(4, basic_type::TYPE_POINTER));
-}
-
 void xpl::type_checker::do_string_node(cdk::string_node * const node, int lvl) {
   ASSERT_UNSPEC;
   node->type(new basic_type(4, basic_type::TYPE_STRING));
+}
+void xpl::type_checker::do_null_node(xpl::null_node * const node, int lvl) {
+  ASSERT_UNSPEC;
+  node->type(new basic_type(4, basic_type::TYPE_POINTER));
 }
 
 //===========================================================================
@@ -181,14 +178,9 @@ inline void xpl::type_checker::processUnaryExpression(cdk::unary_expression_node
   node->type(create_type(node->argument()->type()));
 }
 
-void xpl::type_checker::do_identity_node(xpl::identity_node * const node, int lvl) {
-  processUnaryExpression(node, lvl);
-}
-
 void xpl::type_checker::do_neg_node(cdk::neg_node * const node, int lvl) {
   processUnaryExpression(node, lvl);
 }
-
 void xpl::type_checker::do_not_node(cdk::not_node * const node, int lvl) {
   processUnaryExpression(node, lvl);
   if (node->type()->name() != basic_type::TYPE_INT)
@@ -196,26 +188,8 @@ void xpl::type_checker::do_not_node(cdk::not_node * const node, int lvl) {
       "int");
   node->type(new basic_type(4, basic_type::TYPE_INT));
 }
-
-//---------------------------------------------------------------------------
-
-void xpl::type_checker::do_address_of_node(xpl::address_of_node * const node, int lvl) {
-  ASSERT_UNSPEC;
-  node->argument()->accept(this, lvl + 2);
-  node->type(new basic_type(4, basic_type::TYPE_POINTER));
-  node->type()->_subtype = create_type(node->argument()->type());
-}
-
-void xpl::type_checker::do_malloc_node(xpl::malloc_node * const node, int lvl) {
-  ASSERT_UNSPEC;
-  node->expression()->accept(this, lvl + 2);
-  if (node->expression()->type()->name() != basic_type::TYPE_INT)
-    throw std::string("wrong type in argument of malloc expression, expected "\
-      "int");
-
-  node->type(new basic_type(4, basic_type::TYPE_POINTER));
-  // context dependent
-  node->type()->_subtype = new basic_type();
+void xpl::type_checker::do_identity_node(xpl::identity_node * const node, int lvl) {
+  processUnaryExpression(node, lvl);
 }
 
 //===========================================================================
@@ -357,105 +331,23 @@ void xpl::type_checker::do_or_node(cdk::or_node * const node, int lvl) {
 
 //===========================================================================
 
-void xpl::type_checker::do_assignment_node(cdk::assignment_node * const node, int lvl) {
+void xpl::type_checker::do_address_of_node(xpl::address_of_node * const node, int lvl) {
   ASSERT_UNSPEC;
-
-  try {
-    node->lvalue()->accept(this, lvl + 2);
-  } catch (const std::string &id) {
-    throw "'" + id + "' was never declared";
-  }
-
-  node->rvalue()->accept(this, lvl + 2);
-  if (node->lvalue()->type()->name() == basic_type::TYPE_STRING
-      || node->rvalue()->type()->name() == basic_type::TYPE_STRING) {
-    default_if_unspec(node->lvalue()->type(), node->rvalue()->type());
-    if (node->lvalue()->type()->name() != node->rvalue()->type()->name())
-      throw std::string("mismatching types in assignment expression");
-  } else {
-    check_types(node->lvalue(), node->rvalue(), lvl);
-  }
-
-  if (check_compatible(node->lvalue(), node->rvalue()))
-    node->type(create_type(node->lvalue()->type()));
-  else
-    throw std::string("incompatible types in assignment expression");
-}
-
-void xpl::type_checker::do_rvalue_node(cdk::rvalue_node * const node, int lvl) {
-  ASSERT_UNSPEC;
-  try {
-    node->lvalue()->accept(this, lvl);
-    node->type(node->lvalue()->type());
-  } catch (const std::string &id) {
-    throw "'" + id + "' was never declared";
-  }
-}
-
-void xpl::type_checker::do_evaluation_node(xpl::evaluation_node * const node, int lvl) {
   node->argument()->accept(this, lvl + 2);
-  default_if_unspec(node->argument()->type());
+  node->type(new basic_type(4, basic_type::TYPE_POINTER));
+  node->type()->_subtype = create_type(node->argument()->type());
 }
-
-//===========================================================================
-
-void xpl::type_checker::do_print_node(xpl::print_node * const node, int lvl) {
-  node->argument()->accept(this, lvl + 2);
-  default_if_unspec(node->argument()->type());
-}
-
-void xpl::type_checker::do_read_node(xpl::read_node * const node, int lvl) {
+void xpl::type_checker::do_malloc_node(xpl::malloc_node * const node, int lvl) {
   ASSERT_UNSPEC;
-  node->type(new basic_type());
+  node->expression()->accept(this, lvl + 2);
+  if (node->expression()->type()->name() != basic_type::TYPE_INT)
+    throw std::string("wrong type in argument of malloc expression, expected "\
+      "int");
+
+  node->type(new basic_type(4, basic_type::TYPE_POINTER));
+  // context dependent
+  node->type()->_subtype = new basic_type();
 }
-
-//===========================================================================
-
-void xpl::type_checker::do_sweep_up_node(xpl::sweep_up_node * const node, int lvl) {
-  cdk::assignment_node assign(node->lineno(), node->lvalue(), node->initial());
-  assign.accept(this, lvl);
-
-  node->upper()->accept(this, lvl + 2);
-  cdk::le_node le(node->lineno(), node->lvalue(), node->upper());
-  le.accept(this, lvl);
-
-  node->step()->accept(this, lvl + 2);
-  if (!check_compatible(node->lvalue(), node->step()))
-    throw std::string("incompatible types in 'sweep+' statement's increment");
-}
-
-void xpl::type_checker::do_sweep_down_node(xpl::sweep_down_node * const node, int lvl) {
-  cdk::assignment_node assign(node->lineno(), node->lvalue(), node->initial());
-  assign.accept(this, lvl);
-
-  node->lower()->accept(this, lvl + 2);
-  cdk::ge_node ge(node->lineno(), node->lvalue(), node->lower());
-  ge.accept(this, lvl);
-
-  node->step()->accept(this, lvl + 2);  
-  if(!check_compatible(node->lvalue(), node->step()))
-    throw std::string("incompatible types in 'sweep-' statement's decrement");
-}
-
-//===========================================================================
-
-void xpl::type_checker::do_if_node(xpl::if_node * const node, int lvl) {
-  node->condition()->accept(this, lvl + 4);
-  default_if_unspec(node->condition()->type());
-}
-
-void xpl::type_checker::do_if_else_node(xpl::if_else_node * const node, int lvl) {
-  node->condition()->accept(this, lvl + 4);
-  default_if_unspec(node->condition()->type());
-}
-
-void xpl::type_checker::do_while_node(xpl::while_node * const node, int lvl) {
-  node->condition()->accept(this, lvl + 4);
-  default_if_unspec(node->condition()->type());
-}
-
-//===========================================================================
-
 void xpl::type_checker::do_index_node(xpl::index_node * const node, int lvl) {
   ASSERT_UNSPEC;
   node->expression()->accept(this, lvl + 2);
@@ -483,6 +375,101 @@ void xpl::type_checker::do_identifier_node(cdk::identifier_node * const node, in
   else
     node->type(symbol->type());
 }
+void xpl::type_checker::do_rvalue_node(cdk::rvalue_node * const node, int lvl) {
+  ASSERT_UNSPEC;
+  try {
+    node->lvalue()->accept(this, lvl);
+    node->type(node->lvalue()->type());
+  } catch (const std::string &id) {
+    throw "'" + id + "' was never declared";
+  }
+}
+void xpl::type_checker::do_assignment_node(cdk::assignment_node * const node, int lvl) {
+  ASSERT_UNSPEC;
+
+  try {
+    node->lvalue()->accept(this, lvl + 2);
+  } catch (const std::string &id) {
+    throw "'" + id + "' was never declared";
+  }
+
+  node->rvalue()->accept(this, lvl + 2);
+  if (node->lvalue()->type()->name() == basic_type::TYPE_STRING
+      || node->rvalue()->type()->name() == basic_type::TYPE_STRING) {
+    default_if_unspec(node->lvalue()->type(), node->rvalue()->type());
+    if (node->lvalue()->type()->name() != node->rvalue()->type()->name())
+      throw std::string("mismatching types in assignment expression");
+  } else {
+    check_types(node->lvalue(), node->rvalue(), lvl);
+  }
+
+  if (check_compatible(node->lvalue(), node->rvalue()))
+    node->type(create_type(node->lvalue()->type()));
+  else
+    throw std::string("incompatible types in assignment expression");
+}
+
+//===========================================================================
+
+void xpl::type_checker::do_evaluation_node(xpl::evaluation_node * const node, int lvl) {
+  node->argument()->accept(this, lvl + 2);
+  default_if_unspec(node->argument()->type());
+}
+void xpl::type_checker::do_print_node(xpl::print_node * const node, int lvl) {
+  node->argument()->accept(this, lvl + 2);
+  default_if_unspec(node->argument()->type());
+}
+void xpl::type_checker::do_read_node(xpl::read_node * const node, int lvl) {
+  ASSERT_UNSPEC;
+  node->type(new basic_type());
+}
+
+//===========================================================================
+
+void xpl::type_checker::do_if_node(xpl::if_node * const node, int lvl) {
+  node->condition()->accept(this, lvl + 4);
+  default_if_unspec(node->condition()->type());
+}
+void xpl::type_checker::do_if_else_node(xpl::if_else_node * const node, int lvl) {
+  node->condition()->accept(this, lvl + 4);
+  default_if_unspec(node->condition()->type());
+}
+void xpl::type_checker::do_while_node(xpl::while_node * const node, int lvl) {
+  node->condition()->accept(this, lvl + 4);
+  default_if_unspec(node->condition()->type());
+}
+void xpl::type_checker::do_sweep_up_node(xpl::sweep_up_node * const node, int lvl) {
+  cdk::assignment_node assign(node->lineno(), node->lvalue(), node->initial());
+  assign.accept(this, lvl);
+
+  node->upper()->accept(this, lvl + 2);
+  cdk::le_node le(node->lineno(), node->lvalue(), node->upper());
+  le.accept(this, lvl);
+
+  node->step()->accept(this, lvl + 2);
+  if (!check_compatible(node->lvalue(), node->step()))
+    throw std::string("incompatible types in 'sweep+' statement's increment");
+}
+void xpl::type_checker::do_sweep_down_node(xpl::sweep_down_node * const node, int lvl) {
+  cdk::assignment_node assign(node->lineno(), node->lvalue(), node->initial());
+  assign.accept(this, lvl);
+
+  node->lower()->accept(this, lvl + 2);
+  cdk::ge_node ge(node->lineno(), node->lvalue(), node->lower());
+  ge.accept(this, lvl);
+
+  node->step()->accept(this, lvl + 2);  
+  if(!check_compatible(node->lvalue(), node->step()))
+    throw std::string("incompatible types in 'sweep-' statement's decrement");
+}
+
+//===========================================================================
+
+void xpl::type_checker::do_funcall_node(xpl::funcall_node * const node, int lvl) {
+  // TODO: reimplement tc::do_funcall
+}
+
+//===========================================================================
 
 void xpl::type_checker::do_vardecl_node(xpl::vardecl_node * const node, int lvl) {
   // TODO: reimplement tc::do_vardecl
@@ -498,8 +485,4 @@ void xpl::type_checker::do_fundecl_node(xpl::fundecl_node * const node, int lvl)
 
 void xpl::type_checker::do_function_node(xpl::function_node * const node, int lvl) {
   // TODO: reimplement tc::do_function
-}
-
-void xpl::type_checker::do_funcall_node(xpl::funcall_node * const node, int lvl) {
-  // TODO: reimplement tc::do_funcall
 }
