@@ -3,5 +3,5 @@
 
 ---
 
-### Wiki [here](https://github.com/rgcv/com1617-xpl/wiki)
+### Wiki [here](https://gitlab.com/ist181045/leic-a/2016-2017/com/xpl/wikis/home)
 
